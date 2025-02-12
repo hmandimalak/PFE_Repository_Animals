@@ -103,9 +103,9 @@ LOGIN_REDIRECT_URL = '/'  # Redirect to home after login
 SITE_ID = 1
 LOGOUT_REDIRECT_URL = '/'  # Redirect to home after logout
 
+# settings.py
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+MEDIA_ROOT = 'C:/Users/Dell/Desktop/pfe/media'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
