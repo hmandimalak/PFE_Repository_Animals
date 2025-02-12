@@ -31,7 +31,10 @@ export function middleware(req) {
     return NextResponse.next();
   } catch (error) {
     console.log('Error decoding token:', error);
+    NextResponse.cookies.set('access_token', '', { expires: new Date(0) });
+
     return NextResponse.redirect(new URL('/login', req.url));
+    
   }
 }
 
@@ -39,3 +42,4 @@ export function middleware(req) {
 export const config = {
   matcher: ['/admin/:path*', '/home', ],
 };
+
