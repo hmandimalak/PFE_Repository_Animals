@@ -27,7 +27,7 @@ class Animal(models.Model):
     disponible_pour_garde = models.BooleanField(default=False)
     
     # Type de garde (si applicable)
-    type_garde = models.CharField(max_length=20, choices=TYPE_GARDE_CHOICES, blank=True, null=True)
+    type_garde = models.CharField(max_length=20, choices=TYPE_GARDE_CHOICES, default='Temporaire') 
 
     # Dates de garde temporaire
     date_reservation = models.DateField(blank=True, null=True)
@@ -58,15 +58,24 @@ class DemandeGarde(models.Model):
         ('Acceptee', 'Acceptee'),
         ('Refusee', 'Refusee'),
     ]
+    TYPE_GARDE_CHOICES = [
+        ('Temporaire', 'Temporaire'),
+        ('Définitive', 'Définitive'),
+    ]
 
     animal = models.ForeignKey('Animal', on_delete=models.CASCADE, related_name='demandes_garde')
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='demandes_garde')
     date_demande = models.DateTimeField(auto_now_add=True)
     statut = models.CharField(max_length=20, choices=STATUS_CHOICES, default='En attente')
     message = models.TextField(blank=True, null=True)
+    type_garde = models.CharField(max_length=20, choices=TYPE_GARDE_CHOICES, default='Temporaire') 
+    image = models.ImageField(upload_to='animaux/', blank=True, null=True)
+
+
 
     def __str__(self):
         return f"Demande de garde pour {self.animal.nom} par {self.utilisateur.nom} ({self.statut})"
+
 
 class DemandeAdoption(models.Model):
     STATUS_CHOICES = [

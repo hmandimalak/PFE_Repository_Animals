@@ -10,15 +10,12 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 
 
-# Gestion des animaux et demande de garde
 class AnimalListCreateView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
     parser_classes = [MultiPartParser, FormParser]
+
     def post(self, request):
         # First, create the animal
-
-
-        
         animal_serializer = AnimalSerializer(data=request.data)
         if animal_serializer.is_valid():
             print(request)
@@ -29,7 +26,8 @@ class AnimalListCreateView(APIView):
                 'animal': animal.id,  # Link the created animal to the request
                 'utilisateur': request.user.id,  # Ensure user ID is passed (instead of the user object)
                 'statut': 'En attente',  # Default status for new requests
-                'message': request.data.get('message', '')  # Optionally, include a message
+                'message': request.data.get('message', ''),  # Optionally, include a message
+                'type_garde': animal.type_garde  # Pass the `type_garde` from the created animal
             }
             
             # Pass the request context to the serializer

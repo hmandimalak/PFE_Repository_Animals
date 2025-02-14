@@ -17,6 +17,9 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
         utilisateur = self.context['request'].user  # Get the current logged-in user
         validated_data['utilisateur'] = utilisateur
         return super().create(validated_data)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['type_garde'].choices = [('Temporaire', 'Temporaire'), ('Définitive', 'Définitive')]
 
 class DemandeAdoptionSerializer(serializers.ModelSerializer):
     animal = AnimalSerializer()
