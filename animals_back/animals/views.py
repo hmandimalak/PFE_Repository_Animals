@@ -6,7 +6,7 @@ from .models import Animal, DemandeGarde, DemandeAdoption
 from .serializers import AnimalSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-
+from rest_framework import viewsets
 
 
 
@@ -125,3 +125,38 @@ class DemandeAdoptionDetailView(APIView):
         demande = get_object_or_404(DemandeAdoption, pk=pk)
         demande.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+class AnimalAdminDefinitiveListView(APIView):
+    parser_classes = [MultiPartParser, FormParser]  # Enable file parsing
+
+    def get(self, request):
+        # List all animals in the system
+        animals = Animal.objects.filter(type_garde='Définitive')  # Use the exact value from choices
+        serializer = AnimalSerializer(animals, many=True)
+        #print("test",serializer.data)  
+        return Response(serializer.data)
+class AnimalDetailView(APIView):
+    def get(self, request, pk):
+        try:
+            animal = Animal.objects.get(pk=pk)
+            print("test", animal.image)
+        except Animal.DoesNotExist:
+            return Response({"error": "Animal not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AnimalSerializer(animal)
+        return Response(serializer.data)
+
+class DemandeAdoptionAPIView(APIView):
+    """API view for users to create and view their adoption requests"""
+    
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """Automatically create an adoption request for the logged-in user"""
+        # Create a new adoption request and set the logged-in user as the requester
+        serializer = DemandeAdoptionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(utilisateur=request.user)  # Associate the logged-in user
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
