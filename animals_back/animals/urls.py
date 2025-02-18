@@ -1,6 +1,6 @@
 # animals/urls.py
 from django.urls import path
-from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView
+from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView,NotificationView,NotificationMarkReadView
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
@@ -17,6 +17,10 @@ urlpatterns = [
     #page de consult d'animaux
     path('definitive/', AnimalAdminDefinitiveListView.as_view(), name='admin-animal-list'),  # GET to list all animals
     path('<int:pk>/', AnimalDetailView.as_view(), name='admin-animal-detail'),  # GET to view animal details
+
+    path('notifications/', NotificationView.as_view(), name='notifications-list'),
+    path('notifications/<int:pk>/read/', NotificationMarkReadView.as_view(), name='notification-mark-read'),
+
 
 ]
 # Serve media files during development

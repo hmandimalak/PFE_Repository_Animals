@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from .models import Animal, DemandeGarde, DemandeAdoption
-from .serializers import AnimalSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer
+from .models import Animal, DemandeGarde, DemandeAdoption,Notification
+from .serializers import AnimalSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer,NotificationSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -130,10 +130,11 @@ class AnimalAdminDefinitiveListView(APIView):
 
     def get(self, request):
         # List all animals in the system
-        animals = Animal.objects.filter(type_garde='Définitive')  # Use the exact value from choices
+        animals = Animal.objects.filter(type_garde='Définitive',disponible_pour_adoption=True)  # Use the exact value from choices
         serializer = AnimalSerializer(animals, many=True)
         #print("test",serializer.data)  
         return Response(serializer.data)
+
 class AnimalDetailView(APIView):
     def get(self, request, pk):
         try:
@@ -158,3 +159,20 @@ class DemandeAdoptionAPIView(APIView):
             serializer.save(utilisateur=request.user)  # Associate the logged-in user
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class NotificationView(APIView):
+    def get(self, request):
+        notifications = Notification.objects.filter(utilisateur=request.user, lu=False)
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+class NotificationMarkReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        try:
+            notification = Notification.objects.get(id=pk, utilisateur=request.user)
+            notification.lu = True  # Mark as read
+            notification.save()
+            return Response({"message": "Notification marked as read"}, status=status.HTTP_200_OK)
+        except Notification.DoesNotExist:
+            return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
