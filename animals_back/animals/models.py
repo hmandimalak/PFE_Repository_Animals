@@ -90,5 +90,6 @@ class DemandeAdoption(models.Model):
     statut = models.CharField(max_length=20, choices=STATUS_CHOICES, default='En attente')
     message = models.TextField(blank=True, null=True)
 
+
     def __str__(self):
         return f"Demande d'adoption pour {self.animal.nom} par {self.utilisateur.nom} ({self.statut})"
