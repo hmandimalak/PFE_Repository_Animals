@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from "next-auth/react";
+import { FaGoogle } from "react-icons/fa";
+
 
 
 export default function LoginForm() {
@@ -161,18 +163,13 @@ export default function LoginForm() {
 
         {/* Google OAuth Button */}
         <div className="text-center mt-4">
-          <button
-            onClick={handleGoogleLogin}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-          >
-            <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-              <path fill="#4285F4" d="M24 9.5c3.57 0 6.3 1.47 8.26 2.86l6.18-6.18C34.84 2.03 29.88 0 24 0 14.85 0 7.14 5.85 4 14.27l7.48 5.8c1.64-4.88 6.26-10.57 12.52-10.57z"/>
-              <path fill="#34A853" d="M4 14.27C1.5 19.29 1.5 24.71 4 29.73l7.48-5.8c-.49-1.41-.49-2.91 0-4.43L4 14.27z"/>
-              <path fill="#FBBC05" d="M24 38.5c-3.69 0-6.74-1.13-9.27-3.07l-7.48 5.8C10.29 45.4 16.81 48 24 48c5.88 0 10.84-2.03 14.44-5.82l-6.18-6.18c-1.97 1.39-4.7 2.86-8.26 2.86z"/>
-              <path fill="#EA4335" d="M44 24c0-1.37-.17-2.72-.47-4H24v8h11.44c-.64 2.06-2.03 3.64-4.07 5.07l6.18 6.18C40.44 35.6 44 30.5 44 24z"/>
-            </svg>
-            Sign in with Google
-          </button>
+        <button
+  onClick={() => signIn("google")}
+  className="px-6 py-3 text-sm bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition flex items-center"
+>
+  <FaGoogle className="mr-2" /> Login with Google
+</button>
+
         </div>
       </div>
     </div>

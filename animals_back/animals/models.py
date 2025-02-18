@@ -2,6 +2,7 @@
 from django.db import models
 from datetime import date
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 class Animal(models.Model):
     SEXE_CHOICES = [
@@ -43,6 +44,7 @@ class Animal(models.Model):
         """ Calcule l'âge de l'animal à partir de la date de naissance. """
         today = date.today()
         return today.year - self.date_naissance.year - ((today.month, today.day) < (self.date_naissance.month, self.date_naissance.day))
+        
 
     def en_garde_actuellement(self):
         """ Vérifie si l'animal est actuellement en garde temporaire """
@@ -90,5 +92,24 @@ class DemandeAdoption(models.Model):
     statut = models.CharField(max_length=20, choices=STATUS_CHOICES, default='En attente')
     message = models.TextField(blank=True, null=True)
 
+    def clean(self):
+        """ Ensure that the animal is available for adoption before saving the request. """
+        if not self.animal.disponible_pour_adoption:
+            raise ValidationError(f"L'animal {self.animal.nom} n'est pas disponible pour adoption.")
+
+    def save(self, *args, **kwargs):
+        self.clean()  # Call validation before saving
+        super().save(*args, **kwargs)
+
+
     def __str__(self):
         return f"Demande d'adoption pour {self.animal.nom} par {self.utilisateur.nom} ({self.statut})"
+    
+class Notification(models.Model):
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    date_creation = models.DateTimeField(auto_now_add=True)
+    lu = models.BooleanField(default=False)  # Mark as read/unread
+
+    def __str__(self):
+        return f"Notification for {self.utilisateur.nom}"

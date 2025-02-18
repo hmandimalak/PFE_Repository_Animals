@@ -1,6 +1,6 @@
 # animals/serializers.py
 from rest_framework import serializers
-from .models import Animal, DemandeGarde, DemandeAdoption
+from .models import Animal, DemandeGarde, DemandeAdoption,Notification
 from django.conf import settings
 
 
@@ -45,3 +45,13 @@ class DemandeAdoptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeAdoption
         fields = ['id', 'animal', 'utilisateur', 'date_demande', 'statut', 'message']
+    def validate_animal(self, value):
+        """ Ensure that the animal is available for adoption. """
+        if not value.disponible_pour_adoption:
+            raise serializers.ValidationError(f"L'animal {value.nom} n'est pas disponible pour adoption.")
+        return value
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = '__all__'

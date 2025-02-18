@@ -4,44 +4,77 @@ import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Nunito } from 'next/font/google';
-import { FaPaw, FaSmile, FaHeart, FaBars } from "react-icons/fa"; // Import FaBars
+import { FaPaw, FaSmile, FaHeart, FaBars, FaBell } from "react-icons/fa";
+import { useSession } from "next-auth/react";
+
 const nunito = Nunito({ subsets: ['latin'] });
 
 export default function Home() {
   const [user, setUser] = useState(null);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu toggle
   const router = useRouter();
+  const [notifCount, setNotifCount] = useState(0);
+
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-
+  
     if (token) {
       try {
         const decoded = jwtDecode(token);
-
+  
+        // Fetch user profile
         fetch("http://127.0.0.1:8000/api/auth/profile/", {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Failed to fetch profile");
-            }
-            return response.json();
+          .then(response => response.json())
+          .then(data => setUser(data))
+          .catch(error => console.error("Error fetching user profile", error));
+  
+        // Fetch notifications
+        fetch("http://127.0.0.1:8000/api/animals/notifications/", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then(response => response.json())
+          .then(data => {
+            setNotifications(data);
+            // Set notification count based on unread notifications
+            setNotifCount(data.filter((notif) => !notif.lu).length);
           })
-          .then((data) => {
-            setUser(data);
-          })
-          .catch((error) => {
-            console.error("Error fetching user profile", error);
-          });
+          .catch(error => console.error("Error fetching notifications", error));
+  
       } catch (error) {
         console.error("Invalid token", error);
       }
     }
   }, []);
+  
+  const handleNotifClick = async (notifId) => {
+    // Mark notification as read (set 'lu' to true)
+    await fetch(`http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`, {
+      method: "PUT", // Assuming you're using PUT to update the notification
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+  
+    // Update the notifications state
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notif) =>
+        notif.id === notifId ? { ...notif, lu: true } : notif
+      )
+    );
+  
+    // Update the notification count
+    setNotifCount((prevCount) => prevCount - 1); // Decrease count by 1
+    setIsNotificationOpen(false); // Optionally, close the notification panel
+  };
+  
 
   const logout = () => {
    // Expire the cookies by setting them in the past
@@ -106,27 +139,51 @@ export default function Home() {
           </a>
         ))}
 
-        {/* User Actions */}
-        {user && (
-          <div className="flex items-center space-x-4 ml-auto">
-            <button
-              onClick={() => router.push("/profile")}
-              className="px-6 py-3 text-sm bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition flex items-center"
-            >
-              <FaSmile className="mr-2" /> Profile
-            </button>
-            <button
-              onClick={logout}
-              className="px-6 py-3 text-sm bg-pastel-pink text-white rounded-full hover:bg-pastel-yellow hover:scale-105 transition-transform flex items-center"
-            >
-              <FaHeart className="mr-2" /> Logout
-            </button>
+{user && (
+                  <div className="flex items-center space-x-4 ml-auto">
+                    {/* Notification Button */}
+                    <button onClick={() => setIsNotificationOpen(!isNotificationOpen)} className="relative px-4 py-2 text-gray-800 hover:text-pastel-blue">
+                      <FaBell className="text-xl" />
+                      {notifCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                          {notifCount}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Notification Panel */}
+                    {isNotificationOpen && (
+                      <div className="absolute right-10 top-12 w-64 bg-white shadow-lg rounded-lg p-3">
+                        <h3 className="text-gray-800 font-bold">Notifications</h3>
+                        {notifications.length > 0 ? (
+                          notifications.map((notif) => (
+                            <div 
+                              key={notif.id} 
+                              className="p-2 border-b text-gray-600 cursor-pointer"
+                              onClick={() => handleNotifClick(notif.id)}
+                            >
+                              {notif.lu ? <s>{notif.message}</s> : notif.message}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500 text-sm">No new notifications</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Profile and Logout */}
+                    <button onClick={() => router.push("/profile")} className="px-6 py-3 text-sm bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition flex items-center">
+                      <FaSmile className="mr-2" /> Profile
+                    </button>
+                    <button onClick={logout} className="px-6 py-3 text-sm bg-pastel-pink text-white rounded-full hover:bg-pastel-yellow hover:scale-105 transition-transform flex items-center">
+                      <FaHeart className="mr-2" /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  </div>
-</nav>
+        </nav>
 
 
       {/* Mobile Menu (Dropdown) */}
