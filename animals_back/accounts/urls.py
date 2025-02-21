@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import CustomGoogleLogin
+from .views import GoogleLoginView
 from .views import (
     RegisterView, MyTokenObtainPairView, get_user_profile, password_reset_confirm, 
     password_reset_request, update_user_profile, user_list, user_detail
@@ -17,9 +17,8 @@ urlpatterns = [
     path('users/<int:pk>/', user_detail, name='user-detail'),
 
 
-     # Google OAuth2 Routes
-    path('google/', CustomGoogleLogin.as_view(), name='google_login'),  # Google login endpoint
-    path('google/callback/', CustomGoogleLogin.as_view(), name='google_callback'),  # Callback URL after successful login
+    # Google OAuth2 Routes
+    path('google/', GoogleLoginView.as_view(), name='google_login'),  # Google login endpoint
 
 
     # Include Django Allauth and dj-rest-auth URLs

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
+import Navbar from '../../pages/NavbarPage';
 
 const CreateAnimal = () => {
     const [formData, setFormData] = useState({
@@ -9,22 +11,58 @@ const CreateAnimal = () => {
         date_naissance: '',
         sexe: 'M',
         description: '',
-        type_garde: 'Définitive', // Set default value to 'Définitive'
+        type_garde: 'Définitive',
         date_reservation: '',
         date_fin: '',
         photo: null,
     });
 
+    const speciesOptions = {
+        dog: [
+            "Berger Allemand",
+            "Labrador Retriever",
+            "Golden Retriever",
+            "Bulldog",
+            "Rottweiler",
+            "Husky Sibérien",
+            "Beagle",
+            "Caniche",
+            "Chihuahua",
+            "Yorkshire Terrier",
+            "Autre"
+        ],
+        cat: [
+            "Persan",
+            "Siamois",
+            "Maine Coon",
+            "Bengal",
+            "British Shorthair",
+            "Ragdoll",
+            "Sphynx",
+            "Abyssin",
+            "Sacré de Birmanie",
+            "Européen",
+            "Autre"
+        ]
+    };
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const router = useRouter();
+    const { data: session, status } = useSession();
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
         if (type === 'file') {
             setFormData({
                 ...formData,
-                [name]: files[0], // `files[0]` is the Blob (image file)
+                [name]: files[0],
+            });
+        } else if (name === 'race') {
+            setFormData({
+                ...formData,
+                race: value,
+                espece: '', // Reset species when animal type changes
             });
         } else {
             setFormData({
@@ -38,18 +76,16 @@ const CreateAnimal = () => {
         e.preventDefault();
         setLoading(true);
         setError(null);
-    
-        // Remove date fields if type_garde is 'Définitive'
+
         const formDataToSend = { ...formData };
         if (formData.type_garde === 'Définitive') {
             delete formDataToSend.date_reservation;
             delete formDataToSend.date_fin;
         }
-    
-        // Create FormData to send to backend
+
         const formDataObj = new FormData();
         const file = formData.photo;
-        if (file && file.size > 5000000) { // Example: size > 5MB
+        if (file && file.size > 5000000) {
             setError('File is too large. Maximum size is 5MB.');
             setLoading(false);
             return;
@@ -59,54 +95,52 @@ const CreateAnimal = () => {
             setLoading(false);
             return;
         }
-    
-        // Append other fields from formData (except photo)
+
         for (const key in formDataToSend) {
             formDataObj.append(key, formDataToSend[key]);
         }
-    
-        // Ensure the photo field is appended properly as a file
+
         if (formData.photo) {
-            formDataObj.append('image', formData.photo, formData.photo.name); // Correct key name
+            formDataObj.append('image', formData.photo, formData.photo.name);
         }
-        // Log formData to debug (optional)
-        for (let pair of formDataObj.entries()) {
-            console.log(pair[0] + ": " + pair[1]);  // This will log each key-value pair
-        }
-    
+
+        const token = localStorage.getItem("access_token") || session?.accessToken;
         try {
             const response = await fetch('http://localhost:8000/api/animals/animaux/', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                    // 'Content-Type' header is not required with FormData, it's handled automatically
+                    Authorization: `Bearer ${token}`,
                 },
-                body: formDataObj, // Send the FormData object directly
+                body: formDataObj,
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to create animal');
             }
-    
+
             const data = await response.json();
-            router.push('/'); // Redirect to homepage or animal list
+            router.push('/');
         } catch (error) {
             setError(error.message);
         } finally {
             setLoading(false);
         }
     };
-    
-    
+
     return (
-        <div className="min-h-screen bg-gradient-to-r from-pink-100 to-purple-100 py-10">
-            <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-                <h1 className="text-3xl font-bold text-center text-pink-600 mb-6">Create New Animal</h1>
-                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 py-10">
+            <Navbar />
+            <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-8">
+                <h1 className="text-4xl font-bold text-center text-pink-600 mb-8">Create New Animal</h1>
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">
+                        {error}
+                    </div>
+                )}
                 <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
                     {/* Nom */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Nom</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
                         <input
                             type="text"
                             name="nom"
@@ -114,58 +148,66 @@ const CreateAnimal = () => {
                             onChange={handleChange}
                             placeholder="Nom"
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
-                        />
-                    </div>
-
-                    {/* Espèce */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Espèce</label>
-                        <input
-                            type="text"
-                            name="espece"
-                            value={formData.espece}
-                            onChange={handleChange}
-                            placeholder="Espèce"
-                            required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                         />
                     </div>
 
                     {/* Race */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Race</label>
-                        <input
-                            type="text"
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Race</label>
+                        <select
                             name="race"
                             value={formData.race}
                             onChange={handleChange}
-                            placeholder="Race"
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
-                        />
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                        >
+                            <option value="" disabled hidden>Sélectionnez une race</option>
+                            <option value="dog">Chien</option>
+                            <option value="cat">Chat</option>
+                        </select>
+                    </div>
+
+                    {/* Espèce */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Espèce</label>
+                        <select
+                            name="espece"
+                            value={formData.espece}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                        >
+                            <option value="" disabled hidden>Sélectionnez une espèce</option>
+                            {speciesOptions[formData.race]?.map((species) => (
+                                <option key={species} value={species}>
+                                    {species}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* Date de Naissance */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Date de Naissance</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Date de Naissance</label>
                         <input
                             type="date"
                             name="date_naissance"
                             value={formData.date_naissance}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                         />
                     </div>
 
                     {/* Sexe */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Sexe</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Sexe</label>
                         <select
                             name="sexe"
                             value={formData.sexe}
                             onChange={handleChange}
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                         >
                             <option value="M">Male</option>
                             <option value="F">Femelle</option>
@@ -174,24 +216,25 @@ const CreateAnimal = () => {
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Description</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                         <textarea
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
                             placeholder="Description"
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                            rows="4"
                         />
                     </div>
 
                     {/* Type de Garde */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Type de Garde</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Type de Garde</label>
                         <select
                             name="type_garde"
                             value={formData.type_garde}
                             onChange={handleChange}
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                         >
                             <option value="Définitive">Définitive</option>
                             <option value="Temporaire">Temporaire</option>
@@ -202,24 +245,24 @@ const CreateAnimal = () => {
                     {formData.type_garde === 'Temporaire' && (
                         <>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Date de Début</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Date de Début</label>
                                 <input
                                     type="date"
                                     name="date_reservation"
                                     value={formData.date_reservation}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Date de Fin</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Date de Fin</label>
                                 <input
                                     type="date"
                                     name="date_fin"
                                     value={formData.date_fin}
                                     onChange={handleChange}
-                                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                                 />
                             </div>
                         </>
@@ -227,14 +270,22 @@ const CreateAnimal = () => {
 
                     {/* Photo Upload */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Photo</label>
-                        <input
-                            type="file"
-                            name="photo"
-                            accept="image/*"
-                            onChange={handleChange}
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500"
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
+                        <div className="flex items-center justify-center w-full">
+                            <label className="flex flex-col items-center px-4 py-6 bg-white text-blue-500 rounded-lg shadow-lg tracking-wide border border-blue-500 cursor-pointer hover:bg-blue-50 transition-all">
+                                <span className="text-base leading-normal">Upload a photo</span>
+                                <input
+                                    type="file"
+                                    name="photo"
+                                    accept="image/*"
+                                    onChange={handleChange}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
+                        {formData.photo && (
+                            <p className="mt-2 text-sm text-gray-500">{formData.photo.name}</p>
+                        )}
                     </div>
 
                     {/* Submit Button */}
@@ -242,7 +293,7 @@ const CreateAnimal = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 disabled:bg-pink-300"
+                            className="w-full px-4 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 focus:ring-4 focus:ring-pink-300 disabled:bg-pink-300 transition-all"
                         >
                             {loading ? 'Submitting...' : 'Submit'}
                         </button>
