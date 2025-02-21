@@ -41,6 +41,7 @@ SECRET_KEY = 'django-insecure-zpun@@7w=x@pwsdu-r0%ec%#&cn)4vy7k*ao!0m0^!fk$b!zmz
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+GOOGLE_CALLBACK_URL = "http://localhost:3000/google/callback/"
 
 
 ALLOWED_HOSTS = []
@@ -75,17 +76,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-    'rest_framework.authtoken',  # <-- Add this line
+    'rest_framework.authtoken', 
     'accounts',
     'animals',
     'corsheaders',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     'dj_rest_auth',
-    'dj_rest_auth.registration',
-    
-    
+    'dj_rest_auth.registration', 
 ]
 
 ACCOUNT_USERNAME_REQUIRED = False
@@ -224,3 +224,26 @@ SIMPLE_JWT = {
 }
 
 REST_USE_JWT = True
+
+# Social authentication settings
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+        "APP": {
+            "client_id": "1057263998203-o29at1m8pmogfvd2ekitov2r58cpollr.apps.googleusercontent.com",
+            "secret": "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",
+            "key": "",
+        }
+    }
+}
+GOOGLE_CLIENT_ID = "1057263998203-o29at1m8pmogfvd2ekitov2r58cpollr.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = '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'

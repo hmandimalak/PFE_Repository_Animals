@@ -1,11 +1,10 @@
 'use client';
-
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from "next-auth/react";
 import { FaGoogle } from "react-icons/fa";
-
+import { getSession,useSession } from "next-auth/react";
 
 
 export default function LoginForm() {
@@ -14,41 +13,25 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
 
-  // Handle Google login
-  const handleGoogleLogin = async (googleResponse) => {
-    signIn("google");
+
+
+
+  const handleGoogleLogin = async () => {
     try {
-      const { tokenId } = googleResponse;
-      const response = await fetch('http://localhost:8000/api/auth/google/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          access_token: tokenId, // Pass the tokenId from Google login
-        }),
+      const result = await signIn('google', {
+        callbackUrl: '/',
+        redirect: false,
       });
-       // This will initiate the Google OAuth flow
 
-  
-      const data = await response.json();
-  
-      if (data.access) {
-        // Store tokens in cookies/localStorage
-        document.cookie = `access_token=${data.access}; path=/; max-age=86400`;
-        document.cookie = `refresh_token=${data.refresh}; path=/; max-age=86400`;
-        localStorage.setItem('access_token', data.access);
-        localStorage.setItem('refresh_token', data.refresh);
-        router.push('/');  // Redirect after successful login
-      } else {
-        setError('Google login failed');
+      if (result?.error) {
+        setError('Google login failed. Please try again.');
       }
     } catch (err) {
-      setError('Google login failed');
+      setError('An unexpected error occurred. Please try again.');
     }
   };
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -73,9 +56,13 @@ export default function LoginForm() {
       document.cookie = `access_token=${data.access}; path=/; max-age=86400`;
       document.cookie = `refresh_token=${data.refresh}; path=/; max-age=86400`;
 
+
+      localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
-      router.push('/'); // Redirect to home
+      setTimeout(() => {
+        router.push('/');
+      }, 300);
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -83,14 +70,8 @@ export default function LoginForm() {
     }
   };
 
-  const googleLoginSuccess = (response) => {
-    handleGoogleLogin(response);
-  };
 
-  const googleLoginFailure = (error) => {
-    console.error('Google login error:', error);
-    setError('Google login failed. Please try again.');
-  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -163,13 +144,17 @@ export default function LoginForm() {
 
         {/* Google OAuth Button */}
         <div className="text-center mt-4">
-        <button
-  onClick={() => signIn("google")}
-  className="px-6 py-3 text-sm bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition flex items-center"
->
-  <FaGoogle className="mr-2" /> Login with Google
-</button>
-
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={loading}
+          >
+            <FaGoogle className="mr-2" />
+            {loading ? 'Connecting...' : 'Continue with Google'}
+          </button>
+          {error && (
+            <p className="mt-2 text-sm text-red-600">{error}</p>
+          )}
         </div>
       </div>
     </div>
