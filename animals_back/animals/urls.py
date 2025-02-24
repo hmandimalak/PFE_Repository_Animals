@@ -1,6 +1,6 @@
 # animals/urls.py
 from django.urls import path
-from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView,NotificationView,NotificationMarkReadView,search_animals
+from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView,NotificationView,NotificationMarkReadView,search_animals,get_animal_by_id
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -23,6 +23,8 @@ urlpatterns = [
     path('notifications/<int:pk>/read/', NotificationMarkReadView.as_view(), name='notification-mark-read'),
 
     path('search/', search_animals, name='search_animals'),
+    path('search/<int:pk>/', get_animal_by_id, name='search_animals'),
+
 
 ]
 # Serve media files during development

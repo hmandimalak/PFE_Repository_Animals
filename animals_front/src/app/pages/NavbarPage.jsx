@@ -5,6 +5,8 @@ import { useSession, signOut } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
 import { FaPaw, FaSmile, FaHeart, FaBars, FaBell } from "react-icons/fa";
+import Link from "next/link";
+
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -119,8 +121,11 @@ export default function Navbar() {
       <div className="max-w-10xl mx-auto px-10">
         <div className="flex justify-between items-center py-3 space-x-4">
           <div className="flex items-center mr-5">
+          <Link href="/">
             <Image src="/dogandcat.jpeg" alt="Logo" width={40} height={40} className="rounded-full" />
-            <span className="ml-2 text-xl font-semibold text-gray-800">Pawfect Home 🐶🐱</span>
+            <span className="ml-2 text-xl font-semibold text-gray-800" >Pawfect Home 🐶🐱</span>
+          </Link>
+
           </div>
 
           <div className="hidden md:flex items-center mx-auto space-x-5">

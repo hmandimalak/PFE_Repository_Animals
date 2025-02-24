@@ -10,6 +10,9 @@ export default function NosAnimaux() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [animalType, setAnimalType] = useState('');
+    const [species, setSpecies] = useState('');
     const { data: session } = useSession();
 
     useEffect(() => {
@@ -24,6 +27,24 @@ export default function NosAnimaux() {
         } catch (error) {
             console.error('Error fetching animals:', error);
         }
+    };
+    const searchAnimals = async (query = '', type = '', species = '') => {
+        try {
+            const url = new URL('http://127.0.0.1:8000/api/animals/search/');
+            const params = { query, type, species };
+            Object.keys(params).forEach(key => params[key] && url.searchParams.append(key, params[key]));
+
+            const response = await fetch(url);
+            const data = await response.json();
+            setAnimals(data);
+        } catch (error) {
+            console.error('Error fetching animals:', error);
+        }
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        searchAnimals(searchQuery, animalType, species);
     };
 
     const fetchAnimalDetails = async (animalId) => {
@@ -117,6 +138,39 @@ export default function NosAnimaux() {
             <Navbar />
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-4xl font-bold text-center text-pink-600 mb-8">Animaux Prêts pour l'Adoption</h1>
+                
+                <form onSubmit={handleSearch} className="mb-8 flex gap-4">
+                    <input
+                        type="text"
+                        placeholder="Rechercher par nom..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 p-2 border border-gray-300 rounded-lg"
+                    />
+                    <select
+                        value={animalType}
+                        onChange={(e) => setAnimalType(e.target.value)}
+                        className="p-2 border border-gray-300 rounded-lg"
+                    >
+                        <option value="">Tous les types</option>
+                        <option value="Chien">Chien</option>
+                        <option value="Chat">Chat</option>
+                        {/* Add more options as needed */}
+                    </select>
+                    <select
+                        value={species}
+                        onChange={(e) => setSpecies(e.target.value)}
+                        className="p-2 border border-gray-300 rounded-lg"
+                    >
+                        <option value="">Toutes les races</option>
+                        <option value="Labrador">Labrador</option>
+                        <option value="Persan">Persan</option>
+                        {/* Add more options as needed */}
+                    </select>
+                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        Rechercher
+                    </button>
+                </form>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {animals.map(animal => (
                         <div key={animal.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105 cursor-pointer"

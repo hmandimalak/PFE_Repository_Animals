@@ -358,5 +358,28 @@ def search_animals(request):
         filters &= Q(race__iexact=species)
 
     # Fetch filtered animals
-    animals = Animal.objects.filter(filters).values('id', 'nom', 'espece', 'race', 'image')
+    animals = Animal.objects.filter(filters, disponible_pour_adoption=True, type_garde='Définitive')
+    animals = AnimalSerializer(animals, many=True).data
     return JsonResponse(list(animals), safe=False)
+def get_animal_by_id(request, animal_id):
+    """
+    Get a single animal by ID
+    """
+    query = request.GET.get('query', '')
+    animal_type = request.GET.get('type', '')
+    species = request.GET.get('species', '')
+
+    # Build the query
+    filters = Q()
+    if query:
+        filters &= Q(nom__icontains=query)
+    if animal_type:
+        filters &= Q(espece__iexact=animal_type)
+    if species:
+        filters &= Q(race__iexact=species)
+    try:
+        animal = get_object_or_404(Animal, id=animal_id).filter(filters, disponible_pour_adoption=True, type_garde='Définitive')
+        animal_data = AnimalSerializer(animal).data
+        return JsonResponse(animal_data)
+    except Animal.DoesNotExist:
+        return JsonResponse({'error': 'Animal not found'}, status=404)
