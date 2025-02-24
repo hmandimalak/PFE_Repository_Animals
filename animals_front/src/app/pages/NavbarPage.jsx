@@ -110,6 +110,27 @@ export default function Navbar() {
       router.push("/login");
     }
   };
+  const handleNotifClick = async (notifId) => {
+    // Mark notification as read (set 'lu' to true)
+    await fetch(`http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`, {
+      method: "PUT", // Assuming you're using PUT to update the notification
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    });
+  
+    // Update the notifications state
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notif) =>
+        notif.id === notifId ? { ...notif, lu: true } : notif
+      )
+    );
+  
+    // Update the notification count
+    setNotifCount((prevCount) => prevCount - 1); // Decrease count by 1
+    setIsNotificationOpen(false); // Optionally, close the notification panel
+  };
 
   const isAuthenticated = () => !!user || !!session?.user;
   const getCurrentUser = () => (user ? user.nom : session?.user?.name || "Guest");
