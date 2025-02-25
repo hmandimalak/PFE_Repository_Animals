@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import Navbar from './NavbarPage';
+import { authenticatedFetch } from '../../app/authInterceptor';
+import { useSearchParams } from 'next/navigation'; // Import useSearchParams
 
 export default function NosAnimaux() {
     const [animals, setAnimals] = useState([]);
@@ -14,14 +16,30 @@ export default function NosAnimaux() {
     const [animalType, setAnimalType] = useState('');
     const [species, setSpecies] = useState('');
     const { data: session } = useSession();
+    const searchParams = useSearchParams(); // Get search parameters from the URL
 
     useEffect(() => {
-        fetchAnimals();
-    }, []);
+        // Fetch search parameters from the URL
+        const query = searchParams.get('query') || '';
+        const type = searchParams.get('type') || '';
+        const speciesParam = searchParams.get('species') || '';
 
-    const fetchAnimals = async () => {
+        // Set the state with the search parameters
+        setSearchQuery(query);
+        setAnimalType(type);
+        setSpecies(speciesParam);
+
+        // Fetch animals based on the search parameters
+        fetchAnimals(query, type, speciesParam);
+    }, [searchParams]); // Re-run when searchParams change
+
+    const fetchAnimals = async (query = '', type = '', species = '') => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/animals/definitive/');
+            const url = new URL('http://127.0.0.1:8000/api/animals/search/');
+            const params = { query, type, species };
+            Object.keys(params).forEach(key => params[key] && url.searchParams.append(key, params[key]));
+
+            const response = await fetch(url);
             const data = await response.json();
             setAnimals(data);
         } catch (error) {
@@ -103,7 +121,7 @@ export default function NosAnimaux() {
 
             console.log("Sending request with token:", authToken);
 
-            const response = await fetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
+            const response = await authenticatedFetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

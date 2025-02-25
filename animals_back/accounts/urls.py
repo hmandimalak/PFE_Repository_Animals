@@ -2,7 +2,7 @@ from django.urls import path, include
 from .views import GoogleLoginView
 from .views import (
     RegisterView, MyTokenObtainPairView, get_user_profile, password_reset_confirm, 
-    password_reset_request, update_user_profile, user_list, user_detail
+    password_reset_request, update_user_profile, user_list, user_detail,TokenRefreshView
 )
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
@@ -19,6 +19,8 @@ urlpatterns = [
 
     # Google OAuth2 Routes
     path('google/', GoogleLoginView.as_view(), name='google_login'),  # Google login endpoint
+
+    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 
     # Include Django Allauth and dj-rest-auth URLs

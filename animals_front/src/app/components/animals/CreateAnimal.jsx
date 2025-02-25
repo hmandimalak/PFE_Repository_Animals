@@ -71,8 +71,15 @@ const CreateAnimal = () => {
                 headers: { Authorization: `Bearer ${token}` },
                 body: formDataObj,
             });
-            if (!response.ok) throw new Error('Failed to create animal');
-            router.push('/');
+            if (response.ok) {
+                alert("Demande de garde envoyée avec succès!");
+                setIsModalOpen(false);
+              } else if (response.status === 401) {
+                alert("Votre session a expiré. Veuillez vous reconnecter.");
+                router.push("/login");
+              } else {
+                alert("Erreur lors de l'envoi de la demande de garde. Veuillez réessayer.");
+              }
         } catch (error) {
             setError(error.message);
         } finally {

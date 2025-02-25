@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
 import { FaPaw, FaSmile, FaHeart, FaBars, FaBell } from "react-icons/fa";
 import Link from "next/link";
-
+import { authenticatedFetch } from '../../app/authInterceptor';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -28,11 +28,10 @@ export default function Navbar() {
         const decoded = jwtDecode(token);
         console.log("Decoded token:", decoded);
 
-        // Fetch user profile for normal auth
-        fetch("http://127.0.0.1:8000/api/auth/profile/", {
+        // Fetch user profile using authenticatedFetch
+        authenticatedFetch("http://127.0.0.1:8000/api/auth/profile/", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         })
@@ -40,11 +39,10 @@ export default function Navbar() {
           .then((data) => setUser(data))
           .catch((error) => console.error("Error fetching user profile", error));
 
-        // Fetch notifications with proper authentication
-        fetch("http://127.0.0.1:8000/api/animals/notifications/", {
+        // Fetch notifications using authenticatedFetch
+        authenticatedFetch("http://127.0.0.1:8000/api/animals/notifications/", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         })
@@ -112,13 +110,13 @@ export default function Navbar() {
       router.push("/login");
     }
   };
+  
   const handleNotifClick = async (notifId) => {
-    // Mark notification as read (set 'lu' to true)
-    await fetch(`http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`, {
-      method: "PUT", // Assuming you're using PUT to update the notification
+    // Mark notification as read using authenticatedFetch
+    await authenticatedFetch(`http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
       },
     });
   
@@ -137,16 +135,21 @@ export default function Navbar() {
   const isAuthenticated = () => !!user || !!session?.user;
   const getCurrentUser = () => (user ? user.nom : session?.user?.name || "Guest");
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <nav className="bg-white shadow-lg">
       <div className="max-w-10xl mx-auto px-10">
         <div className="flex justify-between items-center py-3 space-x-4">
           <div className="flex items-center mr-5">
-          <Link href="/">
-            <Image src="/dogandcat.jpeg" alt="Logo" width={40} height={40} className="rounded-full" />
-            <span className="ml-2 text-xl font-semibold text-gray-800" >Pawfect Home 🐶🐱</span>
-          </Link>
-
+            <Link href="/">
+              <div className="flex items-center">
+                <Image src="/dogandcat.jpeg" alt="Logo" width={40} height={40} className="rounded-full" />
+                <span className="ml-2 text-xl font-semibold text-gray-800">Pawfect Home 🐶🐱</span>
+              </div>
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center mx-auto space-x-5">
@@ -169,8 +172,18 @@ export default function Navbar() {
             ))}
           </div>
 
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button 
+              onClick={toggleMobileMenu}
+              className="text-gray-800 hover:text-pastel-blue"
+            >
+              <FaBars className="text-xl" />
+            </button>
+          </div>
+
           {/* Mobile Menu (Dropdown) */}
-          <div className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"} bg-white shadow-lg`}>
+          <div className={`md:hidden absolute top-16 left-0 right-0 ${isMobileMenuOpen ? "block" : "hidden"} bg-white shadow-lg z-10`}>
             <div className="flex flex-col items-center py-4">
               {[
                 { label: "Nos Animaux", href: "/nos-animaux" },
@@ -184,7 +197,7 @@ export default function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="text-gray-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-pastel-blue hover:text-white transition"
+                  className="text-gray-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-pastel-blue hover:text-white transition w-full text-center my-1"
                 >
                   {link.label}
                 </a>
@@ -208,13 +221,13 @@ export default function Navbar() {
                 </button>
 
                 {isNotificationOpen && (
-                  <div className="absolute right-10 top-12 w-64 bg-white shadow-lg rounded-lg p-3">
+                  <div className="absolute right-10 top-12 w-64 bg-white shadow-lg rounded-lg p-3 z-20">
                     <h3 className="text-gray-800 font-bold">Notifications</h3>
                     {notifications.length > 0 ? (
                       notifications.map((notif) => (
                         <div
                           key={notif.id}
-                          className="p-2 border-b text-gray-600 cursor-pointer"
+                          className={`p-2 border-b text-gray-600 cursor-pointer ${notif.lu ? 'text-gray-400' : 'font-semibold'}`}
                           onClick={() => handleNotifClick(notif.id)}
                         >
                           {notif.lu ? <s>{notif.message}</s> : notif.message}

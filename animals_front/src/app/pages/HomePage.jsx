@@ -1,12 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Nunito } from "next/font/google";
 import { FaPaw, FaSmile, FaHeart, FaBars, FaBell } from "react-icons/fa";
 import { useSession, signOut } from "next-auth/react";
-import Navbar from "./NavbarPage"; // Adjust the path if needed
+import Navbar from "./NavbarPage"; // Adjust the path if 
+import { authenticatedFetch } from '../../app/authInterceptor';
+
 
 const nunito = Nunito({ subsets: ["latin"] });
 
@@ -17,10 +19,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [animalType, setAnimalType] = useState(""); // 'cat' or 'dog'
   const [species, setSpecies] = useState(""); // Specific species (e.g., 'Persian', 'Labrador')
   const [searchResults, setSearchResults] = useState([]); // Store search results
+  const scrollContainerRef = useRef(null);
+  const [hasSearched, setHasSearched] = useState(false);
   const router = useRouter();
 
   const speciesOptions = {
@@ -83,8 +86,17 @@ export default function Home() {
         console.error("Invalid token", error);
       }
     }
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleScroll, { passive: false });
+      return () => container.removeEventListener('wheel', handleScroll);
+    }
   }, [session, status]);
 
+  const handleScroll = (e) => {
+    e.preventDefault();
+    scrollContainerRef.current.scrollLeft += e.deltaY;
+  };
   const handleSearch = async () => {
     try {
       // Build query parameters dynamically
@@ -92,87 +104,46 @@ export default function Home() {
       if (searchQuery) queryParams.append("query", searchQuery);
       if (animalType) queryParams.append("type", animalType);
       if (species) queryParams.append("species", species);
-
+  
       // Construct the full URL
       const url = `http://127.0.0.1:8000/api/animals/search/?${queryParams.toString()}`;
-
+  
       // Fetch data from the API
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch search results");
       }
-
+  
       const data = await response.json();
       setSearchResults(data); // Update search results
+      setHasSearched(true); // Set hasSearched to true after a search is performed
     } catch (error) {
       console.error("Error searching animals:", error);
     }
   };
-  const getAuthToken = () => {
-    console.log("Session:", session);
-    console.log("Local storage token:", localStorage.getItem('access_token'));
 
-    const localToken = localStorage.getItem('access_token');
-    if (localToken) {
-        return `Bearer ${localToken}`;
-    }
-
-    if (session?.accessToken) {
-        return `Bearer ${session.accessToken}`;
-    }
-
-    if (session?.user?.token) {
-        return `Bearer ${session.user.token}`;
-    }
-
-    return null;
-};
 
 const handleAdoptClick = async () => {
-    try {
-        const authToken = getAuthToken();
+  try {
+    const response = await authenticatedFetch("http://127.0.0.1:8000/api/animals/demandes-adoption/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ animal: selectedAnimal.id }),
+    });
 
-        if (!authToken) {
-            console.log("No auth token found - redirecting to login");
-            localStorage.setItem('redirectAfterLogin', window.location.pathname);
-            router.push('/login');
-            return;
-        }
-
-        const requestBody = {
-            animal: selectedAnimal.id,
-        };
-
-        console.log("Sending request with token:", authToken);
-
-        const response = await fetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-            },
-            body: JSON.stringify(requestBody),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Adoption request successful:', data);
-            alert('Demande d\'adoption envoyée avec succès!');
-            setIsModalOpen(false);
-        } else {
-            const errorData = await response.json();
-            console.error('Server error:', errorData);
-            if (response.status === 401) {
-                alert('Votre session a expiré. Veuillez vous reconnecter.');
-                router.push('/login');
-            } else {
-                alert('Erreur lors de l\'envoi de la demande d\'adoption. Veuillez réessayer.');
-            }
-        }
-    } catch (error) {
-        console.error('Network error:', error);
-        alert('Erreur de connexion. Veuillez vérifier votre connexion internet.');
+    if (response.ok) {
+      alert("Demande d'adoption envoyée avec succès!");
+      setIsModalOpen(false);
+    } else if (response.status === 401) {
+      alert("Votre session a expiré. Veuillez vous reconnecter.");
+      router.push("/login");
+    } else {
+      alert("Erreur lors de l'envoi de la demande d'adoption. Veuillez réessayer.");
     }
+  } catch (error) {
+    console.error("Network error:", error);
+    alert("Erreur de connexion. Veuillez vérifier votre connexion internet.");
+  }
 };
 
   const handleSeeAllResults = () => {
@@ -182,7 +153,7 @@ const handleAdoptClick = async () => {
     if (animalType) queryParams.append("type", animalType);
     if (species) queryParams.append("species", species);
 
-    router.push(`/animaux?${queryParams.toString()}`);
+    router.push(`/nos-animaux?${queryParams.toString()}`);
   };
   const fetchAnimalDetails = async (animalId) => {
     setLoading(true);
@@ -281,39 +252,51 @@ const handleAdoptClick = async () => {
           </div>
 
           {/* Search Results Bar */}
-          {searchResults.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold text-pastel-blue">Search Results</h2>
-              <div className="flex overflow-x-auto gap-4 py-4">
-                {searchResults.map((animal) => (
-                  <div
-                    key={animal.id}
-                    className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105 cursor-pointer min-w-[200px]"
-                    onClick={() => fetchAnimalDetails(animal.id)}>
-                    {animal.image && (
-                      <div className="relative h-48">
-                      {animal.image ? (
-                          <img src={`http://127.0.0.1:8000${animal.image}`} alt={animal.nom} className="w-full h-full object-cover" />
-                      ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                              <p className="text-gray-500 italic">Pas de photo disponible</p>
-                          </div>
-                      )}
-                  </div>
-                    )}
-                    <h3 className="text-lg font-semibold text-gray-800">{animal.nom}</h3>
-                    <p className="text-sm text-gray-600">{animal.espece}</p>
-                  </div>
-                ))}
+          <div className="mt-8">
+  {/* Scrollable Container */}
+  {hasSearched && (
+  <div className="mt-8">
+    <h2 className="text-2xl font-bold text-pastel-blue">Search Results</h2>
+    {/* Scrollable Container */}
+    <div className="flex overflow-x-auto gap-4 py-4 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      {searchResults.map((animal) => (
+        <div
+          key={animal.id}
+          className="bg-white rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105 cursor-pointer flex-shrink-0"
+          style={{ width: '200px' }} // Adjust width as needed
+          onClick={() => fetchAnimalDetails(animal.id)}
+        >
+          {/* Image Container */}
+          <div className="w-full h-48 overflow-hidden rounded-t-lg">
+            {animal.image ? (
+              <img
+                src={`http://127.0.0.1:8000${animal.image}`}
+                alt={animal.nom}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <p className="text-gray-500 italic">Pas de photo disponible</p>
               </div>
-              <button
-                onClick={handleSeeAllResults}
-                className="mt-4 px-4 py-2 bg-pastel-green text-white rounded-full hover:bg-pastel-blue transition"
-              >
-                See All Results
-              </button>
-            </div>
-          )}
+            )}
+          </div>
+          {/* Animal Name */}
+          <div className="p-2 text-center">
+            <h3 className="text-lg font-semibold text-gray-800">{animal.nom}</h3>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* See All Results Button */}
+    <button
+      onClick={handleSeeAllResults}
+      className="mt-4 px-4 py-2 bg-pastel-green text-white rounded-full hover:bg-pastel-blue transition"
+    >
+      See All Results
+    </button>
+  </div>
+)}
           {isModalOpen && selectedAnimal && (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden transform transition-all duration-300 ease-in-out">
@@ -480,5 +463,6 @@ const handleAdoptClick = async () => {
       </div>
     </div>
     </div>
+  </div>
   );
 }
