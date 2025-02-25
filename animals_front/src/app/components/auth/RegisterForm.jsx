@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
 import Link from 'next/link';
 
-
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
     nom: "",
@@ -13,6 +12,7 @@ export default function RegisterForm() {
     role: "Proprietaire",
     adresse: "",
     password: "",
+    confirmPassword: "",  // New confirmPassword field
   });
 
   const [errors, setErrors] = useState({});
@@ -43,6 +43,10 @@ export default function RegisterForm() {
     if (!formData.password || formData.password.length < 6) {
       newErrors.password = "Le mot de passe doit contenir au moins 6 caractères";
     }
+    // Check if password and confirm password match
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -72,6 +76,7 @@ export default function RegisterForm() {
           role: "Proprietaire",
           adresse: "",
           password: "",
+          confirmPassword: "", // Reset the confirm password field
         });
 
         // ✅ Redirect to the login page
@@ -202,6 +207,25 @@ export default function RegisterForm() {
                 onChange={handleChange}
               />
               {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="sr-only">
+                Confirmer le mot de passe
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Confirmer le mot de passe"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+              />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+              )}
             </div>
           </div>
 
