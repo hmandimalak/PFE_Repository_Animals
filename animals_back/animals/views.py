@@ -9,6 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
 from django.db.models import Q
 from django.http import JsonResponse
+from rest_framework import generics
     
 
 
@@ -383,3 +384,45 @@ def get_animal_by_id(request, animal_id):
         return JsonResponse(animal_data)
     except Animal.DoesNotExist:
         return JsonResponse({'error': 'Animal not found'}, status=404)
+    
+class UserAcceptedTemporaryAnimalsView(generics.ListAPIView):
+    serializer_class = AnimalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Filter animals based on historical garde requests that were accepted
+        return Animal.objects.filter(
+            historiquegarderie__utilisateur=user,        # Link to the logged-in user
+            historiquegarderie__statut_nouveau="Acceptee",  # Only accepted requests
+            historiquegarderie__type_garde="Temporaire"  # Only temporary garde
+        ).distinct()
+    
+class UserAcceptedDefinitiveAnimalsView(generics.ListAPIView):
+    serializer_class = AnimalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Filter animals based on historical garde requests that were accepted
+        return Animal.objects.filter(
+            historiquegarderie__utilisateur=user,        # Link to the logged-in user
+            historiquegarderie__statut_nouveau="Acceptee",  # Only accepted requests
+            historiquegarderie__type_garde="Définitive"  # Only temporary garde
+        ).distinct()
+class UserAcceptedAdoptionAnimalsView(generics.ListAPIView):
+    serializer_class = AnimalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Filter animals based on historical garde requests that were accepted
+        return Animal.objects.filter(
+            historiqueadoption__utilisateur=user,        # Link to the logged-in user
+            historiqueadoption__statut_nouveau="Acceptee",  # Only accepted requests
+            
+        ).distinct()
+
+
+        
+

@@ -81,12 +81,12 @@ export default function EditProfile() {
   if (error) return <p className="text-red-500 text-center mt-10">{error}</p>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-3xl font-bold text-gray-800">Edit Your Profile</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-pastel-pink">
+      <h1 className="text-3xl font-bold text-pastel-pink mb-6">Edit Your Profile</h1>
 
       <form
         onSubmit={handleSubmit}
-        className="mt-6 p-6 bg-white shadow-md rounded-lg w-96 space-y-4"
+         className="bg-white p-4 shadow-lg rounded-lg"
       >
         <input
           type="text"
@@ -94,7 +94,7 @@ export default function EditProfile() {
           value={user.nom}
           onChange={handleChange}
           placeholder="Nom"
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border-2 border-pastel-pink rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-pink focus:border-transparent"
         />
         <input
           type="text"
@@ -102,7 +102,7 @@ export default function EditProfile() {
           value={user.prenom}
           onChange={handleChange}
           placeholder="Prénom"
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border-2 border-pastel-pink rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-pink focus:border-transparent"
         />
         <input
           type="email"
@@ -110,7 +110,7 @@ export default function EditProfile() {
           value={user.email}
           onChange={handleChange}
           placeholder="Email"
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border-2 border-pastel-pink rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-pink focus:border-transparent"
         />
         <input
           type="text"
@@ -118,7 +118,7 @@ export default function EditProfile() {
           value={user.telephone}
           onChange={handleChange}
           placeholder="Téléphone"
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border-2 border-pastel-pink rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-pink focus:border-transparent"
         />
         <input
           type="text"
@@ -126,19 +126,26 @@ export default function EditProfile() {
           value={user.adresse}
           onChange={handleChange}
           placeholder="Adresse"
-          className="w-full p-2 border rounded"
+          className="w-full p-3 border-2 border-pastel-pink rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-pink focus:border-transparent"
         />
 
-        {success && <p className="text-green-500">{success}</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {success && (
+          <p className="text-green-500 text-center">{success}</p>
+        )}
+        {error && (
+          <p className="text-red-500 text-center">{error}</p>
+        )}
 
-        <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded">
+        <button
+          type="submit"
+          className="w-full px-4 py-2 bg-pastel-pink text-white rounded-lg hover:bg-pastel-pink-dark transition-all duration-300"
+        >
           Save Changes
         </button>
         <button
           type="button"
-          onClick={() => router.push("/home")}
-          className="w-full px-4 py-2 mt-2 bg-gray-400 text-white rounded"
+          onClick={() => router.push("/profile")}
+          className="w-full px-4 py-2 mt-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-all duration-300"
         >
           Cancel
         </button>
