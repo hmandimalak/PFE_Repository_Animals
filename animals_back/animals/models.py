@@ -104,6 +104,55 @@ class DemandeAdoption(models.Model):
 
     def __str__(self):
         return f"Demande d'adoption pour {self.animal.nom} par {self.utilisateur.nom} ({self.statut})"
+
+class HistoriqueDemandeGarde(models.Model):
+    TYPE_GARDE_CHOICES = [
+        ('Temporaire', 'Temporaire'),
+        ('Définitive', 'Définitive'),
+        ("Aucun", "Aucun"),
+    ]
+    # Change CASCADE to SET_NULL
+    demande = models.ForeignKey(
+        'DemandeGarde', 
+        on_delete=models.SET_NULL,
+        related_name='historique',
+        null=True,
+        blank=True
+    )
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    statut_precedent = models.CharField(max_length=50)
+    statut_nouveau = models.CharField(max_length=50)
+    date_changement = models.DateTimeField(auto_now_add=True)
+    type_garde = models.CharField(max_length=20, choices=TYPE_GARDE_CHOICES, default='Aucun') 
+    animal = models.ForeignKey(
+        'Animal', 
+        on_delete=models.SET_NULL,
+        related_name='historiquegarderie',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        animal_name = self.animal.nom if self.animal else "Unknown"
+        return f"Historique Garde - {animal_name} - {self.statut_nouveau} ({self.date_changement})"
+class HistoriqueDemandeAdoption(models.Model):
+    demande = models.ForeignKey('DemandeAdoption', on_delete=models.SET_NULL, null=True, blank=True, related_name='historique')
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    statut_precedent = models.CharField(max_length=20)
+    statut_nouveau = models.CharField(max_length=20)
+    date_changement = models.DateTimeField(auto_now_add=True)
+    animal = models.ForeignKey(
+        'Animal', 
+        on_delete=models.SET_NULL,
+        related_name='historiqueadoption',
+        null=True,
+        blank=True
+    )
+
+
+    def __str__(self):
+        animal_name = self.animal.nom if self.animal else "Unknown"
+        return f"Historique Garde - {animal_name} - {self.statut_nouveau} ({self.date_changement})"
     
 class Notification(models.Model):
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')

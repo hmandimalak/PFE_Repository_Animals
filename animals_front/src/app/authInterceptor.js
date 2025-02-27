@@ -28,7 +28,14 @@ const refreshAccessToken = async (refreshToken) => {
 };
 
 export const authenticatedFetch = async (url, options = {}) => {
+  // Check localStorage first, then look for the token in the options headers
   let accessToken = localStorage.getItem('access_token');
+  
+  // If there's an Authorization header already provided, extract the token
+  const authHeader = options.headers?.Authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    accessToken = authHeader.split(' ')[1];
+  }
   
   try {
     const response = await fetch(url, {

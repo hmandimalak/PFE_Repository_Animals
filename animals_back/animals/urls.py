@@ -1,6 +1,6 @@
 # animals/urls.py
 from django.urls import path
-from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView,NotificationView,NotificationMarkReadView,search_animals,get_animal_by_id
+from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView,NotificationView,NotificationMarkReadView, UserAcceptedAdoptionAnimalsView, UserAcceptedDefinitiveAnimalsView, UserAcceptedTemporaryAnimalsView,search_animals,get_animal_by_id
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -24,6 +24,13 @@ urlpatterns = [
 
     path('search/', search_animals, name='search_animals'),
     path('search/<int:pk>/', get_animal_by_id, name='search_animals'),
+    #user informations
+    path('mes-animaux-temporaire/', UserAcceptedTemporaryAnimalsView.as_view(), name='mes-animaux-temporaire'),
+    path('mes-animaux-definitive/', UserAcceptedDefinitiveAnimalsView.as_view(), name='mes-animaux-definitive'),
+    path('mes-adoptions/', UserAcceptedAdoptionAnimalsView.as_view(), name='mes-adoptions'),
+    
+    
+
 
 
 ]

@@ -8,10 +8,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        'pastel-pink': '#FAD0C4',
-        'pastel-blue': '#A9C8D8',
+        'pastel-pink': '#EBE3F5',
+        
+        'pastel-blue': 'white',
         'pastel-green': '#A8E6CF',
         'pastel-yellow': '#FFD700',
+        "pastel-purple": "#CABBE9",
+        "pastel-purple-dark": "#A89EC9",
         background: "var(--background)",
         foreground: "var(--foreground)",
       },

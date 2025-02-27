@@ -1,3 +1,4 @@
+from venv import logger
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from rest_framework.authentication import BaseAuthentication
@@ -35,6 +36,8 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
     telephone = models.CharField(max_length=20)
+    profilepicture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
+
     role = models.CharField(
         max_length=20,
         choices=[("Proprietaire", "Proprietaire"), ("Responsable", "Responsable"), ("Promeneur", "Promeneur")],
@@ -60,7 +63,11 @@ class CustomAuthentication(BaseAuthentication):
 
         try:
             # Split 'Bearer <token>'
-            auth_type, token = auth_header.split(' ')
+            auth_parts = auth_header.split(' ', 1)
+            if len(auth_parts) != 2:
+                return None
+                
+            auth_type, token = auth_parts
             if auth_type.lower() != 'bearer':
                 return None
 
@@ -84,25 +91,26 @@ class CustomAuthentication(BaseAuthentication):
                     )
                     
                     if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
-                        raise ValueError('Wrong issuer.')
+                        return None
                     
                     # Get or create user based on Google info
                     email = idinfo['email']
-                    user, created = Utilisateur.objects.get_or_create(
-                        email=email,
-                        defaults={
-                            'nom': idinfo.get('family_name', ''),
-                            'prenom': idinfo.get('given_name', ''),
-                            'telephone': '',  # You might want to set default values
-                            'role': 'Promeneur',  # Set a default role
-                            'adresse': ''  # You might want to set default values
-                        }
-                    )
+                    try:
+                        user = Utilisateur.objects.get(email=email)
+                    except Utilisateur.DoesNotExist:
+                        # Create new user with all required fields
+                        user = Utilisateur.objects.create_user(
+                            email=email,
+                            password=None,  # No password for Google users
+                            nom=idinfo.get('family_name', ''),
+                            prenom=idinfo.get('given_name', ''),
+                            telephone='',  # Default empty value
+                            role='Proprietaire',  # Default role
+                            adresse=''  # Default empty value
+                        )
                     return (user, None)
                 except ValueError:
-                    raise exceptions.AuthenticationFailed('Invalid Google token')
-        except ValueError:
-            raise exceptions.AuthenticationFailed('Invalid token format')
-
-    def authenticate_header(self, request):
-        return 'Bearer'
+                    return None
+        except Exception as e:
+            print(logger.error(f"Authentication error: {str(e)}"))
+            return None

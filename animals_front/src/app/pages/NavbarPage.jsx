@@ -33,6 +33,7 @@ export default function Navbar() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
           },
         })
           .then((response) => response.json())
@@ -44,6 +45,7 @@ export default function Navbar() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
           },
         })
           .then((response) => {
@@ -245,7 +247,7 @@ export default function Navbar() {
               <>
                 <button
                   onClick={handleProfileClick}
-                  className="px-6 py-3 text-sm bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition flex items-center"
+                  className="px-6 py-3 text-sm bg-pastel-pink  text-white rounded-full hover:bg-pastel-green transition flex items-center"
                 >
                   <FaSmile className="mr-2" /> {getCurrentUser()}
                 </button>
