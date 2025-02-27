@@ -33,6 +33,8 @@ const CreateAnimal = () => {
     const [error, setError] = useState(null);
     const router = useRouter();
     const { data: session, status } = useSession();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;

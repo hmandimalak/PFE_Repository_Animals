@@ -6,11 +6,11 @@ from django.conf import settings
 
 class AnimalSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
-
+    utilisateur_nom = serializers.SerializerMethodField()
+    
     class Meta:
         model = Animal
-        fields = ['id', 'nom', 'espece', 'race', 'date_naissance', 'sexe', 'description', 'image', 'image_url', 
-                  'disponible_pour_adoption', 'disponible_pour_garde', 'type_garde', 'date_reservation', 'date_fin', 'date_creation']
+        fields = '__all__'
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -22,9 +22,19 @@ class AnimalSerializer(serializers.ModelSerializer):
         if obj.image:
             return f"{settings.MEDIA_URL}{obj.image.name}"
         return None
+        
+    def get_utilisateur_nom(self, obj):
+        # Get the latest accepted garde request for this animal
+        demande = obj.demandes_garde.filter(statut='Acceptee').order_by('-date_demande').first()
+        if demande:
+            return demande.utilisateur.nom
+        return None
 
 
 class DemandeGardeSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)  # Make it optional but handle it when present
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = DemandeGarde
         fields = '__all__'
@@ -34,9 +44,15 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
         utilisateur = self.context['request'].user  # Get the current logged-in user
         validated_data['utilisateur'] = utilisateur
         return super().create(validated_data)
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['type_garde'].choices = [('Temporaire', 'Temporaire'), ('Définitive', 'Définitive')]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            return f"{settings.MEDIA_URL}{obj.image.name}"
+        return None
 
 class DemandeAdoptionSerializer(serializers.ModelSerializer):
     animal = serializers.PrimaryKeyRelatedField(queryset=Animal.objects.all())  # Expecting animal_id
