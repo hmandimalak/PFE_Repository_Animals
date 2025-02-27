@@ -21,6 +21,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.contrib.auth.hashers import check_password, make_password
 
 
 
@@ -30,8 +32,10 @@ logger = logging.getLogger(__name__)
 
 class RegisterView(APIView):
     authentication_classes = []  # No authentication required for registration
+    parser_classes = [MultiPartParser, FormParser]  # Add these parsers for file uploads
+
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -127,24 +131,47 @@ class GoogleLoginView(APIView):
             
             # Extract user information
             email = idinfo['email']
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={
-                    'username': email,
-                }
-            )
+            
+            # Check if user exists
+            try:
+                user = User.objects.get(email=email)
+                created = False
+            except User.DoesNotExist:
+                # User doesn't exist, create a new one with all required fields
+                created = True
+                user = User.objects.create_user(
+                    email=email,
+                    # Set password to None or random string since user is logging in with Google
+                    password=None,  
+                    # Extract name from Google profile or use email as fallback
+                    nom=idinfo.get('family_name', email.split('@')[0]),
+                    prenom=idinfo.get('given_name', ''),
+                    telephone='',  # Set default empty value
+                    role='Proprietaire',  # Set default role
+                    adresse=''  # Set default empty value
+                )
             
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
             
+            # Prepare user data for response
+            user_data = {
+                'email': user.email,
+                'name': f"{user.prenom} {user.nom}".strip(),
+            }
+            
+            # Add Google profile picture if available
+            if 'picture' in idinfo:
+                user_data['image'] = idinfo['picture']
+                
+                # Optionally, you can save the Google profile picture to the user's profile
+                # if created and not user.profilepicture:
+                #    # You'd need to implement logic to download and save the image
+            
             return Response({
                 'access_token': str(refresh.access_token),
                 'refresh_token': str(refresh),
-                'user': {
-                    'email': user.email,
-                    'name': f"{user.nom}".strip(),
-                    'image': idinfo.get('picture', ''),
-                }
+                'user': user_data
             })
         
         except Exception as e:
@@ -153,7 +180,6 @@ class GoogleLoginView(APIView):
                 {'error': str(e)}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-
 
 @api_view(['POST'])
 def password_reset_request(request):
@@ -206,6 +232,12 @@ def password_reset_confirm(request):
 def get_user_profile(request):
     authentication_classes = [CustomAuthentication]
     user = request.user
+    
+    # Always return null for profilepicture if it doesn't exist
+    profile_picture = None
+    if hasattr(user, 'profilepicture') and user.profilepicture and hasattr(user.profilepicture, 'url'):
+        profile_picture = request.build_absolute_uri(user.profilepicture.url)
+    
     return Response({
         "nom": user.nom,
         "prenom": user.prenom,
@@ -213,6 +245,7 @@ def get_user_profile(request):
         "telephone": user.telephone,
         "adresse": user.adresse,
         "role": user.role,
+        "profilepicture": profile_picture,
     })
 
 @api_view(['PUT'])
@@ -220,21 +253,35 @@ def get_user_profile(request):
 def update_user_profile(request):
     authentication_classes = [CustomAuthentication]
     user = request.user
+
+    # Vérification des mots de passe
+    current_password = request.data.get('current_password')
+    new_password = request.data.get('new_password')
+
+    if current_password or new_password:
+        if not user.check_password(current_password):
+            return Response({"message": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+        if not new_password:
+            return Response({"message": "New password cannot be empty."}, status=status.HTTP_400_BAD_REQUEST)
+    
+        user.set_password(new_password)
+
+    # Mise à jour des autres champs
     user.nom = request.data.get('nom', user.nom)
     user.prenom = request.data.get('prenom', user.prenom)
     user.email = request.data.get('email', user.email)
     user.telephone = request.data.get('telephone', user.telephone)
     user.adresse = request.data.get('adresse', user.adresse)
-    user.save()
 
-    return Response({
-        "message": "Profile updated successfully",
-        "nom": user.nom,
-        "prenom": user.prenom,
-        "email": user.email,
-        "telephone": user.telephone,
-        "adresse": user.adresse,
-    }, status=200)
+    if 'profilepicture' in request.FILES:
+        user.profilepicture = request.FILES['profilepicture']
+
+    user.save()
+    serializer = UserSerializer(user, context={'request': request})
+
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter
-import Link from 'next/link';
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
@@ -12,24 +12,34 @@ export default function RegisterForm() {
     role: "Proprietaire",
     adresse: "",
     password: "",
-    confirmPassword: "",  // New confirmPassword field
+    confirmPassword: "",
+    profilepicture: null, // For storing the uploaded file
   });
 
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, type } = e.target;
+
+    if (type === "file") {
+      setFormData({
+        ...formData,
+        [name]: e.target.files[0], // Store the file object
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate form fields
     const newErrors = {};
     if (!formData.nom) newErrors.nom = "Le nom est requis";
     if (!formData.prenom) newErrors.prenom = "Le prénom est requis";
@@ -43,7 +53,6 @@ export default function RegisterForm() {
     if (!formData.password || formData.password.length < 6) {
       newErrors.password = "Le mot de passe doit contenir au moins 6 caractères";
     }
-    // Check if password and confirm password match
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
     }
@@ -53,13 +62,17 @@ export default function RegisterForm() {
       return;
     }
 
+    // Exclude confirmPassword from the data sent to the backend
+    const { confirmPassword, ...dataToSend } = formData;
+    const data = new FormData();
+    for (const key in dataToSend) {
+      data.append(key, dataToSend[key]);
+    }
+
     try {
       const response = await fetch("http://127.0.0.1:8000/api/auth/register/", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: data, // FormData automatically sets the content type to multipart/form-data
       });
 
       const result = await response.json();
@@ -68,6 +81,7 @@ export default function RegisterForm() {
       if (response.ok) {
         setSuccess(true);
         setErrors({});
+        // Reset form fields
         setFormData({
           nom: "",
           prenom: "",
@@ -76,10 +90,9 @@ export default function RegisterForm() {
           role: "Proprietaire",
           adresse: "",
           password: "",
-          confirmPassword: "", // Reset the confirm password field
+          confirmPassword: "",
+          profilepicture: null,
         });
-
-        // ✅ Redirect to the login page
         router.push("/login");
       } else {
         setErrors(result);
@@ -100,13 +113,34 @@ export default function RegisterForm() {
         </div>
 
         {errors.api && (
-          <div className="text-red-500 text-sm text-center">
-            {errors.api}
-          </div>
+          <div className="text-red-500 text-sm text-center">{errors.api}</div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit}
+          encType="multipart/form-data"
+        >
           <div className="rounded-md shadow-sm -space-y-px">
+            <div>
+              <label htmlFor="profilepicture" className="sr-only">
+                Profile Picture
+              </label>
+              <input
+                id="profilepicture"
+                name="profilepicture"
+                type="file"
+                accept="image/*"
+                onChange={handleChange}
+                className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+              />
+              {errors.profilepicture && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.profilepicture}
+                </p>
+              )}
+            </div>
+
             <div>
               <label htmlFor="nom" className="sr-only">
                 Nom
@@ -121,7 +155,9 @@ export default function RegisterForm() {
                 value={formData.nom}
                 onChange={handleChange}
               />
-              {errors.nom && <p className="text-red-500 text-sm mt-1">{errors.nom}</p>}
+              {errors.nom && (
+                <p className="text-red-500 text-sm mt-1">{errors.nom}</p>
+              )}
             </div>
 
             <div>
@@ -138,7 +174,9 @@ export default function RegisterForm() {
                 value={formData.prenom}
                 onChange={handleChange}
               />
-              {errors.prenom && <p className="text-red-500 text-sm mt-1">{errors.prenom}</p>}
+              {errors.prenom && (
+                <p className="text-red-500 text-sm mt-1">{errors.prenom}</p>
+              )}
             </div>
 
             <div>
@@ -155,7 +193,9 @@ export default function RegisterForm() {
                 value={formData.email}
                 onChange={handleChange}
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div>
@@ -172,7 +212,9 @@ export default function RegisterForm() {
                 value={formData.telephone}
                 onChange={handleChange}
               />
-              {errors.telephone && <p className="text-red-500 text-sm mt-1">{errors.telephone}</p>}
+              {errors.telephone && (
+                <p className="text-red-500 text-sm mt-1">{errors.telephone}</p>
+              )}
             </div>
 
             <div>
@@ -189,7 +231,9 @@ export default function RegisterForm() {
                 value={formData.adresse}
                 onChange={handleChange}
               />
-              {errors.adresse && <p className="text-red-500 text-sm mt-1">{errors.adresse}</p>}
+              {errors.adresse && (
+                <p className="text-red-500 text-sm mt-1">{errors.adresse}</p>
+              )}
             </div>
 
             <div>
@@ -206,7 +250,9 @@ export default function RegisterForm() {
                 value={formData.password}
                 onChange={handleChange}
               />
-              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
 
             <div>
@@ -224,7 +270,9 @@ export default function RegisterForm() {
                 onChange={handleChange}
               />
               {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
           </div>
@@ -241,7 +289,10 @@ export default function RegisterForm() {
 
         <div className="text-center text-sm">
           <span className="text-gray-600">Already have an account? </span>
-          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link
+            href="/login"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
             Sign in
           </Link>
         </div>

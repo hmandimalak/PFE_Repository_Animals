@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('search/', search_animals, name='search_animals'),
     path('search/<int:pk>/', get_animal_by_id, name='search_animals'),
-
+    #user informations
     path('mes-animaux-temporaire/', UserAcceptedTemporaryAnimalsView.as_view(), name='mes-animaux-temporaire'),
     path('mes-animaux-definitive/', UserAcceptedDefinitiveAnimalsView.as_view(), name='mes-animaux-definitive'),
     path('mes-adoptions/', UserAcceptedAdoptionAnimalsView.as_view(), name='mes-adoptions'),

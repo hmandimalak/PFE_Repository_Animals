@@ -46,6 +46,7 @@ export default function NosAnimaux() {
             console.error('Error fetching animals:', error);
         }
     };
+
     const searchAnimals = async (query = '', type = '', species = '') => {
         try {
             const url = new URL('http://127.0.0.1:8000/api/animals/search/');
@@ -105,16 +106,16 @@ export default function NosAnimaux() {
     };
 
     const handleAdoptClick = async () => {
+        const authToken = getAuthToken();
+
+        if (!authToken) {
+            alert("Vous devez être connecté pour adopter un animal.");
+            localStorage.setItem('redirectAfterLogin', window.location.pathname);
+            router.push('/login');
+            return;
+        }
+
         try {
-            const authToken = getAuthToken();
-
-            if (!authToken) {
-                console.log("No auth token found - redirecting to login");
-                localStorage.setItem('redirectAfterLogin', window.location.pathname);
-                router.push('/login');
-                return;
-            }
-
             const requestBody = {
                 animal: selectedAnimal.id,
             };
@@ -210,13 +211,13 @@ export default function NosAnimaux() {
                     ))}
                 </div>
             </div>
-
             {isModalOpen && selectedAnimal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden transform transition-all duration-300 ease-in-out">
+                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all duration-300 ease-in-out">
                         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <h1 className="text-3xl font-bold text-center text-pink-600 mb-6 col-span-2">Détails de l'Animal</h1>
+                            <h1 className="text-4xl font-bold text-center text-pink-600 mb-6 col-span-2">Détails de l'Animal</h1>
 
+                            {/* Left Side: Basic Information */}
                             <div className="space-y-4">
                                 <div>
                                     <h2 className="text-xl font-semibold text-gray-800">Nom</h2>
@@ -231,6 +232,18 @@ export default function NosAnimaux() {
                                     <p className="text-gray-600">{selectedAnimal.race}</p>
                                 </div>
                                 <div>
+                                    <h2 className="text-xl font-semibold text-gray-800">Type de Garde</h2>
+                                    <p className="text-gray-600">{selectedAnimal.type_garde}</p>
+                                </div>
+                            </div>
+
+                            {/* Right Side: Description */}
+                            <div className="space-y-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold text-gray-800">Description</h2>
+                                    <p className="text-gray-600">{selectedAnimal.description}</p>
+                                </div>
+                                <div>
                                     <h2 className="text-xl font-semibold text-gray-800">Date de Naissance</h2>
                                     <p className="text-gray-600">{selectedAnimal.date_naissance}</p>
                                 </div>
@@ -239,42 +252,13 @@ export default function NosAnimaux() {
                                     <p className="text-gray-600">{selectedAnimal.sexe === 'M' ? 'Male' : 'Femelle'}</p>
                                 </div>
                             </div>
-
-                            <div className="space-y-4">
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Description</h2>
-                                    <p className="text-gray-600">{selectedAnimal.description}</p>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Type de Garde</h2>
-                                    <p className="text-gray-600">{selectedAnimal.type_garde}</p>
-                                </div>
-                                {selectedAnimal.utilisateur && (
-                                    <div>
-                                        <h2 className="text-xl font-semibold text-gray-800">Demandeur</h2>
-                                        <p className="text-gray-600">{selectedAnimal.utilisateur_nom}</p>
-                                    </div>
-                                )}
-                                {selectedAnimal.type_garde === 'Temporaire' && (
-                                    <>
-                                        <div>
-                                            <h2 className="text-xl font-semibold text-gray-800">Date de Début</h2>
-                                            <p className="text-gray-600">{selectedAnimal.date_reservation}</p>
-                                        </div>
-                                        <div>
-                                            <h2 className="text-xl font-semibold text-gray-800">Date de Fin</h2>
-                                            <p className="text-gray-600">{selectedAnimal.date_fin}</p>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
                         </div>
 
                         <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-4">
-                            <button onClick={() => handleAdoptClick(selectedAnimal.id)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
+                            <button onClick={handleAdoptClick} className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition-transform transform hover:scale-105">
                                 Adopter
                             </button>
-                            <button onClick={closeModal} className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition-colors">
+                            <button onClick={closeModal} className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition-transform transform hover:scale-105">
                                 Fermer
                             </button>
                         </div>

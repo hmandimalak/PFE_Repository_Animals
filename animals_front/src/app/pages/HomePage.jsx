@@ -125,7 +125,7 @@ export default function Home() {
 
 const handleAdoptClick = async () => {
   try {
-    const response = await authenticatedFetch("http://127.0.0.1:8000/api/animals/demandes-adoption/", {
+    const response = await fetch("http://127.0.0.1:8000/api/animals/demandes-adoption/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ animal: selectedAnimal.id }),
@@ -226,7 +226,7 @@ const handleAdoptClick = async () => {
                 )}
                 <button
                   onClick={handleSearch}
-                  className="w-full px-4 py-2 bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition"
+                  className="w-full px-4 py-2 bg-pastel-blue text-black rounded-full hover:bg-pastel-green transition"
                 >
                   Search
                 </button>
@@ -298,57 +298,48 @@ const handleAdoptClick = async () => {
   </div>
 )}
           {isModalOpen && selectedAnimal && (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden transform transition-all duration-300 ease-in-out">
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <h1 className="text-3xl font-bold text-center text-pink-600 mb-6 col-span-2">Détails de l'Animal</h1>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 p-4 backdrop-blur-sm">
+    <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all duration-300 ease-in-out">
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h1 className="text-4xl font-bold text-center text-pink-600 mb-6 col-span-2">Détails de l'Animal</h1>
 
-                <div className="space-y-4">
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Nom</h2>
-                        <p className="text-gray-600">{selectedAnimal.nom}</p>
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Espèce</h2>
-                        <p className="text-gray-600">{selectedAnimal.espece}</p>
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Race</h2>
-                        <p className="text-gray-600">{selectedAnimal.race}</p>
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Date de Naissance</h2>
-                        <p className="text-gray-600">{selectedAnimal.date_naissance}</p>
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Sexe</h2>
-                        <p className="text-gray-600">{selectedAnimal.sexe === 'M' ? 'Male' : 'Femelle'}</p>
-                    </div>
+            {/* Left Side: Basic Information */}
+            <div className="space-y-4">
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Nom</h2>
+                    <p className="text-gray-600">{selectedAnimal.nom}</p>
                 </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Espèce</h2>
+                    <p className="text-gray-600">{selectedAnimal.espece}</p>
+                </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Race</h2>
+                    <p className="text-gray-600">{selectedAnimal.race}</p>
+                </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Type de Garde</h2>
+                    <p className="text-gray-600">{selectedAnimal.type_garde}</p>
+                </div>
+                
+            </div>
 
-                <div className="space-y-4">
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Description</h2>
-                        <p className="text-gray-600">{selectedAnimal.description}</p>
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold text-gray-800">Type de Garde</h2>
-                        <p className="text-gray-600">{selectedAnimal.type_garde}</p>
-                    </div>
-                    {selectedAnimal.type_garde === 'Temporaire' && (
-                        <>
-                            <div>
-                                <h2 className="text-xl font-semibold text-gray-800">Date de Début</h2>
-                                <p className="text-gray-600">{selectedAnimal.date_reservation}</p>
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-semibold text-gray-800">Date de Fin</h2>
-                                <p className="text-gray-600">{selectedAnimal.date_fin}</p>
-                            </div>
-                        </>
-                    )}
+            {/* Right Side: Description */}
+            <div className="space-y-4">
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Description</h2>
+                    <p className="text-gray-600">{selectedAnimal.description}</p>
+                </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Date de Naissance</h2>
+                    <p className="text-gray-600">{selectedAnimal.date_naissance}</p>
+                </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-gray-800">Sexe</h2>
+                    <p className="text-gray-600">{selectedAnimal.sexe === 'M' ? 'Male' : 'Femelle'}</p>
                 </div>
             </div>
+        </div>
 
             <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-4">
                 <button onClick={handleAdoptClick} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">

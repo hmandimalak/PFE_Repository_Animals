@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import Navbar from '../../pages/NavbarPage';
@@ -33,6 +33,7 @@ const CreateAnimal = () => {
     const [error, setError] = useState(null);
     const router = useRouter();
     const { data: session, status } = useSession();
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
@@ -50,6 +51,50 @@ const CreateAnimal = () => {
         setLoading(true);
         setError(null);
 
+        const token = localStorage.getItem("access_token") || session?.accessToken;
+        
+        // Check if user is authenticated before submitting
+        if (!token) {
+            alert("Vous devez être connecté pour créer un animal");
+            router.push("/login");
+            setLoading(false);
+            return;
+        }
+         // Validate dates
+        const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+        const { date_naissance, date_reservation, date_fin, type_garde } = formData;
+
+        if (!date_naissance) {
+            alert("Veuillez entrer la date de naissance.");
+            setLoading(false);
+            return;
+        }
+
+        if (type_garde === 'Temporaire') {
+            if (!date_reservation) {
+                alert("Veuillez entrer une date de réservation.");
+                setLoading(false);
+                return;
+            }
+
+            if (date_reservation < today) {
+                alert("La date de réservation doit être aujourd'hui ou une date future.");
+                setLoading(false);
+                return;
+            }
+
+            if (date_naissance >= date_reservation) {
+                alert("La date de naissance doit être avant la date de réservation.");
+                setLoading(false);
+                return;
+            }
+
+            if (date_fin && date_fin <= date_reservation) {
+                alert("La date de fin doit être après la date de réservation.");
+                setLoading(false);
+                return;
+            }
+        }
         const formDataToSend = { ...formData };
         if (formData.type_garde === 'Définitive') {
             delete formDataToSend.date_reservation;
@@ -64,7 +109,6 @@ const CreateAnimal = () => {
             formDataObj.append('image', formData.photo, formData.photo.name);
         }
 
-        const token = localStorage.getItem("access_token") || session?.accessToken;
         try {
             const response = await fetch('http://localhost:8000/api/animals/animaux/', {
                 method: 'POST',
@@ -74,12 +118,13 @@ const CreateAnimal = () => {
             if (response.ok) {
                 alert("Demande de garde envoyée avec succès!");
                 setIsModalOpen(false);
-              } else if (response.status === 401) {
+                router.push('/'); // Redirect to home page after successful submission
+            } else if (response.status === 401) {
                 alert("Votre session a expiré. Veuillez vous reconnecter.");
                 router.push("/login");
-              } else {
+            } else {
                 alert("Erreur lors de l'envoi de la demande de garde. Veuillez réessayer.");
-              }
+            }
         } catch (error) {
             setError(error.message);
         } finally {

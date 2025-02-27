@@ -27,14 +27,16 @@ class AnimalListCreateView(APIView):
 
             # Now, create the corresponding "Demande de Garde" (Guard Request)
             demande_garde_data = {
-                'animal': animal.id,  # Link the created animal to the request
-                'utilisateur': request.user.id,  # Ensure user ID is passed (instead of the user object)
-                'statut': 'En attente',  # Default status for new requests
-                'message': request.data.get('message', ''),  # Optionally, include a message
-                'type_garde': animal.type_garde  # Pass the `type_garde` from the created animal
+                'animal': animal.id,
+                'utilisateur': request.user.id,
+                'statut': 'En attente',
+                'message': request.data.get('message', ''),
+                'type_garde': animal.type_garde,
+                'image': animal.image  # Copy the image from Animal
             }
-            
-            # Pass the request context to the serializer
+
+
+            #Pass the request context to the serializer
             demande_garde_serializer = DemandeGardeSerializer(data=demande_garde_data, context={'request': request})
             if demande_garde_serializer.is_valid():
                 # Save the "Demande de Garde" to the database
@@ -176,43 +178,7 @@ from rest_framework import viewsets
 
 
 
-class AnimalListCreateView(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
-    parser_classes = [MultiPartParser, FormParser]
 
-    def post(self, request):
-        # First, create the animal
-        animal_serializer = AnimalSerializer(data=request.data)
-        if animal_serializer.is_valid():
-            print(request)
-            animal = animal_serializer.save()
-
-            # Now, create the corresponding "Demande de Garde" (Guard Request)
-            demande_garde_data = {
-                'animal': animal.id,  # Link the created animal to the request
-                'utilisateur': request.user.id,  # Ensure user ID is passed (instead of the user object)
-                'statut': 'En attente',  # Default status for new requests
-                'message': request.data.get('message', ''),  # Optionally, include a message
-                'type_garde': animal.type_garde  # Pass the `type_garde` from the created animal
-            }
-            
-            # Pass the request context to the serializer
-            demande_garde_serializer = DemandeGardeSerializer(data=demande_garde_data, context={'request': request})
-            if demande_garde_serializer.is_valid():
-                # Save the "Demande de Garde" to the database
-                demande_garde_serializer.save()
-
-                # Return both the animal and the guard request details
-                return Response({
-                    'animal': animal_serializer.data,
-                    'demande_garde': demande_garde_serializer.data
-                }, status=status.HTTP_201_CREATED)
-
-            # If there are errors in the guard request creation, return them
-            return Response(demande_garde_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # If there are errors in the animal creation, return them
-        return Response(animal_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AnimalDetailView(APIView):
@@ -319,8 +285,7 @@ class DemandeAdoptionAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Automatically create an adoption request for the logged-in user"""
-        # Create a new adoption request and set the logged-in user as the requester
-        serializer = DemandeAdoptionSerializer(data=request.data)
+        serializer = DemandeAdoptionSerializer(data=request.data, context={'request': request})  # Pass the request context
         if serializer.is_valid():
             serializer.save(utilisateur=request.user)  # Associate the logged-in user
             return Response(serializer.data, status=status.HTTP_201_CREATED)
