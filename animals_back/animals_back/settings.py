@@ -85,7 +85,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'dj_rest_auth',
-    'dj_rest_auth.registration', 
+    'dj_rest_auth.registration',
+    'boutique',
 ]
 
 ACCOUNT_USERNAME_REQUIRED = False
