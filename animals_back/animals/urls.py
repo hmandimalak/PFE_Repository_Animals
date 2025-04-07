@@ -1,6 +1,6 @@
 # animals/urls.py
 from django.urls import path
-from .views import AnimalListCreateView, AnimalDetailView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView,NotificationView,NotificationMarkReadView, UserAcceptedAdoptionAnimalsView, UserAcceptedDefinitiveAnimalsView, UserAcceptedTemporaryAnimalsView,search_animals,get_animal_by_id
+from .views import AnimalListCreateView, AnimalDetailView, DemandeEvenementMarcheCreateView, DemandeGardeListCreateView,AnimalAdminDefinitiveListView,AnimalDetailView,DemandeAdoptionAPIView, EvenementMarcheChienDetailsView, EvenementMarcheChienUserListView,NotificationView,NotificationMarkReadView, UserAcceptedAdoptionAnimalsView, UserAcceptedDefinitiveAnimalsView, UserAcceptedTemporaryAnimalsView, UserDemandesEvenementMarcheView,search_animals,get_animal_by_id
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -29,11 +29,14 @@ urlpatterns = [
     path('mes-animaux-definitive/', UserAcceptedDefinitiveAnimalsView.as_view(), name='mes-animaux-definitive'),
     path('mes-adoptions/', UserAcceptedAdoptionAnimalsView.as_view(), name='mes-adoptions'),
     
-    
-
-
-
+ 
+    path('evenements/marche-chiens/', EvenementMarcheChienUserListView.as_view(), name='evenement-marche-list'),
+    path('evenements/marche-chiens/<int:pk>/', EvenementMarcheChienDetailsView.as_view(), name='evenement-marche-detail'),
+    path('demandes/marche-chiens/', DemandeEvenementMarcheCreateView.as_view(), name='demande-marche-create'),
+    path('user/demandes/marche-chiens/', UserDemandesEvenementMarcheView.as_view(), name='user-demandes-marche'),
 ]
+
+
 # Serve media files during development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

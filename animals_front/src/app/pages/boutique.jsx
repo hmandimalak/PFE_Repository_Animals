@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaShoppingCart, FaSearch, FaFilter, FaSortAmountDown } from 'react-icons/fa';
+import { FaTrash,FaShoppingCart, FaSearch, FaFilter, FaSortAmountDown } from 'react-icons/fa';
 import Link from 'next/link';
 import Navbar from './NavbarPage';
 import { useRouter } from 'next/navigation';
@@ -106,7 +106,19 @@ const Boutique = () => {
   useEffect(() => {
     fetchProduits();
   }, [filterCategory, searchTerm, sortBy]);
-
+  const handleRemoveItem = async (productId) => {
+      setCartItems(cartItems.filter(item => item.id !== productId));
+      const authToken = getAuthToken();
+      if (authToken) {
+        try {
+          await authenticatedFetch(`http://127.0.0.1:8000/api/boutique/panier/supprimer/${productId}/`, {
+            method: 'DELETE'
+          });
+        } catch (error) {
+          console.error('Error removing from cart:', error);
+        }
+      }
+    };
   const handleAddToCart = async (produit) => {
     const authToken = getAuthToken(session);
     if (!authToken) {
@@ -134,6 +146,30 @@ const Boutique = () => {
     }
   };
 
+  const handleDirectCheckout = async (produit) => {
+    const authToken = getAuthToken(session);
+    if (!authToken) {
+      alert("Veuillez vous connecter pour commander des articles.");
+      localStorage.setItem('redirectAfterLogin', window.location.pathname);
+      router.push('/login');
+      return;
+    }
+    
+    try {
+      // First, add the product to cart
+      await authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/ajouter/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ produit_id: produit.id, quantity: 1 }),
+      });
+      
+      // Then redirect to checkout page
+      router.push('/commande');
+    } catch (error) {
+      console.error('Network error:', error);
+      alert('Erreur de connexion. Veuillez vérifier votre connexion internet.');
+    }
+  };
   const MiniCart = () => (
     <div className="absolute right-0 top-12 bg-white shadow-lg rounded-lg p-4 w-64 z-10 transition-all duration-300 transform origin-top">
       <h3 className="font-bold mb-2">Votre Panier</h3>
@@ -146,11 +182,12 @@ const Boutique = () => {
               <div key={item.id} className="flex justify-between items-center py-2 border-b">
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">{item.nom}</span>
-                  <span className="text-xs text-gray-500">{item.quantity} x {item.prix}D</span>
+                  <span className="text-xs text-gray-500">{item.quantity} x {item.prix}DT</span>
                 </div>
-                <button onClick={() => handleRemoveFromCart(item.id)} className="text-red-500 text-xs">
-                  Supprimer
-                </button>
+                <button onClick={() => handleRemoveItem(item.id)} className="text-red-500 hover:text-red-700 transition-colors"
+                                      >
+<FaTrash />
+                                      </button>
               </div>
             ))}
           </div>
@@ -162,6 +199,8 @@ const Boutique = () => {
             <Link href="/panier" className="block w-full mt-3 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded text-center">
               Voir le panier
             </Link>
+            
+
           </div>
         </>
       )}
@@ -282,14 +321,20 @@ const Boutique = () => {
 
             {/* Price and Add to Cart Button */}
             <div className="mt-4 flex justify-between items-center">
-              <p className="font-bold text-lg">{parseFloat(produit.prix).toFixed(2)} D</p>
+              <p className="font-bold text-lg">{parseFloat(produit.prix).toFixed(2)} DT</p>
               <button
                 onClick={() => handleAddToCart(produit)}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full"
               >
                 Ajouter au panier
               </button>
-            </div>
+              <button
+                onClick={() => handleDirectCheckout(produit)}
+                className="block w-full mt-2 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded text-center"
+              >
+                Commander
+              </button>
+                          </div>
           </div>
         </div>
       ))

@@ -1,6 +1,6 @@
 # animals/serializers.py
 from rest_framework import serializers
-from .models import Animal, DemandeGarde, DemandeAdoption,Notification
+from .models import Animal, DemandeEvenementMarche, DemandeGarde, DemandeAdoption, EvenementMarcheChien,Notification
 from django.conf import settings
 
 
@@ -113,3 +113,20 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = '__all__'
+
+
+class DemandeEvenementMarcheSerializer(serializers.ModelSerializer):
+    utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
+    chiens_details = AnimalSerializer(source='chiens', many=True, read_only=True)
+    evenement_titre = serializers.CharField(source='evenement.titre', read_only=True)
+    
+    class Meta:
+        model = DemandeEvenementMarche
+        fields = ['id', 'utilisateur', 'utilisateur_nom', 'evenement', 'evenement_titre', 
+                  'chiens', 'chiens_details', 'date_demande', 'statut']
+class EvenementMarcheChienSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EvenementMarcheChien
+        fields = '__all__'
+        
+

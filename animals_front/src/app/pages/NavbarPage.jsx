@@ -159,7 +159,7 @@ export default function Navbar() {
               { label: "Nos Animaux", href: "/nos-animaux" },
               { label: "Service de Garde", href: "/garderie" },
               { label: "Boutique", href: "/boutique" },
-              { label: "Faire un Don", href: "/faire-un-don" },
+              { label: "Evenements", href: "/marche" },
               { label: "Blog", href: "/blog" },
               { label: "Nos Services", href: "#our-services" },
               { label: "FAQ", href: "/faq" },

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaTrash, FaPlus, FaMinus, FaArrowLeft, FaShoppingCart } from 'react-icons/fa';
+import { FaTrash, FaArrowLeft, FaShoppingCart,FaMinus,FaPlus, } from 'react-icons/fa';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from './NavbarPage';
@@ -158,7 +158,7 @@ const Panier = () => {
                       />
                       <div>
                         <h3 className="font-medium text-gray-800">{item.nom}</h3>
-                        <p className="text-gray-600 text-sm">{item.prix} D </p>
+                        <p className="text-gray-600 text-sm">{item.prix} DT </p>
                       </div>
                     </div>
                     
@@ -181,7 +181,7 @@ const Panier = () => {
                       </div>
                       
                       <div className="w-20 text-right mr-4 font-medium text-gray-800">
-                        {(item.prix * item.quantity).toFixed(2)} D
+                        {(item.prix * item.quantity).toFixed(2)} DT
                       </div>
                       
                       <button 
@@ -199,7 +199,7 @@ const Panier = () => {
               <div className="mt-8 pt-6 border-t">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                   <div>
-                    <p className="text-lg text-gray-800 mb-1">Total: <span className="font-bold">{getTotalPrice()} D</span></p>
+                    <p className="text-lg text-gray-800 mb-1">Total: <span className="font-bold">{getTotalPrice()} DT</span></p>
                     <p className="text-sm text-gray-500">Taxes incluses</p>
                   </div>
                   

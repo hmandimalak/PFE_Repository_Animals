@@ -162,3 +162,36 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.utilisateur.nom}"
+class DemandeEvenementMarche(models.Model):
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    evenement = models.ForeignKey('EvenementMarcheChien', on_delete=models.CASCADE, related_name='demandes')
+    chiens = models.ManyToManyField('Animal', related_name='demandes_marche')
+    date_demande = models.DateTimeField(auto_now_add=True)
+    STATUS_CHOICES = [
+        ('En attente', 'En attente'),
+        ('Acceptee', 'Acceptee'),
+        ('Refusee', 'Refusee'),
+    ]
+    statut = models.CharField(max_length=10, choices=STATUS_CHOICES, default='En attente')
+    
+    def __str__(self):
+        return f"Demande de {self.utilisateur.username} pour {self.evenement.titre}"
+    
+    class Meta:
+        verbose_name = "Demande d'événement de marche"
+        verbose_name_plural = "Demandes d'événements de marche"
+class EvenementMarcheChien(models.Model):
+    titre = models.CharField(max_length=200)
+    date = models.DateField()
+    heure = models.TimeField()
+    lieu = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    chiens = models.ManyToManyField('Animal', related_name='evenements_marche')
+    date_creation = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.titre} - {self.date}"
+    
+    class Meta:
+        verbose_name = "Événement de marche"
+        verbose_name_plural = "Événements de marche"

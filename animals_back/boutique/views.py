@@ -5,7 +5,7 @@ from rest_framework import status
 from django.contrib.auth.decorators import login_required
 from .models import Produit, Panier, ArticlesPanier, Commande, ArticlesCommande
 import json
-
+from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -156,12 +156,11 @@ def supprimer_du_panier(request, produit_id):
         return Response({'success': True, 'message': 'Product removed from cart'})
     except ArticlesPanier.DoesNotExist:
         return Response({'error': 'Product not in cart'}, status=status.HTTP_404_NOT_FOUND)
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def creer_commande(request):
     """
-    Create a new order from the cart items
+    Create a new order from the cart items and reduce product inventory
     """
     # Get user's cart
     try:
@@ -175,29 +174,46 @@ def creer_commande(request):
     if not articles:
         return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Calculate total price
-    total_prix = sum(article.produit.prix * article.quantite for article in articles)
-    
-    # Create the order
-    commande = Commande.objects.create(
-        utilisateur=request.user,
-        total_prix=total_prix,
-        statut="En attente"
-    )
-    
-    # Create order items
-    for article in articles:
-        ArticlesCommande.objects.create(
-            commande=commande,
-            produit=article.produit,
-            quantite=article.quantite
+    # Use transaction to ensure database consistency
+    with transaction.atomic():
+        # Check inventory before proceeding
+        for article in articles:
+            # Assuming your Product model has a 'stock' or 'quantite' field
+            if article.produit.stock < article.quantite:
+                return Response({
+                    'error': f'Not enough stock for {article.produit.nom}. Available: {article.produit.stock}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Calculate total price
+        total_prix = sum(article.produit.prix * article.quantite for article in articles)
+        
+        # Create the order
+        commande = Commande.objects.create(
+            utilisateur=request.user,
+            total_prix=total_prix,
+            statut="En attente",
+            
         )
-    
-    # Empty the cart
-    articles.delete()
-    
-    return Response({
-        'success': True,
-        'message': 'Order created successfully',
-        'numero_commande': commande.numero_commande
-    })
+        
+        # Create order items and reduce inventory
+        for article in articles:
+            # Create order item
+            ArticlesCommande.objects.create(
+                commande=commande,
+                produit=article.produit,
+                quantite=article.quantite,
+               
+            )
+            
+            # Reduce product inventory
+            article.produit.stock -= article.quantite
+            article.produit.save()
+        
+        # Empty the cart
+        articles.delete()
+        
+        return Response({
+            'success': True,
+            'message': 'Order created successfully',
+            'numero_commande': commande.numero_commande
+        })
