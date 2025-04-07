@@ -1,9 +1,10 @@
+from datetime import date, timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from .models import Animal, DemandeGarde, DemandeAdoption,Notification
-from .serializers import AnimalSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer,NotificationSerializer
+from .models import Animal, DemandeEvenementMarche, DemandeGarde, DemandeAdoption, EvenementMarcheChien,Notification
+from .serializers import AnimalSerializer, DemandeEvenementMarcheSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer, EvenementMarcheChienSerializer,NotificationSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -388,6 +389,108 @@ class UserAcceptedAdoptionAnimalsView(generics.ListAPIView):
             
         ).distinct()
 
+# views.py
+class EvenementMarcheChienUserListView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        # Get upcoming events (current date or future)
+        today = date.today()
+        evenements = EvenementMarcheChien.objects.filter(date__gte=today).order_by('date')
+        serializer = EvenementMarcheChienSerializer(evenements, many=True)
+        return Response(serializer.data)
 
+class EvenementMarcheChienDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            evenement = EvenementMarcheChien.objects.get(pk=pk)
+            serializer = EvenementMarcheChienSerializer(evenement)
+            
+            # Check if user already has a request for this event
+            user_demande = DemandeEvenementMarche.objects.filter(
+                utilisateur=request.user,
+                evenement=evenement
+            ).first()
+            
+            demande_data = None
+            if user_demande:
+                demande_serializer = DemandeEvenementMarcheSerializer(user_demande)
+                demande_data = demande_serializer.data
+            
+            return Response({
+                'evenement': serializer.data,
+                'user_demande': demande_data
+            })
+        except EvenementMarcheChien.DoesNotExist:
+            return Response({'error': 'Événement non trouvé'}, status=404)
+
+class DemandeEvenementMarcheCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        evenement_id = request.data.get('evenement')
+        chiens_ids = request.data.get('chiens', [])
         
+        # Validate number of dogs
+        if not chiens_ids:
+            return Response({'error': 'Veuillez sélectionner au moins un chien'}, status=400)
+        
+        if len(chiens_ids) > 3:
+            return Response({'error': 'Vous ne pouvez pas sélectionner plus de 3 chiens'}, status=400)
+        
+        try:
+            evenement = EvenementMarcheChien.objects.get(pk=evenement_id)
+            
+            # Check if dogs are part of the event
+            for chien_id in chiens_ids:
+                if not evenement.chiens.filter(id=chien_id).exists():
+                    return Response({'error': f'Chien avec ID {chien_id} n\'est pas dans cet événement'}, status=400)
+            
+            # Check if user already has a request for this event
+            existing_demande = DemandeEvenementMarche.objects.filter(
+                utilisateur=request.user,
+                evenement=evenement
+            ).first()
+            
+            if existing_demande:
+                # Update existing request
+                existing_demande.chiens.clear()
+                for chien_id in chiens_ids:
+                    chien = Animal.objects.get(id=chien_id)
+                    existing_demande.chiens.add(chien)
+                
+                # If it was rejected before, set back to pending
+                if existing_demande.statut == 'Refusee':
+                    existing_demande.statut = 'En attente'
+                    existing_demande.save()
+                    
+                serializer = DemandeEvenementMarcheSerializer(existing_demande)
+                return Response(serializer.data)
+            else:
+                # Create new request
+                demande = DemandeEvenementMarche.objects.create(
+                    utilisateur=request.user,
+                    evenement=evenement,
+                    statut='En attente'
+                )
+                
+                for chien_id in chiens_ids:
+                    chien = Animal.objects.get(id=chien_id)
+                    demande.chiens.add(chien)
+                
+               
+                
+        except EvenementMarcheChien.DoesNotExist:
+            return Response({'error': 'Événement non trouvé'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
 
+class UserDemandesEvenementMarcheView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        demandes = DemandeEvenementMarche.objects.filter(utilisateur=request.user).order_by('-date_demande')
+        serializer = DemandeEvenementMarcheSerializer(demandes, many=True)
+        return Response(serializer.data)
