@@ -41,40 +41,70 @@ export default function Navbar() {
           .catch((error) => console.error("Error fetching user profile", error));
 
         // Fetch notifications using authenticatedFetch
-        authenticatedFetch("http://127.0.0.1:8000/api/animals/notifications/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
-          },
+        
+      // Fetch notifications from animals app
+      authenticatedFetch("http://127.0.0.1:8000/api/animals/notifications/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
         })
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+        .then((animalNotifications) => {
+          console.log("Animal notifications data:", animalNotifications);
+          
+          // Now fetch boutique notifications
+          return authenticatedFetch("http://127.0.0.1:8000/api/boutique/notifications/", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
+            },
           })
-          .then((data) => {
-            console.log("Notifications data:", data); // Debug log
-            const notificationsList = Array.isArray(data) ? data : [];
-            setNotifications(notificationsList);
-            setNotifCount(notificationsList.filter((n) => !n.lu).length);
-          })
-          .catch((error) => {
-            console.error("Error fetching notifications:", error);
-            setNotifications([]);
-            setNotifCount(0);
-          });
-      } catch (error) {
-        console.error("Invalid token", error);
-      }
-
-      if (session?.user) {
-        setUser(session.user);
-      }
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(boutiqueNotifications => {
+              console.log("Boutique notifications data:", boutiqueNotifications);
+              
+              // Add a type property to each notification
+              const typedAnimalNotifications = Array.isArray(animalNotifications) 
+                ? animalNotifications.map(n => ({...n, type: 'animals'})) 
+                : [];
+                
+              const typedBoutiqueNotifications = Array.isArray(boutiqueNotifications) 
+                ? boutiqueNotifications.map(n => ({...n, type: 'boutique'})) 
+                : [];
+              
+              // Combine notifications from both sources
+              const allNotifications = [...typedAnimalNotifications, ...typedBoutiqueNotifications];
+              
+              // Sort by date if notifications have a date field
+              // allNotifications.sort((a, b) => new Date(b.date) - new Date(a.date));
+              
+              setNotifications(allNotifications);
+              setNotifCount(allNotifications.filter((n) => !n.lu).length);
+            });
+        })
+        .catch((error) => {
+          console.error("Error fetching notifications:", error);
+          setNotifications([]);
+          setNotifCount(0);
+        });
+    } catch (error) {
+      console.error("Invalid token", error);
     }
-  }, [session, status]);
-
+  }
+}, [session, status]);
   const handleProfileClick = async () => {
     if (isNavigating) return; // Prevent multiple clicks
 
@@ -113,9 +143,14 @@ export default function Navbar() {
     }
   };
   
-  const handleNotifClick = async (notifId) => {
+  const handleNotifClick = async (notifId, notificationType) => {
+    // Determine the API endpoint based on notification type
+    const apiEndpoint = notificationType === 'boutique' 
+      ? `http://127.0.0.1:8000/api/boutique/notifications/${notifId}/read/`
+      : `http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`;
+    
     // Mark notification as read using authenticatedFetch
-    await authenticatedFetch(`http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`, {
+    await authenticatedFetch(apiEndpoint, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -230,7 +265,7 @@ export default function Navbar() {
                         <div
                           key={notif.id}
                           className={`p-2 border-b text-gray-600 cursor-pointer ${notif.lu ? 'text-gray-400' : 'font-semibold'}`}
-                          onClick={() => handleNotifClick(notif.id)}
+                          onClick={() => handleNotifClick(notif.id, notif.type)}
                         >
                           {notif.lu ? <s>{notif.message}</s> : notif.message}
                         </div>

@@ -3,16 +3,16 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.decorators import login_required
-from .models import Produit, Panier, ArticlesPanier, Commande, ArticlesCommande
+from .models import Notification, Produit, Panier, ArticlesPanier, Commande, ArticlesCommande
 import json
 from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.views import APIView
 
-
-
+from .serializers import NotificationSerializer
 # Existing views
 def get_produits(request):
     products = Produit.objects.all()
@@ -212,10 +212,7 @@ def creer_commande(request):
                 prix_unitaire=article.produit.prix  # Store current price
             )
             
-            # Reduce product inventory
-            article.produit.stock -= article.quantite
-            article.produit.save()
-        
+           
         # Empty the cart
         articles.delete()
         
@@ -224,3 +221,20 @@ def creer_commande(request):
             'message': 'Order created successfully',
             'numero_commande': commande.numero_commande
         })
+class NotificationView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        notifications = Notification.objects.filter(utilisateur=request.user, lu=False)
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data)
+class NotificationMarkReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk):
+        try:
+            notification = Notification.objects.get(id=pk, utilisateur=request.user)
+            notification.lu = True  # Mark as read
+            notification.save()
+            return Response({"message": "Notification marked as read"}, status=status.HTTP_200_OK)
+        except Notification.DoesNotExist:
+            return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
