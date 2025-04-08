@@ -183,6 +183,13 @@ const Boutique = () => {
                 <div className="flex flex-col">
                   <span className="text-sm font-medium">{item.nom}</span>
                   <span className="text-xs text-gray-500">{item.quantity} x {item.prix}DT</span>
+                  <span className={`px-2 py-1 rounded text-xs ${
+            item.stock > 10 ? 'bg-green-100 text-green-800' : 
+            item.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 
+            'bg-red-100 text-red-800'
+          }`}>
+            {item.stock > 0 ? `${item.stock} en stock` : 'Rupture de stock'}
+          </span>
                 </div>
                 <button onClick={() => handleRemoveItem(item.id)} className="text-red-500 hover:text-red-700 transition-colors"
                                       >

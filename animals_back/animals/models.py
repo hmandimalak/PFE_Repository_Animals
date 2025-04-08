@@ -155,11 +155,15 @@ class HistoriqueDemandeAdoption(models.Model):
         return f"Historique Garde - {animal_name} - {self.statut_nouveau} ({self.date_changement})"
     
 class Notification(models.Model):
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='animal_notifications'  # Changed from 'notifications'
+    )
     message = models.TextField()
     date_creation = models.DateTimeField(auto_now_add=True)
-    lu = models.BooleanField(default=False)  # Mark as read/unread
-
+    lu = models.BooleanField(default=False)
+    
     def __str__(self):
         return f"Notification for {self.utilisateur.nom}"
 class DemandeEvenementMarche(models.Model):

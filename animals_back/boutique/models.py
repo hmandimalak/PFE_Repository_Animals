@@ -77,3 +77,15 @@ class ArticlesCommande(models.Model):
 
     def __str__(self):
         return f"{self.quantite} x {self.produit.nom} dans {self.commande.numero_commande}"
+class Notification(models.Model):
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='boutique_notifications'  # Changed from 'notifications'
+    )
+    message = models.TextField()
+    date_creation = models.DateTimeField(auto_now_add=True)
+    lu = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Notification for {self.utilisateur.nom}"
