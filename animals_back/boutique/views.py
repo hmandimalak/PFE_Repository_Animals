@@ -162,6 +162,12 @@ def creer_commande(request):
     """
     Create a new order from the cart items and reduce product inventory
     """
+    # Get request data
+    data = request.data
+    adresse_livraison = data.get('adresse_livraison', '')
+    telephone = data.get('telephone', '')
+    methode_paiement = data.get('methode_paiement', 'livraison')
+    
     # Get user's cart
     try:
         panier = Panier.objects.get(utilisateur=request.user)
@@ -178,7 +184,6 @@ def creer_commande(request):
     with transaction.atomic():
         # Check inventory before proceeding
         for article in articles:
-            # Assuming your Product model has a 'stock' or 'quantite' field
             if article.produit.stock < article.quantite:
                 return Response({
                     'error': f'Not enough stock for {article.produit.nom}. Available: {article.produit.stock}'
@@ -192,7 +197,9 @@ def creer_commande(request):
             utilisateur=request.user,
             total_prix=total_prix,
             statut="En attente",
-            
+            adresse_livraison=adresse_livraison,
+            telephone=telephone,
+            methode_paiement=methode_paiement
         )
         
         # Create order items and reduce inventory
@@ -202,7 +209,7 @@ def creer_commande(request):
                 commande=commande,
                 produit=article.produit,
                 quantite=article.quantite,
-               
+                prix_unitaire=article.produit.prix  # Store current price
             )
             
             # Reduce product inventory

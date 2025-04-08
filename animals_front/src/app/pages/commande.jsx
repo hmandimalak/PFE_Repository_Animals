@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FaArrowLeft, FaMoneyBill ,FaTrash,FaPlus, FaMinus,} from 'react-icons/fa';
+import { FaArrowLeft, FaMoneyBill, FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
 import Link from 'next/link';
 import Navbar from './NavbarPage';
 import { useSession } from "next-auth/react";
 import { authenticatedFetch } from '../../app/authInterceptor';
-
 
 const getAuthToken = () => {
   if (typeof window !== 'undefined') {
@@ -31,7 +30,7 @@ const Commande = () => {
     ville: '',
     telephone: ''
   });
-  
+
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -147,7 +146,9 @@ const Commande = () => {
       // Create order with address and payment method
       const response = await authenticatedFetch('http://127.0.0.1:8000/api/boutique/commander/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify({
           adresse_livraison: `${addressData.prenom} ${addressData.nom}, ${addressData.adresse}, ${addressData.code_postal} ${addressData.ville}`,
           telephone: addressData.telephone,
@@ -155,7 +156,14 @@ const Commande = () => {
         })
       });
       
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Order error details:', errorData);
+        alert(`Error: ${JSON.stringify(errorData)}`);
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      // Get response data
       const data = await response.json();
       
       // Clear cart
@@ -168,10 +176,10 @@ const Commande = () => {
       setProcessingOrder(false);
     } catch (error) {
       console.error('Error creating order:', error);
-      alert("Une erreur s'est produite lors de la création de votre commande. Veuillez réessayer.");
       setProcessingOrder(false);
     }
   };
+
   const handleRemoveItem = async (productId) => {
     try {
       // Remove from state
@@ -189,29 +197,30 @@ const Commande = () => {
       alert("Une erreur s'est produite lors de la suppression de l'article.");
     }
   };
-   const handleQuantityChange = async (productId, change) => {
-      const updatedCart = cartItems.map(item => {
-        if (item.id === productId) {
-          const newQuantity = item.quantity + change;
-          return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
-        }
-        return item;
-      });
-      setCartItems(updatedCart);
-      const updatedItem = updatedCart.find(item => item.id === productId);
-      const authToken = getAuthToken();
-      if (authToken && updatedItem) {
-        try {
-          await authenticatedFetch(`http://127.0.0.1:8000/api/boutique/panier/update/${productId}/`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ quantity: updatedItem.quantity })
-          });
-        } catch (error) {
-          console.error('Error updating quantity:', error);
-        }
+
+  const handleQuantityChange = async (productId, change) => {
+    const updatedCart = cartItems.map(item => {
+      if (item.id === productId) {
+        const newQuantity = item.quantity + change;
+        return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
       }
-    };
+      return item;
+    });
+    setCartItems(updatedCart);
+    const updatedItem = updatedCart.find(item => item.id === productId);
+    const authToken = getAuthToken();
+    if (authToken && updatedItem) {
+      try {
+        await authenticatedFetch(`http://127.0.0.1:8000/api/boutique/panier/update/${productId}/`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: updatedItem.quantity })
+        });
+      } catch (error) {
+        console.error('Error updating quantity:', error);
+      }
+    }
+  };
 
   if (!isClient || loading) {
     return (
@@ -411,47 +420,45 @@ const Commande = () => {
                 <h3 className="font-medium text-gray-700 mb-2">Articles ({cartItems.length})</h3>
                 <div className="space-y-3 max-h-60 overflow-y-auto">
                 {cartItems.map(item => (
-  <div key={item.id} className="flex items-center text-sm">
-   
+                  <div key={item.id} className="flex items-center text-sm">
+                    <div className="w-12 h-12 rounded bg-gray-200 flex-shrink-0 mr-3 overflow-hidden">
+                      {item.image_url && (
+                        <img src={item.image_url} alt={item.nom} className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <p className="text-gray-800">{item.nom}</p>
+                      <p className="text-gray-500">Quantité: {item.quantity}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{(item.prix * item.quantity).toFixed(2)} DT</p>
+                    </div>
 
-    <div className="w-12 h-12 rounded bg-gray-200 flex-shrink-0 mr-3 overflow-hidden">
-      {item.image_url && (
-        <img src={item.image_url} alt={item.nom} quality={100} className="w-full h-full object-cover" />
-      )}
-    </div>
-    <div className="flex-grow">
-      <p className="text-gray-800">{item.nom}</p>
-      <p className="text-gray-500">Quantité: {item.quantity}</p>
-    </div>
-    <div className="text-right">
-      <p className="font-medium">{(item.prix * item.quantity).toFixed(2)} DT</p>
-    </div>
-
-    <div className="flex items-center border rounded-lg mr-4">
-                            <button 
-                              onClick={() => handleQuantityChange(item.id, -1)} 
-                              className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors"
-                              disabled={item.quantity <= 1}
-                            >
-                              <FaMinus size={12} />
-                            </button>
-                            <span className="px-4 text-gray-700">{item.quantity}</span>
-                            <button 
-                              onClick={() => handleQuantityChange(item.id, 1)} 
-                              className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors"
-                            >
-                              <FaPlus size={12} />
-                            </button>
-                          </div>
-                          <button 
-      onClick={() => handleRemoveItem(item.id)}
-      className="text-red-500 hover:text-red-700 transition-colors mr-2"
-      aria-label="Supprimer l'article"
-    >
-      <FaTrash />
-    </button>
-  </div>
-))}
+                    <div className="flex items-center border rounded-lg mr-4">
+                      <button 
+                        onClick={() => handleQuantityChange(item.id, -1)} 
+                        className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors"
+                        disabled={item.quantity <= 1}
+                      >
+                        <FaMinus size={12} />
+                      </button>
+                      <span className="px-4 text-gray-700">{item.quantity}</span>
+                      <button 
+                        onClick={() => handleQuantityChange(item.id, 1)} 
+                        className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors"
+                      >
+                        <FaPlus size={12} />
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="text-red-500 hover:text-red-700 transition-colors mr-2"
+                      aria-label="Supprimer l'article"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                ))}
                 </div>
               </div>
               
