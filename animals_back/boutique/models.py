@@ -56,6 +56,9 @@ class Commande(models.Model):
         default="En attente",
     )
     date_commande = models.DateTimeField(auto_now_add=True)
+    adresse_livraison = models.TextField(blank=True, null=True)
+    telephone = models.CharField(max_length=20, blank=True, null=True)
+    methode_paiement = models.CharField(max_length=50, default='livraison')
 
     def save(self, *args, **kwargs):
         if not self.numero_commande:
@@ -70,6 +73,7 @@ class ArticlesCommande(models.Model):
     commande = models.ForeignKey(Commande, on_delete=models.CASCADE)
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     quantite = models.PositiveIntegerField(default=1)
+    prix_unitaire = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Add this line
 
     def __str__(self):
         return f"{self.quantite} x {self.produit.nom} dans {self.commande.numero_commande}"
