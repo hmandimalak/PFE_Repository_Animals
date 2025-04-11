@@ -158,7 +158,7 @@ export default function NosAnimaux() {
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-4xl font-bold text-center text-pink-600 mb-8">Animaux Prêts pour l'Adoption</h1>
                 
-                <form onSubmit={handleSearch} className="mb-8 flex gap-4">
+                <form onSubmit={handleSearch} className="mb-8 flex gap-4 text-black">
                     <input
                         type="text"
                         placeholder="Rechercher par nom..."

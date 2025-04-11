@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class', // Add this line
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,19 +9,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        'pastel-pink': '#EBE3F5',
-        
-        'pastel-blue': 'white',
-        'pastel-green': '#A8E6CF',
-        'pastel-yellow': '#FFD700',
-        "pastel-purple": "#CABBE9",
-        "pastel-purple-dark": "#A89EC9",
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: '#6A89A7',    // Main brand color
+        secondary: '#BDDDFC',   // Light background/container
+        accent: '#88BDF2',      // Interactive elements
+        dark: '#384959',        // Dark text/headers
       },
     },
   },
- 
-  
   plugins: [],
 };

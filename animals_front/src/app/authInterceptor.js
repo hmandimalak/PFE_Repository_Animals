@@ -13,12 +13,23 @@ const refreshAccessToken = async (refreshToken) => {
       })
     });
 
-    if (!response.ok) throw new Error('Failed to refresh token');
+    if (!response.ok) {
+      // Check for specific 401 error
+      if (response.status === 401) {
+        throw new Error('Refresh token expired or invalid');
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
     
     const data = await response.json();
+    
+    // Store both tokens
     localStorage.setItem('access_token', data.access);
+    localStorage.setItem('refresh_token', data.refresh); // Add this line
+    
     return data.access;
   } catch (error) {
+    // Clear tokens and redirect
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
@@ -28,17 +39,10 @@ const refreshAccessToken = async (refreshToken) => {
 };
 
 export const authenticatedFetch = async (url, options = {}) => {
-  // Check localStorage first, then look for the token in the options headers
   let accessToken = localStorage.getItem('access_token');
   
-  // If there's an Authorization header already provided, extract the token
-  const authHeader = options.headers?.Authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    accessToken = authHeader.split(' ')[1];
-  }
-  
   try {
-    const response = await fetch(url, {
+    let response = await fetch(url, {
       ...options,
       headers: {
         ...options.headers,
@@ -47,27 +51,38 @@ export const authenticatedFetch = async (url, options = {}) => {
       },
     });
 
+    // Token is valid - return immediately
     if (response.ok) return response;
 
+    // Handle token expiration
     if (response.status === 401) {
       const refreshToken = localStorage.getItem('refresh_token');
-      if (!refreshToken) throw new Error('No refresh token available');
+      
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
 
-      accessToken = await refreshAccessToken(refreshToken);
-
-      return fetch(url, {
+      // Refresh token and retry
+      const newAccessToken = await refreshAccessToken(refreshToken);
+      
+      // Retry with new token
+      response = await fetch(url, {
         ...options,
         headers: {
           ...options.headers,
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${newAccessToken}`,
           'Content-Type': 'application/json',
         },
       });
+      
+      return response;
     }
 
+    // Handle other errors
     return response;
+    
   } catch (error) {
+    console.error('Fetch error:', error);
     throw error;
   }
-  
 };

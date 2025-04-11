@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+import json
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -45,35 +46,6 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
     authentication_classes = []  # No authentication required for login
 
-class CustomTokenRefreshView(TokenRefreshView):
-    def post(self, request, *args, **kwargs):
-        try:
-            refresh_token = request.data.get('refresh')
-            
-            if not refresh_token:
-                return Response(
-                    {'error': 'Refresh token is required'}, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            refresh = RefreshToken(refresh_token)
-            data = {
-                'access': str(refresh.access_token),
-                'refresh': str(refresh)  # New refresh token
-            }
-
-            return Response(data, status=status.HTTP_200_OK)
-
-        except TokenError as e:
-            return Response(
-                {'error': 'Invalid or expired refresh token'}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-        except Exception as e:
-            return Response(
-                {'error': 'An error occurred while refreshing token'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -298,4 +270,62 @@ def user_list(request):
     users = Utilisateur.objects.all()
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
-
+@api_view(['POST'])
+def contact_form(request):
+    """
+    API endpoint to handle contact form submissions.
+    """
+    try:
+        data = json.loads(request.body)
+        name = data.get('name', '')
+        email = data.get('email', '')
+        message = data.get('message', '')
+        
+        # Validate data
+        if not all([name, email, message]):
+            return Response(
+                {'error': 'Tous les champs sont obligatoires'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Send email
+        subject = f'Nouvelle question de {name}'
+        email_message = f"""
+        Nom: {name}
+        Email: {email}
+        
+        Message:
+        {message}
+        """
+        
+        send_mail(
+            subject=subject,
+            message=email_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.DEFAULT_FROM_EMAIL],  # Define this in settings.py
+            fail_silently=False,
+        )
+        
+        # Send confirmation email to user
+        send_mail(
+            subject='Nous avons bien reçu votre message',
+            message=f"""
+            Bonjour {name},
+            
+            Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.
+            
+            Cordialement,
+            L'équipe du refuge
+            """,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        
+        return Response({'message': 'Message envoyé avec succès'}, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
