@@ -215,7 +215,7 @@ const Boutique = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 text-black">
       <Navbar />
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-pink-500 to-purple-600 py-16 text-white text-center">

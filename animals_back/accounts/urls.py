@@ -2,10 +2,12 @@ from django.urls import path, include
 from .views import GoogleLoginView
 from .views import (
     RegisterView, MyTokenObtainPairView, get_user_profile, password_reset_confirm, 
-    password_reset_request, update_user_profile, user_list, user_detail,TokenRefreshView
+    password_reset_request, update_user_profile, user_list, user_detail,contact_form,
 )
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from rest_framework_simplejwt.views import TokenRefreshView
+
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', MyTokenObtainPairView.as_view(), name='login'),
@@ -28,4 +30,8 @@ urlpatterns = [
     path('', include('dj_rest_auth.urls')),
     path('registration/', include('dj_rest_auth.registration.urls')),
     path('allauth/', include('allauth.urls')),  # Social login redirect handling
+
+
+    path('contact/', contact_form, name='contact_form'),
+
 ]

@@ -19,122 +19,72 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check for normal authentication
-    const token = localStorage.getItem("access_token") || session?.accessToken;
-    console.log("Token available:", !!token); // Debug log
+    const fetchData = async () => {
+      const token = localStorage.getItem("access_token") || session?.accessToken;
+      if (!token) return;
 
-    if (token) {
       try {
-        const decoded = jwtDecode(token);
-        console.log("Decoded token:", decoded);
+        // Fetch user profile and notifications in parallel
+        const [profileResponse, animalResponse, boutiqueResponse] = await Promise.all([
+          authenticatedFetch("http://127.0.0.1:8000/api/auth/profile/"),
+          authenticatedFetch("http://127.0.0.1:8000/api/animals/notifications/"),
+          authenticatedFetch("http://127.0.0.1:8000/api/boutique/notifications/")
+        ]);
 
-        // Fetch user profile using authenticatedFetch
-        authenticatedFetch("http://127.0.0.1:8000/api/auth/profile/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
-          },
-        })
-          .then((response) => response.json())
-          .then((data) => setUser(data))
-          .catch((error) => console.error("Error fetching user profile", error));
+        // Handle profile response
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setUser(profileData);
+        }
 
-        // Fetch notifications using authenticatedFetch
-        
-      // Fetch notifications from animals app
-      authenticatedFetch("http://127.0.0.1:8000/api/animals/notifications/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
-        },
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((animalNotifications) => {
-          console.log("Animal notifications data:", animalNotifications);
-          
-          // Now fetch boutique notifications
-          return authenticatedFetch("http://127.0.0.1:8000/api/boutique/notifications/", {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              ...(session?.accessToken && { "Authorization": `Bearer ${session.accessToken}` })
-            },
-          })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              return response.json();
-            })
-            .then(boutiqueNotifications => {
-              console.log("Boutique notifications data:", boutiqueNotifications);
-              
-              // Add a type property to each notification
-              const typedAnimalNotifications = Array.isArray(animalNotifications) 
-                ? animalNotifications.map(n => ({...n, type: 'animals'})) 
-                : [];
-                
-              const typedBoutiqueNotifications = Array.isArray(boutiqueNotifications) 
-                ? boutiqueNotifications.map(n => ({...n, type: 'boutique'})) 
-                : [];
-              
-              // Combine notifications from both sources
-              const allNotifications = [...typedAnimalNotifications, ...typedBoutiqueNotifications];
-              
-              // Sort by date if notifications have a date field
-              // allNotifications.sort((a, b) => new Date(b.date) - new Date(a.date));
-              
-              setNotifications(allNotifications);
-              setNotifCount(allNotifications.filter((n) => !n.lu).length);
-            });
-        })
-        .catch((error) => {
-          console.error("Error fetching notifications:", error);
-          setNotifications([]);
-          setNotifCount(0);
-        });
-    } catch (error) {
-      console.error("Invalid token", error);
-    }
-  }
-}, [session, status]);
-  const handleProfileClick = async () => {
-    if (isNavigating) return; // Prevent multiple clicks
+        // Process notifications
+        const processNotifications = async (response, type) => {
+          if (!response.ok) return [];
+          const data = await response.json();
+          return Array.isArray(data) ? data.map(n => ({ ...n, type })) : [];
+        };
 
-    try {
-      setIsNavigating(true);
+        const [animalNotifications, boutiqueNotifications] = await Promise.all([
+          processNotifications(animalResponse, 'animals'),
+          processNotifications(boutiqueResponse, 'boutique')
+        ]);
 
-      // Wait for session to stabilize
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Adjust timeout as needed
+        const allNotifications = [...animalNotifications, ...boutiqueNotifications];
+        setNotifications(allNotifications);
+        setNotifCount(allNotifications.filter(n => !n.lu).length);
 
-      if ((status === "authenticated" && session?.user) || user) {
-        console.log("User profile:", user || session.user);
-        await router.push("/profile");
+      } catch (error) {
+        console.error("Fetch error:", error);
+        handleLogout();
       }
+    };
+
+    fetchData();
+  }, [session, status]);
+
+  const handleProfileClick = async () => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+    
+    try {
+      await router.push("/profile");
     } finally {
       setIsNavigating(false);
     }
   };
 
-  const handleLoginClick = () => {
-    router.push("/login");
-  };
+  const handleLoginClick = () => router.push("/login");
 
   const handleLogout = async () => {
     try {
+      // Clear all authentication tokens
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       sessionStorage.removeItem("access_token");
       sessionStorage.removeItem("refresh_token");
       document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
       document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+      
       await signOut({ redirect: false });
       router.push("/login");
     } catch (error) {
@@ -142,54 +92,57 @@ export default function Navbar() {
       router.push("/login");
     }
   };
-  
+
   const handleNotifClick = async (notifId, notificationType) => {
-    // Determine the API endpoint based on notification type
-    const apiEndpoint = notificationType === 'boutique' 
-      ? `http://127.0.0.1:8000/api/boutique/notifications/${notifId}/read/`
-      : `http://127.0.0.1:8000/api/animals/notifications/${notifId}/read/`;
-    
-    // Mark notification as read using authenticatedFetch
-    await authenticatedFetch(apiEndpoint, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  
-    // Update the notifications state
-    setNotifications((prevNotifications) =>
-      prevNotifications.map((notif) =>
-        notif.id === notifId ? { ...notif, lu: true } : notif
-      )
-    );
-  
-    // Update the notification count
-    setNotifCount((prevCount) => prevCount - 1); // Decrease count by 1
-    setIsNotificationOpen(false); // Optionally, close the notification panel
+    try {
+      const endpoint = `http://127.0.0.1:8000/api/${notificationType}/notifications/${notifId}/read/`;
+      await authenticatedFetch(endpoint, { method: "PUT" });
+
+      setNotifications(prev => 
+        prev.map(notif => 
+          notif.id === notifId ? { ...notif, lu: true } : notif
+        )
+      );
+      setNotifCount(prev => prev - 1);
+    } catch (error) {
+      console.error("Notification update failed:", error);
+    }
   };
 
   const isAuthenticated = () => !!user || !!session?.user;
-  const getCurrentUser = () => (user ? user.nom : session?.user?.name || "Guest");
+  const getCurrentUser = () => user?.nom || session?.user?.name || "Guest";
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  
+  // Close notification panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notifPanel = document.getElementById('notification-panel');
+      if (isNotificationOpen && notifPanel && !notifPanel.contains(event.target) && !event.target.closest('button[aria-label="Notifications"]')) {
+        setIsNotificationOpen(false);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isNotificationOpen]);
 
   return (
-    <nav className="bg-white shadow-lg">
-      <div className="max-w-10xl mx-auto px-10">
-        <div className="flex justify-between items-center py-3 space-x-4">
-          <div className="flex items-center mr-5">
+    <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo and Site Name */}
+          <div className="flex items-center">
             <Link href="/">
-              <div className="flex items-center">
-                <Image src="/dogandcat.jpeg" alt="Logo" width={40} height={40} className="rounded-full" />
-                <span className="ml-2 text-xl font-semibold text-gray-800">Pawfect Home 🐶🐱</span>
+              <div className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-secondary/30 transition duration-300">
+                <Image src="/dogandcat.jpeg" alt="Logo" width={40} height={40} className="rounded-full border-2 border-primary" />
+                <span className="ml-1 text-xl font-bold text-primary">Pawfect Home <span className="text-accent">🐶🐱</span></span>
               </div>
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center mx-auto space-x-5">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center space-x-1">
             {[
               { label: "Nos Animaux", href: "/nos-animaux" },
               { label: "Service de Garde", href: "/garderie" },
@@ -202,106 +155,121 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-gray-800 px-3 py-2 rounded-full text-sm font-medium hover:bg-pastel-blue hover:text-white transition"
+                className="text-dark px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary hover:text-primary transition duration-300"
               >
                 {link.label}
               </a>
             ))}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button 
-              onClick={toggleMobileMenu}
-              className="text-gray-800 hover:text-pastel-blue"
-            >
-              <FaBars className="text-xl" />
-            </button>
-          </div>
-
-          {/* Mobile Menu (Dropdown) */}
-          <div className={`md:hidden absolute top-16 left-0 right-0 ${isMobileMenuOpen ? "block" : "hidden"} bg-white shadow-lg z-10`}>
-            <div className="flex flex-col items-center py-4">
-              {[
-                { label: "Nos Animaux", href: "/nos-animaux" },
-                { label: "Service de Garde", href: "/garderie" },
-                { label: "Boutique", href: "/boutique" },
-                { label: "Faire un Don", href: "/faire-un-don" },
-                { label: "Blog", href: "/blog" },
-                { label: "Nos Services", href: "#our-services" },
-                { label: "FAQ", href: "/faq" },
-              ].map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-800 px-4 py-2 rounded-full text-sm font-medium hover:bg-pastel-blue hover:text-white transition w-full text-center my-1"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
+          {/* Right Side: Notifications, Profile, Login/Logout */}
+          <div className="flex items-center space-x-2">
             {isAuthenticated() && (
-              <>
+              <div className="relative">
                 <button
-                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  className="relative px-4 py-2 text-gray-800 hover:text-pastel-blue"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsNotificationOpen(!isNotificationOpen);
+                  }}
+                  className="relative p-2 text-dark hover:text-accent transition-colors"
+                  aria-label="Notifications"
                 >
                   <FaBell className="text-xl" />
                   {notifCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    <span className="absolute -top-1 -right-1 bg-primary text-white text-xs px-2 py-1 rounded-full">
                       {notifCount}
                     </span>
                   )}
                 </button>
 
                 {isNotificationOpen && (
-                  <div className="absolute right-10 top-12 w-64 bg-white shadow-lg rounded-lg p-3 z-20">
-                    <h3 className="text-gray-800 font-bold">Notifications</h3>
-                    {notifications.length > 0 ? (
-                      notifications.map((notif) => (
-                        <div
-                          key={notif.id}
-                          className={`p-2 border-b text-gray-600 cursor-pointer ${notif.lu ? 'text-gray-400' : 'font-semibold'}`}
-                          onClick={() => handleNotifClick(notif.id, notif.type)}
-                        >
-                          {notif.lu ? <s>{notif.message}</s> : notif.message}
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500 text-sm">No new notifications</p>
-                    )}
+                  <div 
+                    id="notification-panel"
+                    className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl py-2 z-10 border border-secondary"
+                  >
+                    <h3 className="text-dark font-semibold px-4 py-2 border-b border-secondary">Notifications</h3>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.length > 0 ? (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            className={`px-4 py-2 border-b border-secondary/50 cursor-pointer hover:bg-secondary/20 transition ${notif.lu ? 'text-dark/60' : 'text-dark font-medium'}`}
+                            onClick={() => handleNotifClick(notif.id, notif.type)}
+                          >
+                            {notif.lu ? <s>{notif.message}</s> : notif.message}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-dark/60 text-sm px-4 py-3 text-center">Aucune notification</p>
+                      )}
+                    </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
 
-            {isAuthenticated() ? (
-              <>
+            {/* User Profile and Auth Buttons */}
+            <div className="flex items-center space-x-2">
+              {isAuthenticated() ? (
+                <>
+                  <button
+                    onClick={handleProfileClick}
+                    className="px-4 py-2 text-sm bg-primary text-white rounded-full hover:bg-accent transition-colors shadow-sm flex items-center"
+                    disabled={isNavigating}
+                  >
+                    <FaSmile className="mr-2" /> {getCurrentUser()}
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm bg-dark text-white rounded-full hover:bg-primary transition-colors shadow-sm flex items-center"
+                  >
+                    <FaHeart className="mr-2" /> Déconnexion
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={handleProfileClick}
-                  className="px-6 py-3 text-sm bg-pastel-pink  text-white rounded-full hover:bg-pastel-green transition flex items-center"
+                  onClick={handleLoginClick}
+                  className="px-4 py-2 text-sm bg-accent text-white rounded-full hover:bg-primary transition-colors shadow-sm flex items-center"
                 >
-                  <FaSmile className="mr-2" /> {getCurrentUser()}
+                  <FaSmile className="mr-2" /> Connexion
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="px-6 py-3 text-sm bg-pastel-pink text-white rounded-full hover:bg-pastel-yellow hover:scale-105 transition-transform flex items-center"
-                >
-                  <FaHeart className="mr-2" /> Logout
-                </button>
-              </>
-            ) : (
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden flex items-center">
               <button
-                onClick={handleLoginClick}
-                className="px-6 py-3 text-sm bg-pastel-blue text-white rounded-full hover:bg-pastel-green transition flex items-center"
+                onClick={toggleMobileMenu}
+                className="p-2 rounded-md text-dark hover:text-primary focus:outline-none"
               >
-                <FaSmile className="mr-2" /> Login
+                <FaBars className="text-xl" />
               </button>
-            )}
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}>
+        <div className="bg-white border-t border-secondary shadow-inner px-2 py-3 space-y-1">
+          {[
+            { label: "Nos Animaux", href: "/nos-animaux" },
+            { label: "Service de Garde", href: "/garderie" },
+            { label: "Boutique", href: "/boutique" },
+            { label: "Evenements", href: "/marche" },
+            { label: "Blog", href: "/blog" },
+            { label: "Nos Services", href: "#our-services" },
+            { label: "FAQ", href: "/faq" },
+          ].map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="block px-3 py-2 rounded-md text-base font-medium text-dark hover:bg-secondary hover:text-primary transition"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
       </div>
     </nav>

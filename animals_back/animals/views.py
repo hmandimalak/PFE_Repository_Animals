@@ -15,10 +15,10 @@ from rest_framework import generics
 
 
 
+
 class AnimalListCreateView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
     parser_classes = [MultiPartParser, FormParser]
-
     def post(self, request):
         # First, create the animal
         animal_serializer = AnimalSerializer(data=request.data)
@@ -176,9 +176,6 @@ from .serializers import AnimalSerializer, DemandeGardeSerializer, DemandeAdopti
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
-
-
-
 
 
 

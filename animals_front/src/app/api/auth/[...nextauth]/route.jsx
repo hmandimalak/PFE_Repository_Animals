@@ -69,7 +69,7 @@ const handler = NextAuth({
     },
     async redirect({ url, baseUrl }) {
       return url.startsWith(baseUrl) ? url : baseUrl;
-    },
+    },  
   },
   pages: {
     signIn: '/login',

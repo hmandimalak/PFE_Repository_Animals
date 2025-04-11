@@ -35,6 +35,7 @@ const CreateAnimal = () => {
     const { data: session, status } = useSession();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
         if (type === 'file') {
@@ -135,7 +136,7 @@ const CreateAnimal = () => {
     return (
         <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 py-10">
             <Navbar />
-            <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-8">
+            <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-8 text-black">
                 <h1 className="text-4xl font-bold text-center text-pink-600 mb-8">Create New Animal</h1>
                 {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">{error}</div>}
                 <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">

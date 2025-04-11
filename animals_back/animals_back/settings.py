@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # Define BASE_DIR
 
 # settings.py
 MEDIA_URL = '/media/'
-MEDIA_ROOT = 'C:/Users/Dell/Desktop/pfe/media'
+MEDIA_ROOT = 'D:\PFE\media'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -198,7 +198,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
 

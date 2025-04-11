@@ -22,6 +22,13 @@ class AnimalSerializer(serializers.ModelSerializer):
         if obj.image:
             return f"{settings.MEDIA_URL}{obj.image.name}"
         return None
+        
+    def get_utilisateur_nom(self, obj):
+        # Get the latest accepted garde request for this animal
+        demande = obj.demandes_garde.filter(statut='Acceptee').order_by('-date_demande').first()
+        if demande:
+            return demande.utilisateur.nom
+        return None
 
     def get_utilisateur_nom(self, obj):
         # Get the latest accepted garde request for this animal
@@ -44,7 +51,6 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
         request = self.context['request']
         utilisateur = request.user
         validated_data['utilisateur'] = utilisateur
-
         # Pop out the image from validated_data if present
         image = validated_data.pop('image', None)
         instance = DemandeGarde.objects.create(**validated_data)
@@ -64,6 +70,11 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['type_garde'].choices = [('Temporaire', 'Temporaire'), ('Définitive', 'Définitive')]
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            return f"{settings.MEDIA_URL}{obj.image.name}"
+        return None
 
     def get_image_url(self, obj):
         if obj.image:
