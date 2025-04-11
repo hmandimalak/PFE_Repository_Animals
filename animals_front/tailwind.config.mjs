@@ -9,8 +9,7 @@ export default {
     extend: {
       colors: {
         'pastel-pink': '#EBE3F5',
-        
-        'pastel-blue': 'white',
+        'pastel-blue': '#A5C4D4',
         'pastel-green': '#A8E6CF',
         'pastel-yellow': '#FFD700',
         "pastel-purple": "#CABBE9",
@@ -20,6 +19,7 @@ export default {
       },
     },
   },
+
  
   
   plugins: [],

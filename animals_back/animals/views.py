@@ -448,45 +448,42 @@ class DemandeEvenementMarcheCreateView(APIView):
                 if not evenement.chiens.filter(id=chien_id).exists():
                     return Response({'error': f'Chien avec ID {chien_id} n\'est pas dans cet événement'}, status=400)
             
-            # Check if user already has a request for this event
-            existing_demande = DemandeEvenementMarche.objects.filter(
+            # Check if user already has requests for any of these dogs
+            existing_demandes = DemandeEvenementMarche.objects.filter(
                 utilisateur=request.user,
-                evenement=evenement
-            ).first()
+                evenement=evenement,
+                chiens__id__in=chiens_ids
+            ).distinct()
             
-            if existing_demande:
-                # Update existing request
-                existing_demande.chiens.clear()
-                for chien_id in chiens_ids:
-                    chien = Animal.objects.get(id=chien_id)
-                    existing_demande.chiens.add(chien)
+            if existing_demandes.exists():
+                conflicting_dogs = []
+                for demande in existing_demandes:
+                    for chien in demande.chiens.filter(id__in=chiens_ids):
+                        conflicting_dogs.append(chien.nom)
                 
-                # If it was rejected before, set back to pending
-                if existing_demande.statut == 'Refusee':
-                    existing_demande.statut = 'En attente'
-                    existing_demande.save()
-                    
-                serializer = DemandeEvenementMarcheSerializer(existing_demande)
-                return Response(serializer.data)
-            else:
-                # Create new request
-                demande = DemandeEvenementMarche.objects.create(
-                    utilisateur=request.user,
-                    evenement=evenement,
-                    statut='En attente'
-                )
-                
-                for chien_id in chiens_ids:
-                    chien = Animal.objects.get(id=chien_id)
-                    demande.chiens.add(chien)
-                
-               
-                
+                return Response({
+                    'error': 'Vous avez déjà une demande pour ces chiens: ' + ', '.join(conflicting_dogs),
+                    'conflicting_dogs': conflicting_dogs
+                }, status=400)
+            
+            # Create new request
+            demande = DemandeEvenementMarche.objects.create(
+                utilisateur=request.user,
+                evenement=evenement,
+                statut='En attente'
+            )
+            
+            for chien_id in chiens_ids:
+                chien = Animal.objects.get(id=chien_id)
+                demande.chiens.add(chien)
+    
+            serializer = DemandeEvenementMarcheSerializer(demande)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
         except EvenementMarcheChien.DoesNotExist:
             return Response({'error': 'Événement non trouvé'}, status=404)
         except Exception as e:
             return Response({'error': str(e)}, status=400)
-
 class UserDemandesEvenementMarcheView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -494,3 +491,60 @@ class UserDemandesEvenementMarcheView(APIView):
         demandes = DemandeEvenementMarche.objects.filter(utilisateur=request.user).order_by('-date_demande')
         serializer = DemandeEvenementMarcheSerializer(demandes, many=True)
         return Response(serializer.data)
+# Add this to your views.py
+class AnimalDetailedView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            animal = get_object_or_404(Animal, pk=pk)
+            serializer = AnimalSerializer(animal)
+            
+            # Get dog participation in events
+            events_participated = animal.evenements_marche.all()
+            events_data = []
+            if events_participated:
+                for event in events_participated:
+                    events_data.append({
+                        'id': event.id,
+                        'titre': event.titre,
+                        'date': str(event.date),  # Convert date to string for JSON
+                        'lieu': event.lieu
+                    })
+            
+            # Get adoption/garde status
+            adoption_status = None
+            adoption_requests = animal.demandes_adoption.filter(utilisateur=request.user).first()
+            if adoption_requests:
+                adoption_status = adoption_requests.statut
+                
+            garde_status = None
+            garde_requests = animal.demandes_garde.filter(utilisateur=request.user).first()
+            if garde_requests:
+                garde_status = garde_requests.statut
+            
+            # Calculate age in years and months
+            today = date.today()
+            dob = animal.date_naissance
+            age_years = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+            age_months = (today.month - dob.month) % 12
+            if today.day < dob.day:
+                age_months = (age_months - 1) % 12
+                
+            age_display = ""
+            if age_years > 0:
+                age_display += f"{age_years} an{'s' if age_years > 1 else ''}"
+                if age_months > 0:
+                    age_display += f" et {age_months} mois"
+            else:
+                age_display = f"{age_months} mois"
+            
+            return Response({
+                'animal': serializer.data,
+                'evenements': events_data,
+                'adoption_status': adoption_status,
+                'garde_status': garde_status,
+                'age_display': age_display
+            })
+        except Animal.DoesNotExist:
+            return Response({'error': 'Animal not found'}, status=404)

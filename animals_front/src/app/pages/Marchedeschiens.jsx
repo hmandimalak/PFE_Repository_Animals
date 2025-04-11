@@ -49,7 +49,7 @@ export default function EvenementMarcheList() {
   };
 
   const navigateToEventDetail = (eventId) => {
-    router.push("/marchedetail");
+    router.push(`/marchedetail/${eventId}`);
   };
 
   if (loading) {
