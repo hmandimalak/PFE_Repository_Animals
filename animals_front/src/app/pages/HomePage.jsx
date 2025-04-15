@@ -435,28 +435,28 @@ export default function Home() {
                   title: "Adoption",
                   description: "Adopter un animal, c'est lui offrir une nouvelle chance et un foyer aimant. En adoptant, vous faites une différence dans sa vie et dans la vôtre.",
                   image: "/adoption.jpg",
-                  bgColor: "bg-dark/40",
+                  bgColor: "bg-white",
                   borderColor: "border-secondary"
                 },
                 {
                   title: "Service de Garde",
                   description: "Besoin de soins pour votre animal pendant votre absence ? Nos soignants de confiance garantissent que votre animal soit en sécurité et heureux.",
                   image: "/garderie.jpg",
-                  bgColor: "bg-dark/40",
+                  bgColor: "bg-white",
                   borderColor: "border-accent"
                 },
                 {
                   title: "Boutique",
                   description: "Achetez des produits de qualité pour animaux afin de garder vos compagnons heureux et en bonne santé.",
                   image: "/boutique.jpg",
-                  bgColor: "bg-dark/40",
+                  bgColor: "bg-white",
                   borderColor: "border-dark"
                 },
                 {
                   title: "Événement de Marche avec les Chiens",
                   description: "Rejoignez-nous pour des événements de marche avec les chiens, l'occasion de socialiser et de faire de l'exercice avec d'autres amoureux des animaux.",
                   image: "/marche.jpg",
-                  bgColor: "bg-dark/40",
+                  bgColor: "bg-white",
                   borderColor: "border-primary"
                 },
               ].map((service, index) => (
@@ -477,8 +477,8 @@ export default function Home() {
                     />
                   </div>
                   {/* Title and description */}
-                  <h3 className="text-xl font-semibold text-secondary mt-2">{service.title}</h3>
-                  <p className="mt-2 text-accent text-center">{service.description}</p>
+                  <h3 className="text-xl font-semibold text-primary mt-2">{service.title}</h3>
+                  <p className="mt-2 text-dark text-center">{service.description}</p>
                 </div>
               ))}
             </div>

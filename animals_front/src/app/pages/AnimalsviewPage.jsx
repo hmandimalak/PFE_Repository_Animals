@@ -4,7 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import Navbar from './NavbarPage';
 import { authenticatedFetch } from '../../app/authInterceptor';
-import { useSearchParams } from 'next/navigation'; // Import useSearchParams
+import { useSearchParams } from 'next/navigation';
+import { Search, X, ChevronDown } from 'lucide-react';
 
 export default function NosAnimaux() {
     const [animals, setAnimals] = useState([]);
@@ -15,8 +16,39 @@ export default function NosAnimaux() {
     const [searchQuery, setSearchQuery] = useState('');
     const [animalType, setAnimalType] = useState('');
     const [species, setSpecies] = useState('');
+    const [pageLoading, setPageLoading] = useState(true);
     const { data: session } = useSession();
-    const searchParams = useSearchParams(); // Get search parameters from the URL
+    const searchParams = useSearchParams();
+
+    // Species options like on the homepage
+    const speciesOptions = {
+        chien: [
+            "Berger Allemand",
+            "Labrador Retriever",
+            "Golden Retriever",
+            "Bulldog",
+            "Rottweiler",
+            "Husky Sibérien",
+            "Beagle",
+            "Caniche",
+            "Chihuahua",
+            "Yorkshire Terrier",
+            "Autre",
+        ],
+        chat: [
+            "Persan",
+            "Siamois",
+            "Maine Coon",
+            "Bengal",
+            "British Shorthair",
+            "Ragdoll",
+            "Sphynx",
+            "Abyssin",
+            "Sacré de Birmanie",
+            "Européen",
+            "Autre",
+        ],
+    };
 
     useEffect(() => {
         // Fetch search parameters from the URL
@@ -31,9 +63,10 @@ export default function NosAnimaux() {
 
         // Fetch animals based on the search parameters
         fetchAnimals(query, type, speciesParam);
-    }, [searchParams]); // Re-run when searchParams change
+    }, [searchParams]);
 
     const fetchAnimals = async (query = '', type = '', species = '') => {
+        setPageLoading(true);
         try {
             const url = new URL('http://127.0.0.1:8000/api/animals/search/');
             const params = { query, type, species };
@@ -44,26 +77,25 @@ export default function NosAnimaux() {
             setAnimals(data);
         } catch (error) {
             console.error('Error fetching animals:', error);
-        }
-    };
-
-    const searchAnimals = async (query = '', type = '', species = '') => {
-        try {
-            const url = new URL('http://127.0.0.1:8000/api/animals/search/');
-            const params = { query, type, species };
-            Object.keys(params).forEach(key => params[key] && url.searchParams.append(key, params[key]));
-
-            const response = await fetch(url);
-            const data = await response.json();
-            setAnimals(data);
-        } catch (error) {
-            console.error('Error fetching animals:', error);
+        } finally {
+            setPageLoading(false);
         }
     };
 
     const handleSearch = (e) => {
         e.preventDefault();
-        searchAnimals(searchQuery, animalType, species);
+        
+        // Update the URL with search parameters
+        const queryParams = new URLSearchParams();
+        if (searchQuery) queryParams.append("query", searchQuery);
+        if (animalType) queryParams.append("type", animalType);
+        if (species) queryParams.append("species", species);
+        
+        // Navigate to the same page but with search parameters
+        router.push(`/nos-animaux?${queryParams.toString()}`);
+        
+        // Also fetch the data directly
+        fetchAnimals(searchQuery, animalType, species);
     };
 
     const fetchAnimalDetails = async (animalId) => {
@@ -86,9 +118,6 @@ export default function NosAnimaux() {
     };
 
     const getAuthToken = () => {
-        console.log("Session:", session);
-        console.log("Local storage token:", localStorage.getItem('access_token'));
-
         const localToken = localStorage.getItem('access_token');
         if (localToken) {
             return `Bearer ${localToken}`;
@@ -120,8 +149,6 @@ export default function NosAnimaux() {
                 animal: selectedAnimal.id,
             };
 
-            console.log("Sending request with token:", authToken);
-
             const response = await authenticatedFetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
                 method: 'POST',
                 headers: {
@@ -133,12 +160,10 @@ export default function NosAnimaux() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Adoption request successful:', data);
                 alert('Demande d\'adoption envoyée avec succès!');
                 closeModal();
             } else {
                 const errorData = await response.json();
-                console.error('Server error:', errorData);
                 if (response.status === 401) {
                     alert('Votre session a expiré. Veuillez vous reconnecter.');
                     router.push('/login');
@@ -152,115 +177,307 @@ export default function NosAnimaux() {
         }
     };
 
+    // Function to format age in a more friendly way
+    const formatAge = (dateString) => {
+        if (!dateString) return "Âge inconnu";
+        
+        const birthDate = new Date(dateString);
+        const today = new Date();
+        
+        // Calculate years and months
+        let years = today.getFullYear() - birthDate.getFullYear();
+        let months = today.getMonth() - birthDate.getMonth();
+        
+        // Adjust for month difference
+        if (today.getDate() < birthDate.getDate()) {
+            months--;
+        }
+        
+        // Handle negative months
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        
+        // Build age string
+        let ageParts = [];
+        if (years > 0) {
+            ageParts.push(`${years} an${years > 1 ? 's' : ''}`);
+        }
+        if (months > 0) {
+            ageParts.push(`${months} mois`);
+        }
+        
+        return ageParts.join(' et ') || 'Nouveau-né';
+    };
+
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
             <Navbar />
-            <div className="container mx-auto px-4 py-8">
-                <h1 className="text-4xl font-bold text-center text-pink-600 mb-8">Animaux Prêts pour l'Adoption</h1>
-                
-                <form onSubmit={handleSearch} className="mb-8 flex gap-4 text-black">
-                    <input
-                        type="text"
-                        placeholder="Rechercher par nom..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 p-2 border border-gray-300 rounded-lg"
-                    />
-                    <select
-                        value={animalType}
-                        onChange={(e) => setAnimalType(e.target.value)}
-                        className="p-2 border border-gray-300 rounded-lg"
-                    >
-                        <option value="">Tous les types</option>
-                        <option value="Chien">Chien</option>
-                        <option value="Chat">Chat</option>
-                        {/* Add more options as needed */}
-                    </select>
-                    <select
-                        value={species}
-                        onChange={(e) => setSpecies(e.target.value)}
-                        className="p-2 border border-gray-300 rounded-lg"
-                    >
-                        <option value="">Toutes les races</option>
-                        <option value="Labrador">Labrador</option>
-                        <option value="Persan">Persan</option>
-                        {/* Add more options as needed */}
-                    </select>
-                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                        Rechercher
-                    </button>
-                </form>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {animals.map(animal => (
-                        <div key={animal.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105 cursor-pointer"
-                            onClick={() => fetchAnimalDetails(animal.id)}>
-                            <div className="relative h-48">
-                                {animal.image ? (
-                                    <img src={`http://127.0.0.1:8000${animal.image}`} alt={animal.nom} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                        <p className="text-gray-500 italic">Pas de photo disponible</p>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-4">
-                                <h2 className="text-xl font-semibold text-gray-800">{animal.nom}</h2>
-                                <p className="text-gray-600">{animal.type}</p>
-                            </div>
+            
+            {/* Compact Header Section */}
+            <div className="bg-primary text-white py-8">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="max-w-2xl">
+                            <h1 className="text-3xl md:text-4xl font-bold mb-2">Nos Protégés</h1>
+                            <p className="text-white/80">Chaque animal mérite un foyer chaleureux. Découvrez nos compagnons disponibles pour l'adoption.</p>
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
-            {isModalOpen && selectedAnimal && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full overflow-hidden transform transition-all duration-300 ease-in-out">
-                        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <h1 className="text-4xl font-bold text-center text-pink-600 mb-6 col-span-2">Détails de l'Animal</h1>
 
-                            {/* Left Side: Basic Information */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Nom</h2>
-                                    <p className="text-gray-600">{selectedAnimal.nom}</p>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Espèce</h2>
-                                    <p className="text-gray-600">{selectedAnimal.espece}</p>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Race</h2>
-                                    <p className="text-gray-600">{selectedAnimal.race}</p>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Type de Garde</h2>
-                                    <p className="text-gray-600">{selectedAnimal.type_garde}</p>
-                                </div>
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                {/* Search Section */}
+                <div className="mb-8 bg-white rounded-xl shadow-lg border border-accent/20 transform -translate-y-8">
+                    <form onSubmit={handleSearch} className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Rechercher par nom..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all"
+                                />
+                                <Search size={20} className="absolute left-3 top-3 text-dark/40" />
+                            </div>
+                            
+                            <div className="relative">
+                                <select
+                                    value={animalType}
+                                    onChange={(e) => {
+                                        setAnimalType(e.target.value);
+                                        setSpecies(''); // Reset species when animal type changes
+                                    }}
+                                    className="w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-accent focus:border-accent appearance-none"
+                                >
+                                    <option value="">Tous les types</option>
+                                    <option value="chien">🐶 Chien</option>
+                                    <option value="chat">🐱 Chat</option>
+                                </select>
+                                <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
                             </div>
 
-                            {/* Right Side: Description */}
-                            <div className="space-y-4">
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Description</h2>
-                                    <p className="text-gray-600">{selectedAnimal.description}</p>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Date de Naissance</h2>
-                                    <p className="text-gray-600">{selectedAnimal.date_naissance}</p>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-semibold text-gray-800">Sexe</h2>
-                                    <p className="text-gray-600">{selectedAnimal.sexe === 'M' ? 'Male' : 'Femelle'}</p>
-                                </div>
+                            <div className="relative">
+                                <select
+                                    value={species}
+                                    onChange={(e) => setSpecies(e.target.value)}
+                                    disabled={!animalType}
+                                    className={`w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-accent focus:border-accent appearance-none ${!animalType ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                >
+                                    <option value="">Toutes les races</option>
+                                    {animalType && speciesOptions[animalType]?.map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
                             </div>
+
+                            <button 
+                                type="submit" 
+                                className="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
+                            >
+                                <Search size={20} />
+                                <span>Rechercher</span>
+                            </button>
                         </div>
+                    </form>
+                </div>
 
-                        <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-4">
-                            <button onClick={handleAdoptClick} className="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 transition-transform transform hover:scale-105">
-                                Adopter
-                            </button>
-                            <button onClick={closeModal} className="bg-pink-500 text-white px-4 py-2 rounded-lg shadow hover:bg-pink-600 transition-transform transform hover:scale-105">
-                                Fermer
-                            </button>
+                {/* Results Section */}
+                <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-dark mb-2">
+                        {searchQuery || animalType || species ? 'Résultats de recherche' : 'Tous nos animaux'}
+                    </h2>
+                    <p className="text-dark/60">
+                        {animals.length} {animals.length > 1 ? 'animaux trouvés' : 'animal trouvé'}
+                    </p>
+                </div>
+
+                {/* Loading State */}
+                {pageLoading && (
+                    <div className="flex justify-center items-center py-16">
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+                    </div>
+                )}
+
+                {/* Animals Grid */}
+                {!pageLoading && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {animals.length > 0 ? (
+                            animals.map(animal => (
+                                <div 
+                                    key={animal.id} 
+                                    className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                                    onClick={() => fetchAnimalDetails(animal.id)}
+                                >
+                                    <div className="relative h-56">
+                                        {animal.image ? (
+                                            <img 
+                                                src={`http://127.0.0.1:8000${animal.image}`} 
+                                                alt={animal.nom} 
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-secondary/30">
+                                                <span className="text-4xl">🐾</span>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Animal type badge */}
+                                        <div className="absolute top-3 left-3">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                animal.espece.toLowerCase() === 'chien' 
+                                                    ? 'bg-primary text-white' 
+                                                    : 'bg-accent text-dark'
+                                            }`}>
+                                                {animal.espece.toLowerCase() === 'chien' ? '🐶 Chien' : '🐱 Chat'}
+                                            </span>
+                                        </div>
+                                        
+                                        {/* Name overlay */}
+                                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-dark/80 to-transparent">
+                                            <h3 className="text-lg font-bold text-white">{animal.nom}</h3>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="p-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-dark font-medium">{animal.race}</span>
+                                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${animal.sexe === 'M' ? 'bg-primary' : 'bg-accent'} text-white text-sm`}>
+                                                {animal.sexe === 'M' ? '♂' : '♀'}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="flex justify-between text-sm text-dark/60">
+                                            <span>{animal.date_naissance ? formatAge(animal.date_naissance) : "Âge inconnu"}</span>
+                                            <span>{animal.type_garde || "Refuge"}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-full">
+                                <div className="bg-white rounded-xl shadow-md p-8 text-center">
+                                    <div className="mx-auto mb-4 bg-secondary/30 rounded-full h-16 w-16 flex items-center justify-center">
+                                        <Search size={24} className="text-dark/40" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-dark mb-2">Aucun animal trouvé</h3>
+                                    <p className="text-dark/60 mb-4">Essayez d'autres critères de recherche.</p>
+                                    <button 
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setAnimalType('');
+                                            setSpecies('');
+                                            router.push('/nos-animaux');
+                                        }}
+                                        className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                                    >
+                                        Voir tous les animaux
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Animal Details Modal */}
+            {isModalOpen && selectedAnimal && (
+                <div className="fixed inset-0 flex items-center justify-center bg-dark/60 backdrop-blur-sm p-4 z-50 animate-fade-in">
+                    <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden">
+                        {/* Close button */}
+                        <button 
+                            onClick={closeModal}
+                            className="absolute right-4 top-4 bg-white/80 hover:bg-white p-2 rounded-full z-10 transition-colors"
+                        >
+                            <X size={20} className="text-dark" />
+                        </button>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                            {/* Image column */}
+                            <div className="h-64 md:h-full relative">
+                                {selectedAnimal.image ? (
+                                    <img 
+                                        src={`http://127.0.0.1:8000${selectedAnimal.image}`} 
+                                        alt={selectedAnimal.nom} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-secondary/30">
+                                        <span className="text-6xl">🐾</span>
+                                    </div>
+                                )}
+                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-dark/80 to-transparent md:hidden">
+                                    <h2 className="text-2xl font-bold text-white">{selectedAnimal.nom}</h2>
+                                </div>
+                            </div>
+                            
+                            {/* Details column */}
+                            <div className="p-6 overflow-y-auto max-h-96 md:max-h-[600px]">
+                                <h2 className="text-2xl font-bold text-dark mb-4 hidden md:block">{selectedAnimal.nom}</h2>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    <div className="bg-secondary/20 p-3 rounded-lg">
+                                        <span className="text-sm text-dark/60 block">Espèce</span>
+                                        <span className="text-dark font-medium">{selectedAnimal.espece}</span>
+                                    </div>
+                                    <div className="bg-secondary/20 p-3 rounded-lg">
+                                        <span className="text-sm text-dark/60 block">Race</span>
+                                        <span className="text-dark font-medium">{selectedAnimal.race}</span>
+                                    </div>
+                                    <div className="bg-secondary/20 p-3 rounded-lg">
+                                        <span className="text-sm text-dark/60 block">Sexe</span>
+                                        <span className="text-dark font-medium">
+                                            {selectedAnimal.sexe === 'M' ? 'Mâle' : 'Femelle'}
+                                        </span>
+                                    </div>
+                                    <div className="bg-secondary/20 p-3 rounded-lg">
+                                        <span className="text-sm text-dark/60 block">Âge</span>
+                                        <span className="text-dark font-medium">
+                                            {selectedAnimal.date_naissance ? formatAge(selectedAnimal.date_naissance) : "Âge inconnu"}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-semibold text-dark mb-2">Description</h3>
+                                    <div className="bg-secondary/20 p-4 rounded-lg">
+                                        <p className="text-dark/80">
+                                            {selectedAnimal.description || `${selectedAnimal.nom} est un adorable ${selectedAnimal.espece.toLowerCase()} qui attend avec impatience de trouver sa famille pour toujours. Venez le rencontrer au refuge !`}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                
+                                
+                                <div className="mt-6 space-y-4">
+                                    <button 
+                                        onClick={handleAdoptClick}
+                                        disabled={loading}
+                                        className="w-full bg-primary text-white px-4 py-3 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                <span>Envoi en cours...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span>❤️ Faire une demande d'adoption</span>
+                                            </>
+                                        )}
+                                    </button>
+                                    <button 
+                                        onClick={closeModal}
+                                        className="w-full px-4 py-3 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
+                                    >
+                                        Retour à la liste
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

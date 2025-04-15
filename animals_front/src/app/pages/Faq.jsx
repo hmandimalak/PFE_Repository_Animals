@@ -88,7 +88,7 @@ const FAQPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pastel-pink/20 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
       <Navbar/>
       <section className="max-w-4xl mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-pastel-blue mb-8 flex items-center justify-center">
@@ -145,7 +145,7 @@ const FAQPage = () => {
           <p className="mb-6 text-black">Notre équipe répond sous 24h !</p>
           <button 
             onClick={() => setShowContactForm(true)}
-            className="inline-block px-8 py-3 bg-pastel-green text-white rounded-full hover:bg-pastel-blue transition-colors"
+            className="inline-block px-8 py-3 bg-gradient-to-b from-secondary to-white text-pastel-blue rounded-full hover:bg-pastel-blue transition-colors"
           >
             Nous Contacter
           </button>

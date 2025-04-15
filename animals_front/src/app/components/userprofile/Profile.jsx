@@ -5,7 +5,8 @@ import Navbar from "../../../app/pages/NavbarPage";
 import EditProfile from "./Edit";
 import Image from "next/image";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-
+import { FaKey, FaPen ,FaSave} from "react-icons/fa"; // Import the key and pen icons
+ 
 // Function to fetch temporary animals
 const fetchTemporaryAnimals = async () => {
     try {
@@ -190,9 +191,9 @@ export default function Profile() {
     if (error) return <p className="text-red-500 text-center mt-10">{error}</p>;
 
     return (
-        <div className="min-h-screen bg-pastel-pink">
-            <Navbar />
-            <div className="min-h-screen flex">
+        <div className="flex flex-col min-h-screen bg-gradient-to-b from-secondary to-white">
+        <Navbar />
+        <div className="max-w-7xl mx-auto  bg-white rounded-2xl shadow-xl p-10 text-dark w-full transform transition-all duration-300 hover:shadow-2xl flex flex-row">             
                 {/* Sidebar */}
                 <aside className="w-64 bg-white shadow-lg  p-5 sticky top-0 h-screen">
                     <div className="flex items-center space-x-3 mb-6">
@@ -208,8 +209,8 @@ export default function Profile() {
                                 }}
                                 className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                     activeSection === "profile"
-                                        ? "bg-pastel-pink text-white shadow-md"
-                                        : "text-gray-800 hover:bg-pastel-pink hover:text-white hover:shadow-md"
+                                        ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                 }`}
                             >
                                 Informations Personnelles
@@ -220,8 +221,8 @@ export default function Profile() {
                                 onClick={() => setShowGarderieOptions(!showGarderieOptions)}
                                 className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                     activeSection === "garderie"
-                                        ? "bg-pastel-pink text-white"
-                                        : "text-gray-800 hover:bg-pastel-pink hover:text-white"
+                                       ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                 }`}
                             >
                                 Animaux en Garderie
@@ -236,8 +237,8 @@ export default function Profile() {
                                             }}
                                             className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                                 garderieType === "temporaire"
-                                                    ? "bg-pastel-pink text-white"
-                                                    : "text-gray-700 hover:bg-pastel-pink hover:text-white"
+                                                   ? "bg-pastel-pink text-dark shadow-md"
+                                                    : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                             }`}
                                         >
                                             Temporaire
@@ -251,8 +252,8 @@ export default function Profile() {
                                             }}
                                             className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                                 garderieType === "definitive"
-                                                    ? "bg-pastel-pink text-white"
-                                                    : "text-gray-700 hover:bg-pastel-pink hover:text-white"
+                                                    ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                             }`}
                                         >
                                             Définitive
@@ -269,8 +270,8 @@ export default function Profile() {
                                 }}
                                 className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                     activeSection === "adoptions"
-                                        ? "bg-pastel-pink text-white"
-                                        : "text-gray-800 hover:bg-pastel-pink hover:text-white"
+                                       ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                 }`}
                             >
                                 Mes Adoptions
@@ -281,136 +282,126 @@ export default function Profile() {
 
                 {/* Main Content */}
                 <main className="flex-1 p-6">
-                    {activeSection === "profile" && user && (
-                        <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-pastel-pink-100 to-blue-100">
-                            <div className="bg-white p-10 shadow-2xl rounded-2xl border border-gray-200 transform transition-all duration-300 hover:scale-105 hover:shadow-3xl text-center">
-                                <img 
-                                    src={user.profilepicture || 'defaultProfilePic.png'} 
-                                    alt="Profile" 
-                                    className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-pastel-pink"
-                                />
-                                <h1 className="text-5xl font-bold text-pastel-pink mb-6">Votre Profil</h1>
-                                <div className="space-y-4 text-gray-700">
-                                    <p className="flex items-center"><i className="fas fa-user text-pastel-pink mr-2"></i><strong className="text-gray-800">Nom:</strong> {user.nom}</p>
-                                    <p className="flex items-center"><i className="fas fa-user text-pastel-pink mr-2"></i><strong className="text-gray-800">Prénom:</strong> {user.prenom}</p>
-                                    <p className="flex items-center"><i className="fas fa-envelope text-pastel-pink mr-2"></i><strong className="text-gray-800">Email:</strong> {user.email}</p>
-                                    <p className="flex items-center"><i className="fas fa-phone text-pastel-pink mr-2"></i><strong className="text-gray-800">Téléphone:</strong> {user.telephone}</p>
-                                    <p className="flex items-center"><i className="fas fa-map-marker-alt text-pastel-pink mr-2"></i><strong className="text-gray-800">Adresse:</strong> {user.adresse}</p>
-                                    <p className="flex items-center"><i className="fas fa-user-tag text-pastel-pink mr-2"></i><strong className="text-gray-800">Role:</strong> {user.role}</p>
-                                </div>
-                                <div className="mt-8 flex justify-center space-x-4">
-                                    <button
-                                        onClick={() => setActiveSection("editProfile")}
-                                        className="px-6 py-3 bg-gradient-to-r from-pastel-pink to-pastel-pink-dark text-white rounded-xl hover:from-pastel-pink-dark hover:to-pastel-pink transition-all duration-300 shadow-md hover:shadow-lg"
-                                    >
-                                        Modifier
-                                    </button>
-                                </div>
+                {activeSection === "profile" && user && (
+          <div className="space-y-8 animate-fade-in">
+            <div className="mb-10 text-center space-y-2">
+              <h1 className="text-5xl font-extrabold text-primary animate-fade-in-down">
+                Votre Profil
+              </h1>
+              <p className="text-dark/80">Gérez vos informations personnelles</p>
+              <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-8">
+              {/* Left Column */}
+              <div className="space-y-6 border-r-2 border-accent/20 pr-8">
+                <div className="animate-slide-in-left">
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Photo de Profil
+                  </label>
+                  <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden">
+                    {user.profilepicture ? (
+                      <img 
+                        src={user.profilepicture} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <AccountCircleIcon className="text-gray-400 text-6xl" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="animate-slide-in-left delay-100">
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Nom Complet
+                  </label>
+                  <div className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl bg-gray-50">
+                    {user.nom} {user.prenom}
+                  </div>
+                </div>
+
+                <div className="animate-slide-in-left delay-200">
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Email
+                  </label>
+                  <div className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl bg-gray-50">
+                    {user.email}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-6 pl-8">
+                <div className="animate-slide-in-right">
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Téléphone
+                  </label>
+                  <div className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl bg-gray-50">
+                    {user.telephone || 'Non spécifié'}
+                  </div>
+                </div>
+
+                <div className="animate-slide-in-right delay-100">
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Adresse
+                  </label>
+                  <div className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl bg-gray-50">
+                    {user.adresse || 'Non spécifiée'}
+                  </div>
+                </div>
+
+                <div className="animate-slide-in-right delay-200">
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Rôle
+                  </label>
+                  <div className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl bg-gray-50">
+                    {user.role}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 animate-fade-in-up">
+              <button
+                onClick={() => setActiveSection("editProfile")}
+                className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-transform shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2"
+              >
+                <FaPen className="text-lg" />
+                Modifier le Profil
+              </button>
+            </div>
+          </div>
+        )}
+        
+                {activeSection === "editProfile" && <EditProfile user={user} setActiveSection={handleSetActiveSection}  />}
+                {/* Updated Animal Sections */}
+                {(activeSection === "garderie" || activeSection === "adoptions") && (
+                    <div className="space-y-8 animate-fade-in">
+                        <div className="text-center space-y-4">
+                            <h1 className="text-5xl font-extrabold text-primary">
+                                {activeSection === "garderie" 
+                                    ? `Animaux en Garderie ${garderieType}`
+                                    : "Mes Adoptions"}
+                            </h1>
+                            <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+                        </div>
+
+                        {animals.length === 0 ? (
+                            <div className="text-center p-8 border-2 border-dashed border-accent/30 rounded-xl">
+                                <p className="text-dark/60">Aucun animal trouvé</p>
                             </div>
-                        </div>
-                    )}
-
-                    {activeSection === "editProfile" && <EditProfile user={user} setActiveSection={handleSetActiveSection}  />}
-
-                    {activeSection === "garderie" && garderieType === "temporaire" && (
-                        <div className="bg-gradient-to-r from-blue-50 to-pink-50 p-6 shadow-lg rounded-lg">
-                            <h1 className="text-4xl font-extrabold text-pastel-pink mb-6 text-center">Animaux en Garderie Temporaire</h1>
-                            {animals.length === 0 ? (
-                                <p className="text-center text-lg text-gray-600">Aucun animal en garderie temporaire.</p>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {animals.map((animal) => (
-                                        <div 
-                                            key={animal.id} 
-                                            className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 cursor-pointer hover:shadow-xl"
-                                            onClick={() => handleAnimalClick(animal.id)}
-                                        >
-                                            <div className="relative h-48">
-                                                {animal.image ? (
-                                                    <img 
-                                                        src={getImageUrl(animal.image)} 
-                                                        alt={animal.nom} 
-                                                        className="w-full h-full object-cover rounded-t-lg"
-                                                        onError={(e) => {
-                                                            console.error("Image failed to load:", animal.image);
-                                                            e.target.src = "/placeholder-pet.jpg"; // Fallback image
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded-t-lg">
-                                                        <p className="text-gray-500 italic">Pas de photo disponible</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="p-4">
-                                                <h2 className="text-2xl font-bold text-gray-800">{animal.nom}</h2>
-                                                <p className="text-sm text-gray-500 mt-2">{animal.espece}</p>
-                                                <p className="text-gray-600">{animal.race}</p>
-                                                
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {activeSection === "garderie" && garderieType === "definitive" && (
-                        <div className="bg-gradient-to-r from-blue-50 to-pink-50 p-6 shadow-lg rounded-lg">
-                            <h1 className="text-4xl font-extrabold text-pastel-pink mb-6 text-center">Animaux en Garderie Définitive</h1>
-                            {animals.length === 0 ? (
-                                <p className="text-center text-lg text-gray-600">Aucun animal en garderie définitive.</p>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {animals.map((animal) => (
-                                        <div 
-                                            key={animal.id} 
-                                            className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 cursor-pointer hover:shadow-xl"
-                                            onClick={() => handleAnimalClick(animal.id)}
-                                        >
-                                            <div className="relative h-48">
-                                                {animal.image ? (
-                                                    <img 
-                                                        src={getImageUrl(animal.image)} 
-                                                        alt={animal.nom} 
-                                                        className="w-full h-full object-cover rounded-t-lg"
-                                                        onError={(e) => {
-                                                            console.error("Image failed to load:", animal.image);
-                                                            e.target.src = "/placeholder-pet.jpg"; // Fallback image
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded-t-lg">
-                                                        <p className="text-gray-500 italic">Pas de photo disponible</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="p-4">
-                                                <h2 className="text-2xl font-bold text-gray-800">{animal.nom}</h2>
-                                                <p className="text-sm text-gray-500 mt-2">{animal.espece}</p>
-                                                <p className="text-gray-600">{animal.race}</p>
-                                                
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {activeSection === "adoptions" && (
-                        <div className="bg-gradient-to-r from-blue-50 to-pink-50 p-6 shadow-lg rounded-lg">
-                            <h1 className="text-4xl font-extrabold text-pastel-pink mb-6 text-center">Mes Adoptions</h1>
-                            {adoptedAnimals.length === 0 ? (
-                                <p className="text-center text-lg text-gray-600">Aucune adoption trouvée.</p>
-                            ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {adoptedAnimals.map((animal) => (
-                                        <div
-                                            key={animal.id}
-                                            className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 cursor-pointer"
-                                            onClick={() => handleAnimalClick(animal.id)}
-                                        >
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {animals.map((animal) => (
+                                    <div 
+                                        key={animal.id}
+                                        className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-105 cursor-pointer"
+                                        onClick={() => handleAnimalClick(animal.id)}
+                                    >
+                                    
                                             <div className="relative h-56">
                                                 {animal.image ? (
                                                     <img
@@ -440,9 +431,9 @@ export default function Profile() {
                             )}
                         </div>
                     )}
-                </main>
+                    </main>
             </div>
-
+            
             {/* Modal for Animal Details */}
             {isModalOpen && selectedAnimal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-50">

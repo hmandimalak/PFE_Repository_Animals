@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import Navbar from './NavbarPage';
 
 export default function EvenementMarcheDetail() {
   const [evenement, setEvenement] = useState(null);
@@ -16,6 +17,7 @@ export default function EvenementMarcheDetail() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dogEvents, setDogEvents] = useState([]);
   const [selectedDogs, setSelectedDogs] = useState([]);
+
   
   const router = useRouter();
   const params = useParams();
@@ -268,256 +270,227 @@ export default function EvenementMarcheDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-teal-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6 flex justify-between items-center">
+    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
+      <Navbar />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Back Button at Top Left */}
+        <div className="mb-6">
           <button 
             onClick={() => router.push('/marche')}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg flex items-center gap-2"
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/90 text-lg font-medium"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
             </svg>
-            Retour aux Événements
+            Retour aux événements
           </button>
         </div>
         
+        <div className="text-center mb-8 space-y-6">
+          {/* Title Section */}
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold text-primary">{evenement?.titre}</h1>
+            <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+          </div>
+          {evenement?.description && (
+    <div className="max-w-2xl mx-auto px-4">
+      <p className="text-dark/80 text-lg leading-relaxed text-justify italic border-l-4 border-accent pl-4">
+        "{evenement.description}"
+      </p>
+    </div>
+  )}
+
+
+          {/* Event Metadata */}
+          <div className="bg-accent/10 rounded-xl p-6 space-y-4">
+            <div className="flex flex-wrap justify-center gap-6 text-lg text-dark">
+              <div className="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-sm">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="font-medium">{formatDate(evenement?.date)}</span>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-sm">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-medium">{evenement?.heure.substring(0, 5)}</span>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-white px-5 py-2 rounded-full shadow-sm">
+                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                </svg>
+                <span className="font-medium">{evenement?.lieu}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Error/Success Messages */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
             {error}
           </div>
         )}
-        
+
         {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-6">
             {success}
           </div>
         )}
-        
+
         {loading ? (
-          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-blue-800">Chargement des détails de l'événement...</p>
+          <div className="text-center p-12">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-primary">Chargement des détails...</p>
           </div>
         ) : evenement ? (
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-            <div className="bg-blue-600 text-white p-6">
-              <h1 className="text-3xl font-bold">{evenement.titre}</h1>
-              <div className="flex flex-wrap gap-4 mt-4">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>{formatDate(evenement.date)}</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{evenement.heure.substring(0, 5)}</span>
-                </div>
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <span>{evenement.lieu}</span>
-                </div>
+          <div className="space-y-8">
+
+ 
+
+            {/* Dogs Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-primary">
+                  Chiens participants
+                  <span className="text-lg text-dark/60 ml-2">
+                    ({filteredDogs.length} chien{filteredDogs.length > 1 ? 's' : ''})
+                  </span>
+                </h2>
               </div>
-            </div>
-            
-            {evenement.description && (
-              <div className="p-6 border-b">
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">Description</h2>
-                <p className="text-gray-600">{evenement.description}</p>
-              </div>
-            )}
-            
-            <div className="p-6">
-              <h2 className="text-2xl font-semibold mb-6">Chiens disponibles pour la marche</h2>
               
               {filteredDogs.length === 0 ? (
-                <div className="text-center p-8 bg-gray-50 rounded-lg">
-                  <div className="text-5xl mb-4">🐕</div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">Aucun chien trouvé</h3>
-                  <p className="text-gray-600">Il n'y a aucun chien disponible pour cet événement.</p>
+                <div className="bg-accent/10 rounded-2xl p-8 text-center">
+                  <div className="text-5xl mb-4">🐾</div>
+                  <h3 className="text-xl font-semibold text-dark">Aucun chien disponible</h3>
+                  <p className="text-dark/60">Revenez plus tard pour voir les participants</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredDogs.map((dog, index) => (
-                    dog && dog.id ? (
-                      <div 
-                        key={`dog-${dog.id}`}
-                        className={`bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105 cursor-pointer ${
-                          selectedDogs.includes(dog.id) ? 'ring-2 ring-blue-500' : ''
-                        } ${
-                          userDemandes[dog.id] ? 'opacity-70 cursor-not-allowed' : ''
-                        }`}
-                        onClick={() => !userDemandes[dog.id] && fetchAnimalDetails(dog)}
-                      >
-                        <div className="relative h-48">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {filteredDogs.map((dog) => (
+                    <div
+                      key={dog.id}
+                      className={`group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all ${
+                        userDemandes[dog.id] ? 'opacity-70 cursor-not-allowed' : ''
+                      } ${selectedDogs.includes(dog.id) ? 'ring-2 ring-primary' : ''}`}
+                      onClick={() => !userDemandes[dog.id] && fetchAnimalDetails(dog)}
+                    >
+                      <div className="flex items-start gap-6">
+                        <div className="w-24 h-24 rounded-xl overflow-hidden bg-accent/10">
                           {dog.image ? (
-                            <img 
-                              src={`http://127.0.0.1:8000${dog.image}`} 
-                              alt={dog.nom} 
+                            <img
+                              src={`http://127.0.0.1:8000${dog.image}`}
+                              alt={dog.nom}
                               className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = '/placeholder-dog.jpg';
-                              }}
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                              <p className="text-gray-500 italic">Pas de photo disponible</p>
+                            <div className="w-full h-full flex items-center justify-center text-primary/30">
+                              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
                             </div>
                           )}
-                          {selectedDogs.includes(dog.id) && (
-                            <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                              ✓
-                            </div>
-                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold text-dark">{dog.nom}</h3>
+                          <p className="text-dark/60 mt-1">{dog.race || 'Race non spécifiée'}</p>
                           {userDemandes[dog.id] && (
-                            <div className={`absolute bottom-2 left-2 px-2 py-1 rounded text-xs font-medium ${
-                              getStatusBadgeClass(userDemandes[dog.id].status)
-                            }`}>
+                            <span className={`inline-block mt-3 px-3 py-1 rounded-full text-sm ${getStatusBadgeClass(userDemandes[dog.id].status)}`}>
                               {getStatusText(userDemandes[dog.id].status)}
-                            </div>
+                            </span>
                           )}
                         </div>
-                        <div className="p-4">
-                          <h2 className="text-xl font-semibold text-gray-800">{dog.nom}</h2>
-                          <p className="text-gray-600">{dog.race || 'Non spécifiée'}</p>
-                        </div>
+                        {selectedDogs.includes(dog.id) && (
+                          <div className="text-primary">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div key={`invalid-dog-${index}`} className="bg-red-50 p-4 rounded-lg">
-                        <p className="text-red-600">Données du chien invalides</p>
-                      </div>
-                    )
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           </div>
         ) : (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            Impossible de charger les détails de l'événement
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl">
+            Événement non trouvé
           </div>
         )}
-        
-        {selectedDogs.length > 0 && (
-          <div className="fixed bottom-6 right-6">
-            <button 
-              onClick={submitRequest}
-              disabled={submitting}
-              className="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full shadow-lg flex items-center gap-2"
-            >
-              {submitting ? "Soumission..." : `Participer avec ${selectedDogs.length} chien${selectedDogs.length > 1 ? 's' : ''}`}
-              <span className="bg-white text-green-500 rounded-full w-6 h-6 flex items-center justify-center">
-                {selectedDogs.length}
-              </span>
-            </button>
-          </div>
-        )}
-        
-        <div className="mt-8">
-          <button 
-            onClick={() => router.push('/user/demandes/marche-chiens')}
-            className="text-blue-600 hover:text-blue-800 flex items-center">
-            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
-            Voir mes demandes de participation
-          </button>
-        </div>
-      </div>
 
+      
+
+      {/* Dog Details Modal */}
       {isModalOpen && selectedDog && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-70 p-4 backdrop-blur-sm z-50">
-          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full overflow-hidden">
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4 col-span-2 md:col-span-1">
-                <div className="mb-4 h-64 md:h-80 overflow-hidden rounded-lg bg-gray-100">
-                  {selectedDog.image ? (
-                    <img 
-                      src={`http://localhost:8000${selectedDog.image}`} 
-                      alt={selectedDog.nom} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = '/placeholder-dog.jpg';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                      <p className="text-gray-500 italic">Pas de photo disponible</p>
-                    </div>
-                  )}
-                </div>
-
-                {selectedDog.id && getDogRequestStatus(selectedDog.id) && (
-                  <div className={`py-2 px-3 rounded text-center font-medium ${getStatusBadgeClass(getDogRequestStatus(selectedDog.id))}`}>
-                    {getStatusText(getDogRequestStatus(selectedDog.id))}
+        <div className="fixed inset-0 flex items-center justify-center bg-dark/80 backdrop-blur-sm p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+              {/* Image Column */}
+              <div className="relative h-96 rounded-xl overflow-hidden">
+                {selectedDog.image ? (
+                  <img 
+                    src={`http://127.0.0.1:8000${selectedDog.image}`} 
+                    alt={selectedDog.nom} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-accent/10">
+                    <div className="text-6xl text-dark/30">🐾</div>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-4 col-span-2 md:col-span-1">
-                <h2 className="text-2xl font-bold text-gray-800">{selectedDog.nom}</h2>
+              {/* Details Column */}
+              <div className="space-y-6">
+                <h2 className="text-3xl font-bold text-dark">{selectedDog.nom}</h2>
                 
-                <div>
-                  <h3 className="text-md font-semibold text-gray-700">Espèce</h3>
-                  <p className="text-gray-600">{selectedDog.espece || 'Non spécifié'}</p>
-                </div>
-                
-                <div>
-                  <h3 className="text-md font-semibold text-gray-700">Race</h3>
-                  <p className="text-gray-600">{selectedDog.race || 'Non spécifiée'}</p>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-primary">ESPÈCE</h3>
+                    <p className="text-xl text-dark">{selectedDog.espece || 'Non spécifié'}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-primary">RACE</h3>
+                    <p className="text-xl text-dark">{selectedDog.race || 'Non spécifiée'}</p>
+                  </div>
+                  {selectedDog.date_naissance && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-primary">ÂGE</h3>
+                      <p className="text-xl text-dark">{formatDate(selectedDog.date_naissance)}</p>
+                    </div>
+                  )}
+                  {selectedDog.sexe && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-primary">SEXE</h3>
+                      <p className="text-xl text-dark">{selectedDog.sexe === 'M' ? 'Mâle' : 'Femelle'}</p>
+                    </div>
+                  )}
                 </div>
 
-                {selectedDog.date_naissance && (
-                  <div>
-                    <h3 className="text-md font-semibold text-gray-700">Date de naissance</h3>
-                    <p className="text-gray-600">{formatDate(selectedDog.date_naissance)}</p>
-                  </div>
-                )}
-
-                {selectedDog.sexe && (
-                  <div>
-                    <h3 className="text-md font-semibold text-gray-700">Sexe</h3>
-                    <p className="text-gray-600">{selectedDog.sexe === 'M' ? 'Mâle' : 'Femelle'}</p>
-                  </div>
-                )}
-                
                 {selectedDog.description && (
-                  <div>
-                    <h3 className="text-md font-semibold text-gray-700">Description</h3>
-                    <p className="text-gray-600">{selectedDog.description}</p>
+                  <div className="border-t border-accent/20 pt-6">
+                    <h3 className="text-sm font-semibold text-primary mb-2">DESCRIPTION</h3>
+                    <p className="text-dark/80 leading-relaxed">
+                      {selectedDog.description}
+                    </p>
                   </div>
                 )}
 
-                {dogEvents && dogEvents.length > 0 && (
-                  <div>
-                    <h3 className="text-md font-semibold text-gray-700">Historique des événements</h3>
-                    <ul className="list-disc pl-5 text-gray-600">
-                      {dogEvents.map((event, index) => (
-                        <li key={`event-${index}`}>
-                          {event.titre} - {formatDate(event.date)}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <div className="pt-4">
+                {/* Action Buttons */}
+                <div className="border-t border-accent/20 pt-6">
                   {selectedDog.id && getDogRequestStatus(selectedDog.id) ? (
                     getDogRequestStatus(selectedDog.id) !== 'Acceptee' && (
                       <button
                         onClick={() => cancelRequest(selectedDog.id)}
                         disabled={submitting}
-                        className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors"
+                        className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl transition-colors"
                       >
-                        {submitting ? "Annulation..." : "Annuler ma demande"}
+                        {submitting ? "Annulation..." : "Annuler la demande"}
                       </button>
                     )
                   ) : (
@@ -528,26 +501,36 @@ export default function EvenementMarcheDetail() {
                         closeModal();
                       }}
                       disabled={submitting}
-                      className={`w-full ${selectedDogs.includes(selectedDog.id) ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} text-white py-2 px-4 rounded-md transition-colors`}
+                      className={`w-full ${
+                        selectedDogs.includes(selectedDog.id) 
+                          ? 'bg-red-500 hover:bg-red-600' 
+                          : 'bg-primary hover:bg-primary/90'
+                      } text-white py-3 rounded-xl transition-colors`}
                     >
-                      {selectedDogs.includes(selectedDog.id) ? "Désélectionner ce chien" : "Sélectionner ce chien"}
+                      {selectedDogs.includes(selectedDog.id) 
+                        ? "Désélectionner" 
+                        : "Sélectionner ce chien"}
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-50 px-6 py-4 flex justify-end">
-              <button 
-                onClick={closeModal} 
-                className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
-              >
-                Fermer
-              </button>
+            {/* Modal Footer */}
+            <div className="border-t border-accent/20 px-8 py-6 bg-secondary/20">
+              <div className="flex justify-end">
+                <button 
+                  onClick={closeModal}
+                  className="px-6 py-3 rounded-xl border-2 border-primary text-primary hover:bg-primary/10 transition-colors"
+                >
+                  Fermer
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

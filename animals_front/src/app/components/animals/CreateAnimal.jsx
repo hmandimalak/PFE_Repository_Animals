@@ -134,87 +134,250 @@ const CreateAnimal = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 py-10">
+        <div className="flex flex-col min-h-screen bg-gradient-to-b from-secondary to-white">
             <Navbar />
-            <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-2xl p-8 text-black">
-                <h1 className="text-4xl font-bold text-center text-pink-600 mb-8">Create New Animal</h1>
-                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 text-center">{error}</div>}
-                <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Nom</label>
-                        <input type="text" name="nom" value={formData.nom} onChange={handleChange} placeholder="Nom" required className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500" />
-                    </div>
+            <div className="max-w-7xl mx-auto mt-12 bg-white rounded-2xl shadow-xl p-10 text-dark w-full transform transition-all duration-300 hover:shadow-2xl">
+                <div className="mb-10 text-center space-y-2">
+                    <h1 className="text-5xl font-extrabold text-primary animate-fade-in-down">
+                        Nouvelle Fiche Animal
+                    </h1>
+                    <p className="text-dark/80">Remplissez les détails de votre animal</p>
+                    <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+                </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Espèce</label>
-                        <select name="espece" value={formData.espece} onChange={handleChange} required className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500">
-                            <option value="" disabled>Sélectionnez une espèce</option>
-                            <option value="Chien">Chien</option>
-                            <option value="Chat">Chat</option>
-                        </select>
+                {error && (
+                    <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-lg animate-shake">
+                        <p>⚠️ {error}</p>
                     </div>
+                )}
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Race</label>
-                        <select name="race" value={formData.race} onChange={handleChange} required className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500">
-                            <option value="" disabled>Sélectionnez une race</option>
-                            {speciesOptions[formData.espece]?.map((race) => (
-                                <option key={race} value={race}>{race}</option>
-                            ))}
-                        </select>
-                    </div>
+                <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-8" encType="multipart/form-data">
+                    {/* First Column */}
+                    <div className="space-y-6 border-r-2 border-accent/20 pr-8">
+                        <div className="animate-slide-in-left">
+                            <label className="block text-sm font-semibold text-dark mb-2">
+                                Nom
+                                <span className="text-primary"> *</span>
+                            </label>
+                            <input
+                                type="text"
+                                name="nom"
+                                value={formData.nom}
+                                onChange={handleChange}
+                                placeholder="Buddy"
+                                required
+                                className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Date de Naissance</label>
-                        <input type="date" name="date_naissance" value={formData.date_naissance} onChange={handleChange} required className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500" />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Sexe</label>
-                        <select name="sexe" value={formData.sexe} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500">
-                            <option value="M">Male</option>
-                            <option value="F">Femelle</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500" rows="4" />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Type de Garde</label>
-                        <select name="type_garde" value={formData.type_garde} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500">
-                            <option value="Définitive">Définitive</option>
-                            <option value="Temporaire">Temporaire</option>
-                        </select>
-                    </div>
-
-                    {formData.type_garde === 'Temporaire' && (
-                        <>
+                        <div className="grid grid-cols-2 gap-6 animate-slide-in-left delay-100">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Date de Réservation</label>
-                                <input type="date" name="date_reservation" value={formData.date_reservation} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500" />
+                                <label className="block text-sm font-semibold text-dark mb-2">
+                                    Espèce
+                                    <span className="text-primary"> *</span>
+                                </label>
+                                <select
+                                    name="espece"
+                                    value={formData.espece}
+                                    onChange={handleChange}
+                                    required
+                                    className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzODQ5NTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im03IDE1IDUgNSA1LTUiLz48L3N2Zz4K')] bg-no-repeat bg-[center_right_1rem]"
+                                >
+                                    <option value="" disabled>Choisir une espèce</option>
+                                    <option value="Chien">🐶 Chien</option>
+                                    <option value="Chat">🐱 Chat</option>
+                                </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Date de Fin</label>
-                                <input type="date" name="date_fin" value={formData.date_fin} onChange={handleChange} className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500" />
-                            </div>
-                        </>
-                    )}
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" name="photo" accept="image/*" onChange={handleChange} className="mt-1 block w-full px-4 py-3 border rounded-lg shadow-sm focus:ring-pink-500 focus:border-pink-500" />
+                            <div>
+                                <label className="block text-sm font-semibold text-dark mb-2">
+                                    Race
+                                    <span className="text-primary"> *</span>
+                                </label>
+                                <select
+                                    name="race"
+                                    value={formData.race}
+                                    onChange={handleChange}
+                                    required
+                                    className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary"
+                                >
+                                    <option value="" disabled>Sélectionner une race</option>
+                                    {speciesOptions[formData.espece]?.map((race) => (
+                                        <option key={race} value={race}>{race}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 animate-slide-in-left delay-200">
+                            <div>
+                                <label className="block text-sm font-semibold text-dark mb-2">
+                                    Date de Naissance
+                                    <span className="text-primary"> *</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    name="date_naissance"
+                                    value={formData.date_naissance}
+                                    onChange={handleChange}
+                                    required
+                                    className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-dark mb-2">
+                                    Sexe
+                                </label>
+                                <div className="mt-1 flex gap-4">
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
+                                            name="sexe"
+                                            value="M"
+                                            checked={formData.sexe === 'M'}
+                                            onChange={handleChange}
+                                            className="w-5 h-5 text-primary border-2 border-accent/30"
+                                        />
+                                        <span className="text-dark/90">Mâle</span>
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
+                                            name="sexe"
+                                            value="F"
+                                            checked={formData.sexe === 'F'}
+                                            onChange={handleChange}
+                                            className="w-5 h-5 text-primary border-2 border-accent/30"
+                                        />
+                                        <span className="text-dark/90">Femelle</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button type="submit" disabled={loading} className="w-full px-4 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 focus:ring-4 focus:ring-pink-500 focus:outline-none">
-                        {loading ? 'Submitting...' : 'Submit'}
-                    </button>
+                    {/* Second Column */}
+                    <div className="space-y-6 pl-8">
+                        <div className="animate-slide-in-right">
+                            <label className="block text-sm font-semibold text-dark mb-2">
+                                Description
+                            </label>
+                            <textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                placeholder="Décrivez le caractère, les particularités..."
+                                className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary h-32 resize-none"
+                            />
+                        </div>
+
+                        <div className="animate-slide-in-right delay-100">
+                            <label className="block text-sm font-semibold text-dark mb-2">
+                                Type de Garde
+                            </label>
+                            <div className="grid grid-cols-2 gap-4 mt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({...formData, type_garde: 'Définitive'})}
+                                    className={`p-4 rounded-xl border-2 transition-all ${formData.type_garde === 'Définitive' ? 
+                                        'border-primary bg-primary/10 text-primary font-semibold' : 
+                                        'border-accent/30 text-dark/70 hover:border-primary/50'}`}
+                                >
+                                    🏠 Définitive
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({...formData, type_garde: 'Temporaire'})}
+                                    className={`p-4 rounded-xl border-2 transition-all ${formData.type_garde === 'Temporaire' ? 
+                                        'border-primary bg-primary/10 text-primary font-semibold' : 
+                                        'border-accent/30 text-dark/70 hover:border-primary/50'}`}
+                                >
+                                    📅 Temporaire
+                                </button>
+                            </div>
+                        </div>
+
+                        {formData.type_garde === 'Temporaire' && (
+                            <div className="space-y-6 animate-fade-in">
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-dark mb-2">
+                                            Date de Réservation
+                                        </label>
+                                        <input
+                                            type="date"
+                                            name="date_reservation"
+                                            value={formData.date_reservation}
+                                            onChange={handleChange}
+                                            className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-dark mb-2">
+                                            Date de Fin
+                                        </label>
+                                        <input
+                                            type="date"
+                                            name="date_fin"
+                                            value={formData.date_fin}
+                                            onChange={handleChange}
+                                            className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="animate-slide-in-right delay-200">
+                            <label className="block text-sm font-semibold text-dark mb-2">
+                                Photo de l'animal
+                            </label>
+                            <div className="mt-1 flex items-center justify-center w-full">
+                                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-accent/30 rounded-xl cursor-pointer hover:border-primary/50 transition-colors">
+                                    {formData.photo ? (
+                                        <div className="text-primary">
+                                            📸 Photo sélectionnée: {formData.photo.name}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-dark/60">
+                                            <div className="text-4xl mb-2">📁</div>
+                                            <span className="font-medium">Glissez une photo ou</span>
+                                            <span className="text-primary ml-1">parcourir</span>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        name="photo"
+                                        accept="image/*"
+                                        onChange={handleChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="col-span-2 mt-10 animate-fade-in-up">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-transform shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+                                    Envoi en cours...
+                                </>
+                            ) : (
+                                '✅ Soumettre la demande'
+                            )}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     );
 };
-
 export default CreateAnimal;

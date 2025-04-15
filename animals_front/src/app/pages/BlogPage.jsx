@@ -96,7 +96,8 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-pastel-pink/50 to-white ${nunito.className}`}>
+    <div className={`min-h-screen bg-gradient-to-b from-secondary to-white  ${nunito.className}`}>
+      
       <Navbar />
       
       <main className="max-w-6xl mx-auto px-4 py-12">

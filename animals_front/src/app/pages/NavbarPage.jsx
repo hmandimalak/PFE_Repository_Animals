@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
-import { FaPaw, FaSmile, FaHeart, FaBars, FaBell } from "react-icons/fa";
+import { FaPaw, FaSmile, FaHeart, FaBars, FaBell ,FaUser, FaSignOutAlt,} from "react-icons/fa";
 import Link from "next/link";
 import { authenticatedFetch } from '../../app/authInterceptor';
+
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -130,13 +131,12 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-20 items-center">
           {/* Logo and Site Name */}
           <div className="flex items-center">
             <Link href="/">
               <div className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-secondary/30 transition duration-300">
-                <Image src="/dogandcat.jpeg" alt="Logo" width={40} height={40} className="rounded-full border-2 border-primary" />
-                <span className="ml-1 text-xl font-bold text-primary">Pawfect Home <span className="text-accent">🐶🐱</span></span>
+                <Image src="/adopti.png" alt="Logo" width={90} height={10} className="rounded-full border-2 border-primary" />
               </div>
             </Link>
           </div>
@@ -163,7 +163,7 @@ export default function Navbar() {
           </div>
 
           {/* Right Side: Notifications, Profile, Login/Logout */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             {isAuthenticated() && (
               <div className="relative">
                 <button
@@ -209,32 +209,46 @@ export default function Navbar() {
             )}
 
             {/* User Profile and Auth Buttons */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               {isAuthenticated() ? (
-                <>
-                  <button
-                    onClick={handleProfileClick}
-                    className="px-4 py-2 text-sm bg-primary text-white rounded-full hover:bg-accent transition-colors shadow-sm flex items-center"
-                    disabled={isNavigating}
-                  >
-                    <FaSmile className="mr-2" /> {getCurrentUser()}
-                  </button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center bg-secondary/10 rounded-full pr-4 pl-2 py-1 hover:bg-secondary/20 transition-colors">
+                    <button
+                      onClick={handleProfileClick}
+                      className="flex items-center gap-2"
+                      disabled={isNavigating}
+                    >
+                      <div className="bg-primary p-2 rounded-full text-white">
+                        <FaUser className="text-lg" />
+                      </div>
+                      <span className="text-dark font-medium text-sm">
+                        {getCurrentUser()}
+                      </span>
+                    </button>
+                  </div>
+                  
                   <button
                     onClick={handleLogout}
-                    className="px-4 py-2 text-sm bg-dark text-white rounded-full hover:bg-primary transition-colors shadow-sm flex items-center"
+                    className="flex items-center gap-2 bg-dark/10 hover:bg-dark/20 px-3 py-2 rounded-full transition-colors"
                   >
-                    <FaHeart className="mr-2" /> Déconnexion
+                    <FaSignOutAlt className="text-dark text-lg" />
+                    <span className="text-dark font-medium text-sm">
+                      Déconnexion
+                    </span>
                   </button>
-                </>
+                </div>
               ) : (
                 <button
                   onClick={handleLoginClick}
-                  className="px-4 py-2 text-sm bg-accent text-white rounded-full hover:bg-primary transition-colors shadow-sm flex items-center"
+                  className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-full hover:bg-primary transition-colors"
                 >
-                  <FaSmile className="mr-2" /> Connexion
+                  <FaUser className="text-lg" />
+                  <span>Connexion</span>
                 </button>
               )}
             </div>
+
+          
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
