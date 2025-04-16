@@ -311,6 +311,7 @@ export default function EditProfile({ setActiveSection }) {
           <div className="col-span-2 mt-8 animate-fade-in-up">
             <button
               type="submit"
+              onClick={handleSubmit}
               disabled={loading}
               className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-transform shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2"
             >
