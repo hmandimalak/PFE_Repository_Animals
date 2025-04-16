@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaTrash, FaShoppingCart, FaSearch, 
-  FaDog, FaCat, FaBone, FaShower, 
+  FaDog, FaCat, FaBone, FaShower, FaPaw,
   FaChevronRight, FaHeart, FaStar,FaFilter
 } from 'react-icons/fa';
 import Link from 'next/link';
@@ -10,6 +10,11 @@ import Navbar from './NavbarPage';
 import { useRouter } from 'next/navigation';
 import { authenticatedFetch } from '../../app/authInterceptor';
 import { useSession } from "next-auth/react";
+import { Nunito } from "next/font/google";
+
+
+const nunito = Nunito({ subsets: ["latin"] });
+
 
 const getAuthToken = (session) => {
   if (typeof window !== "undefined") {
@@ -435,9 +440,23 @@ const Boutique = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white">
-      <Navbar />
-      <CartIcon />
+     <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
+                 <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+                     <Navbar />
+                     <CartIcon />
+
+                 </div>
+                 
+                 {/* Animated background elements */}
+                 <div className="absolute top-20 right-10 opacity-10 animate-bounce">
+                     <FaDog className="w-24 h-24 text-primary" />
+                 </div>
+                 <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+                     <FaCat className="w-32 h-32 text-dark" />
+                 </div>
+                 <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
+                     <FaPaw className="w-20 h-20 text-primary" />
+                 </div>
       {cartOpen && <MiniCart />}
 
       <div className="max-w-7xl mx-auto px-4 py-12">

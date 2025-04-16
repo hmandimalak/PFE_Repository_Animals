@@ -4,7 +4,7 @@ import Image from "next/image";
 import Navbar from "./NavbarPage";
 import { useState } from "react";
 import AnimalStoryModal  from "./AnimalStoryModal"
-import { FaPaw, FaCalendarAlt, FaShoppingCart, FaHandHoldingHeart, FaRegClipboard, FaArrowRight } from "react-icons/fa";
+import { FaPaw, FaCalendarAlt, FaShoppingCart, FaHandHoldingHeart, FaRegClipboard, FaArrowRight, FaDog, FaCat, FaGoogle, FaHeart, FaSmile,FaHome,FaShoppingBag,FaWalking } from "react-icons/fa";
 
 const nunito = Nunito({ subsets: ["latin"] });
 
@@ -96,9 +96,22 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-b from-secondary to-white  ${nunito.className}`}>
-      
-      <Navbar />
+    <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
+                 <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+                     <Navbar />
+
+                 </div>
+                 
+                 {/* Animated background elements */}
+                 <div className="absolute top-20 right-10 opacity-10 animate-bounce">
+                     <FaDog className="w-24 h-24 text-primary" />
+                 </div>
+                 <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+                     <FaCat className="w-32 h-32 text-dark" />
+                 </div>
+                 <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
+                     <FaPaw className="w-20 h-20 text-primary" />
+                 </div>
       
       <main className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-5xl font-bold text-pastel-blue text-center mb-4">
@@ -271,11 +284,8 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
                 fill
                 className="object-cover hover:scale-105 transition-all duration-500"
               />
-              <div className="absolute top-4 right-4 bg-pastel-yellow text-white px-4 py-2 rounded-full font-bold">
-                Prochain événement
-              </div>
+              
             </div>
-            
             <div className="flex flex-col justify-center space-y-6">
               <h3 className="text-2xl font-bold text-pastel-green">{featuredContent.evenements.prochain.title}</h3>
               <div className="bg-pastel-blue/20 py-3 px-5 rounded-lg inline-block w-fit">

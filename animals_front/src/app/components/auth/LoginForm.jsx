@@ -263,7 +263,7 @@ export default function LoginForm() {
                   disabled={loading}
                   className="w-full py-3 px-6 bg-white border border-gray-300 text-dark font-medium rounded-lg shadow hover:shadow-md transition-all flex items-center justify-center"
                 >
-                  <FaGoogle className="mr-2 text-red-500" />
+                  <FaGoogle className="mr-2 text-primary" />
                   {loading ? "Connexion en cours..." : "Continuer avec Google"}
                 </button>
               </div>

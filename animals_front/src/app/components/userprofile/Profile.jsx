@@ -193,6 +193,7 @@ export default function Profile() {
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-secondary to-white">
         <Navbar />
+
         <div className="max-w-7xl mx-auto  bg-white rounded-2xl shadow-xl p-10 text-dark w-full transform transition-all duration-300 hover:shadow-2xl flex flex-row">             
                 {/* Sidebar */}
                 <aside className="w-64 bg-white shadow-lg  p-5 sticky top-0 h-screen">

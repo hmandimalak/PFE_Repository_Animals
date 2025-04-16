@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
+
 import { FaPaw, FaSmile, FaHeart, FaBars, FaBell ,FaUser, FaSignOutAlt,} from "react-icons/fa";
 import Link from "next/link";
 import { authenticatedFetch } from '../../app/authInterceptor';
@@ -21,7 +22,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem("access_token") || session?.accessToken;
+      const token = localStorage.getItem("access_token") || session?.user?.accessToken;
       if (!token) return;
 
       try {
@@ -130,6 +131,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50 w-full">
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           {/* Logo and Site Name */}
@@ -149,7 +151,7 @@ export default function Navbar() {
               { label: "Boutique", href: "/boutique" },
               { label: "Evenements", href: "/marche" },
               { label: "Blog", href: "/blog" },
-              { label: "Nos Services", href: "#our-services" },
+              { label: "Nos Services", href: "/#our-services" },
               { label: "FAQ", href: "/faq" },
             ].map((link) => (
               <a

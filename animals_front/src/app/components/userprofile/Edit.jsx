@@ -203,6 +203,7 @@ export default function EditProfile({ setActiveSection }) {
                 className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary transition-all"
               />
             </div>
+
           
            </div>
 
@@ -305,6 +306,7 @@ export default function EditProfile({ setActiveSection }) {
                 </div>
               </div>
             )}
+
             </div>
 
             {/* Submit Button */}
