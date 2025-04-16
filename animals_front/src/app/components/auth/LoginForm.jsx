@@ -1,160 +1,294 @@
-'use client';
-import { useState,useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { FaGoogle } from "react-icons/fa";
-import { getSession,useSession } from "next-auth/react";
-
+import { useSession } from "next-auth/react";
+import { 
+  FaLock, FaEnvelope, FaPaw, FaDog, FaCat, 
+  FaGoogle, FaSignInAlt, FaKey, FaArrowRight
+} from "react-icons/fa";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
 
-
-
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
 
   const handleGoogleLogin = async () => {
     try {
-      const result = await signIn('google', {
-        callbackUrl: '/',
+      setLoading(true);
+      const result = await signIn("google", {
+        callbackUrl: "/",
         redirect: false,
       });
 
       if (result?.error) {
-        setError('Google login failed. Please try again.');
+        setError("Google login failed. Please try again.");
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    }
-  };
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:8000/api/auth/login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.detail || 'Login failed');
-
-      document.cookie = `access_token=${data.access}; path=/; max-age=86400`;
-      document.cookie = `refresh_token=${data.refresh}; path=/; max-age=86400`;
-
-
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem('access_token', data.access);
-      localStorage.setItem('refresh_token', data.refresh);
-      setTimeout(() => {
-        router.push('/');
-      }, 300);
-    } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
 
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          email: formData.email, 
+          password: formData.password 
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Login failed");
+
+      document.cookie = `access_token=${data.access}; path=/; max-age=86400`;
+      document.cookie = `refresh_token=${data.refresh}; path=/; max-age=86400`;
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("refresh_token", data.refresh);
+      
+      setTimeout(() => {
+        router.push("/");
+      }, 300);
+    } catch (err) {
+      setError(err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Email and password input fields */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-accent to-white py-12 relative overflow-hidden">
+      {/* Animated pet silhouettes in background - slightly different positioning */}
+      <div className="absolute top-20 right-10 opacity-10 animate-bounce">
+        <FaDog className="w-24 h-24 text-primary" />
+      </div>
+      <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+        <FaCat className="w-32 h-32 text-dark" />
+      </div>
+      <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
+        <FaPaw className="w-20 h-20 text-primary" />
+      </div>
+      <div className="absolute bottom-20 left-2/3 opacity-10 animate-pulse delay-500">
+        <FaDog className="w-28 h-28 text-dark transform -rotate-12" />
+      </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 p-2 block w-full rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="md:flex flex-row-reverse">
+            {/* Right side - Animal image panel (reversed from register page) */}
+            <div className="md:w-2/5 bg-gradient-to-bl from-primary to-accent p-8 text-white relative hidden md:block">
+              <div className="h-full flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center mb-6">
+                    <FaPaw className="h-8 w-8 mr-3 text-white" />
+                    <h2 className="text-2xl font-bold">Adopti</h2>
+                  </div>
+                  <h3 className="text-3xl font-bold mb-4">Heureux de vous revoir</h3>
+                  <p className="text-white mb-6">
+                    Connectez-vous pour retrouver votre espace personnel et continuer à partager votre amour pour les animaux.
+                  </p>
+                </div>
 
-          <div>
-            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <Link href="/forgot" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot your password?
-              </Link>
+                {/* Animal image showcase - different style */}
+                <div className="relative h-64 rounded-xl overflow-hidden mt-4 shadow-lg">
+                  <img 
+                    src="animals.jpg" 
+                    alt="Happy pets" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark/80 to-transparent flex items-end">
+                    <div className="p-4 text-white">
+                      <div className="text-lg font-bold mb-1">Connectez-vous pour continuer</div>
+                      <div className="text-sm">Votre aventure avec Adopti continue ici</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Different style of decorative element */}
+                <div className="flex justify-center space-x-3 mt-8">
+                  <div className="h-3 w-3 rounded-full bg-white opacity-50"></div>
+                  <div className="h-3 w-3 rounded-full bg-white opacity-70"></div>
+                  <div className="h-3 w-3 rounded-full bg-white opacity-90"></div>
+                  <div className="h-3 w-3 rounded-full bg-white"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Left side - Form (reversed from register page) */}
+            <div className="md:w-3/5 p-8 md:p-10">
+              {/* En-tête - different icon and styling */}
+              <div className="text-center mb-8">
+                <div className="mb-4">
+                  <div className="mx-auto h-16 w-16 bg-primary rounded-full flex items-center justify-center">
+                    <FaKey className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h1 className="text-3xl font-bold text-dark mb-2">
+                  Connexion
+                </h1>
+                <p className="text-dark/70">
+                  Accédez à votre espace Pawfect Home
+                </p>
+              </div>
+
+              {/* Formulaire - simplified from register */}
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-6">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaEnvelope className="h-5 w-5 text-primary" />
+                    </div>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      required
+                      className="w-full pl-10 pr-3 py-3 border-2 border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                      placeholder="Adresse email"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaLock className="h-5 w-5 text-primary" />
+                    </div>
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      required
+                      className="w-full pl-10 pr-3 py-3 border-2 border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                      placeholder="Mot de passe"
+                      value={formData.password}
+                      onChange={handleChange}
+                    />
+                  </div>
+                
+                  {error && (
+                    <div className="bg-red-50 border-l-4 border-red-500 text-red-600 px-4 py-3 rounded-lg text-sm">
+                      {error}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <input
+                        id="remember_me"
+                        name="remember_me"
+                        type="checkbox"
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <label htmlFor="remember_me" className="ml-2 block text-sm text-dark">
+                        Se souvenir de moi
+                      </label>
+                    </div>
+                    <div className="text-sm">
+                      <Link
+                        href="/forgot"
+                        className="font-medium text-primary hover:text-accent transition-colors"
+                      >
+                        Mot de passe oublié?
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Different style of highlight box */}
+                  <div className="px-4 py-3 bg-primary/10 border-l-4 border-primary rounded-r-lg">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <FaPaw className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-dark">
+                          Connectez-vous pour retrouver vos compagnons à quatre pattes
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bouton de connexion - different style */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 px-6 bg-primary text-white font-medium rounded-lg shadow-lg hover:bg-accent transition-colors flex items-center justify-center"
+                  >
+                    {loading ? (
+                      "Connexion en cours..."
+                    ) : (
+                      <>
+                        Se Connecter
+                        <FaArrowRight className="ml-2" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* Google OAuth Button - different style */}
+              <div className="mt-6">
+                <button
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="w-full py-3 px-6 bg-white border border-gray-300 text-dark font-medium rounded-lg shadow hover:shadow-md transition-all flex items-center justify-center"
+                >
+                  <FaGoogle className="mr-2 text-primary" />
+                  {loading ? "Connexion en cours..." : "Continuer avec Google"}
+                </button>
+              </div>
+
+              {/* Lien d'inscription - different styling */}
+              <div className="mt-8 py-4 border-t border-gray-200 text-center">
+                <p className="text-dark/70">
+                  Pas encore membre ? {' '}
+                  <Link
+                    href="/register"
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Créez un compte
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
-          </div>
-        </form>
-
-        <div className="text-center text-sm">
-          <span className="text-gray-600">Don't have an account? </span>
-          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Sign up
-          </Link>
         </div>
 
-        {/* Google OAuth Button */}
-        <div className="text-center mt-4">
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full flex justify-center items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            disabled={loading}
-          >
-            <FaGoogle className="mr-2" />
-            {loading ? 'Connecting...' : 'Continue with Google'}
-          </button>
-          {error && (
-            <p className="mt-2 text-sm text-red-600">{error}</p>
-          )}
+        {/* Different footer decoration */}
+        <div className="flex justify-center mt-8">
+          <div className="px-4 py-2 bg-primary/20 rounded-full text-xs text-primary font-medium flex items-center">
+            <FaPaw className="mr-2" /> Adopti © 2025
+          </div>
         </div>
       </div>
     </div>

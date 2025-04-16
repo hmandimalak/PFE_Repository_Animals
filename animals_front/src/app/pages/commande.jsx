@@ -224,10 +224,10 @@ const Commande = () => {
 
   if (!isClient || loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent/20">
             <div className="text-center py-8">
               <p>Chargement...</p>
             </div>
@@ -239,16 +239,21 @@ const Commande = () => {
 
   if (cartItems.length === 0 && !orderSuccess) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="text-center py-8">
-              <p className="text-xl text-gray-500 mb-4">Votre panier est vide</p>
-              <Link href="/boutique" className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded-full transition-colors">
-                Retourner à la boutique
-              </Link>
-            </div>
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="text-center mb-12 space-y-4 animate-fade-in-down">
+            <h1 className="text-5xl font-extrabold text-primary">Panier Vide</h1>
+            <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent/20 text-center py-12">
+            <p className="text-xl text-dark/60 mb-6">Votre panier est vide</p>
+            <Link 
+              href="/boutique" 
+              className="bg-primary text-white px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              Retourner à la boutique
+            </Link>
           </div>
         </div>
       </div>
@@ -257,27 +262,24 @@ const Commande = () => {
 
   if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Commande réussie!</h2>
-              <p className="text-lg text-gray-600 mb-6">Votre commande numéro <span className="font-semibold">{orderNumber}</span> a été enregistrée.</p>
-              <p className="text-gray-600 mb-8">Vous recevrez bientôt un e-mail de confirmation avec les détails de votre commande.</p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/boutique" className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-6 rounded-full transition-colors inline-block">
-                  Continuer les achats
-                </Link>
-                <Link href="/mes-commandes" className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-6 rounded-full transition-colors inline-block">
-                  Voir mes commandes
-                </Link>
-              </div>
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent/20 text-center py-12">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-dark mb-2">Commande réussie!</h2>
+            <p className="text-lg text-dark/60 mb-6">Votre commande numéro <span className="font-semibold text-primary">{orderNumber}</span> a été enregistrée.</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/boutique" className="bg-primary hover:bg-primary/90 text-white py-2 px-6 rounded-xl transition-colors">
+                Continuer les achats
+              </Link>
+              <Link href="/mes-commandes" className="bg-accent/10 hover:bg-accent/20 text-dark py-2 px-6 rounded-xl transition-colors">
+                Voir mes commandes
+              </Link>
             </div>
           </div>
         </div>
@@ -286,115 +288,118 @@ const Commande = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Link href="/panier" className="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-            <FaArrowLeft className="mr-2" />
-            Retour au panier
-          </Link>
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="text-center mb-12 space-y-4 animate-fade-in-down">
+          <h1 className="text-5xl font-extrabold text-primary">Finaliser Votre Commande</h1>
+          <p className="text-dark/80 text-xl">Complétez vos informations de livraison</p>
+          <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
         </div>
-        
-        <div className="flex flex-col md:flex-row gap-6">
-          {/* Left side - Order details form */}
-          <div className="md:w-2/3">
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Informations de livraison</h2>
-              
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Left Column - Shipping Form */}
+          <div className="lg:w-2/3">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent/20">
+              <Link 
+                href="/panier" 
+                className="flex items-center text-primary hover:text-primary/80 transition-colors mb-6"
+              >
+                <FaArrowLeft className="mr-2" />
+                Retour au panier
+              </Link>
+
               <form onSubmit={handleSubmitOrder}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div>
-                    <label className="block text-gray-700 mb-2" htmlFor="nom">Nom</label>
+                    <label className="block text-dark/80 mb-2" htmlFor="nom">Nom</label>
                     <input
                       type="text"
                       id="nom"
                       name="nom"
                       value={addressData.nom}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full border-2 border-accent/20 rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
                       required
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-gray-700 mb-2" htmlFor="prenom">Prénom</label>
+                    <label className="block text-dark/80 mb-2" htmlFor="prenom">Prénom</label>
                     <input
                       type="text"
                       id="prenom"
                       name="prenom"
                       value={addressData.prenom}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full border-2 border-accent/20 rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
                       required
                     />
                   </div>
-                  
+
                   <div className="md:col-span-2">
-                    <label className="block text-gray-700 mb-2" htmlFor="adresse">Adresse</label>
+                    <label className="block text-dark/80 mb-2" htmlFor="adresse">Adresse</label>
                     <input
                       type="text"
                       id="adresse"
                       name="adresse"
                       value={addressData.adresse}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full border-2 border-accent/20 rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
                       required
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-gray-700 mb-2" htmlFor="code_postal">Code Postal</label>
+                    <label className="block text-dark/80 mb-2" htmlFor="code_postal">Code Postal</label>
                     <input
                       type="text"
                       id="code_postal"
                       name="code_postal"
                       value={addressData.code_postal}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full border-2 border-accent/20 rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
                       required
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-gray-700 mb-2" htmlFor="ville">Ville</label>
+                    <label className="block text-dark/80 mb-2" htmlFor="ville">Ville</label>
                     <input
                       type="text"
                       id="ville"
                       name="ville"
                       value={addressData.ville}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full border-2 border-accent/20 rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
                       required
                     />
                   </div>
+
                   <div className="md:col-span-2">
-                    <label className="block text-gray-700 mb-2" htmlFor="telephone">Téléphone</label>
+                    <label className="block text-dark/80 mb-2" htmlFor="telephone">Téléphone</label>
                     <input
                       type="tel"
                       id="telephone"
                       name="telephone"
                       value={addressData.telephone}
                       onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                      className="w-full border-2 border-accent/20 rounded-xl px-4 py-3 focus:outline-none focus:border-primary"
                       required
                     />
                   </div>
                 </div>
-                
-                <div className="mb-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4">Méthode de paiement</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="border border-yellow-500 bg-yellow-50 rounded-lg p-4">
-                      <div className="flex items-center">
-                        <div className="w-5 h-5 rounded-full border border-yellow-500 mr-3 flex items-center justify-center">
-                          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        </div>
-                        <div className="flex items-center">
-                          <FaMoneyBill className="text-gray-600 mr-2" />
-                          <span className="font-medium">Paiement à la livraison</span>
-                        </div>
+
+                <div className="mb-8">
+                  <h3 className="text-xl font-semibold text-dark mb-4">Méthode de Paiement</h3>
+                  <div className="border-2 border-accent/20 rounded-xl p-4 bg-secondary/10">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <FaMoneyBill className="text-2xl text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-dark">Paiement à la livraison</h4>
+                        <p className="text-dark/60 text-sm">Espèces ou carte à la réception</p>
                       </div>
                     </div>
                   </div>
@@ -402,82 +407,73 @@ const Commande = () => {
 
                 <button 
                   type="submit" 
-                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-6 rounded-lg transition-colors disabled:bg-gray-400"
+                  className="w-full bg-primary text-white py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:bg-gray-400"
                   disabled={processingOrder}
                 >
-                  {processingOrder ? 'Traitement en cours...' : 'Finaliser la commande'}
+                  {processingOrder ? 'Traitement en cours...' : 'Confirmer la Commande'}
                 </button>
               </form>
             </div>
           </div>
-          
-          {/* Right side - Order summary */}
-          <div className="md:w-1/3">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Résumé de la commande</h2>
-              
-              <div className="mb-4">
-                <h3 className="font-medium text-gray-700 mb-2">Articles ({cartItems.length})</h3>
-                <div className="space-y-3 max-h-60 overflow-y-auto">
-                {cartItems.map(item => (
-                  <div key={item.id} className="flex items-center text-sm">
-                    <div className="w-12 h-12 rounded bg-gray-200 flex-shrink-0 mr-3 overflow-hidden">
-                      {item.image_url && (
-                        <img src={item.image_url} alt={item.nom} className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-gray-800">{item.nom}</p>
-                      <p className="text-gray-500">Quantité: {item.quantity}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{(item.prix * item.quantity).toFixed(2)} DT</p>
-                    </div>
 
-                    <div className="flex items-center border rounded-lg mr-4">
-                      <button 
-                        onClick={() => handleQuantityChange(item.id, -1)} 
-                        className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors"
-                        disabled={item.quantity <= 1}
-                      >
-                        <FaMinus size={12} />
-                      </button>
-                      <span className="px-4 text-gray-700">{item.quantity}</span>
-                      <button 
-                        onClick={() => handleQuantityChange(item.id, 1)} 
-                        className="px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors"
-                      >
-                        <FaPlus size={12} />
-                      </button>
+          {/* Right Column - Order Summary */}
+          <div className="lg:w-1/3">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-accent/20 sticky top-8">
+              <h2 className="text-2xl font-bold text-dark mb-6">Résumé</h2>
+
+              <div className="space-y-6 mb-8">
+                {cartItems.map(item => (
+                  <div key={item.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={item.image_url} 
+                        alt={item.nom} 
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div>
+                        <h4 className="font-medium text-dark">{item.nom}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <button 
+                            onClick={() => handleQuantityChange(item.id, -1)}
+                            className="p-1 text-primary hover:bg-accent/10 rounded-lg"
+                            disabled={item.quantity <= 1}
+                          >
+                            <FaMinus className="w-4 h-4" />
+                          </button>
+                          <span className="px-3 py-1 bg-accent/10 rounded-lg">{item.quantity}</span>
+                          <button 
+                            onClick={() => handleQuantityChange(item.id, 1)}
+                            className="p-1 text-primary hover:bg-accent/10 rounded-lg"
+                          >
+                            <FaPlus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                    <button 
-                      onClick={() => handleRemoveItem(item.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors mr-2"
-                      aria-label="Supprimer l'article"
-                    >
-                      <FaTrash />
-                    </button>
+                    <p className="font-semibold text-primary">{(item.prix * item.quantity).toFixed(2)} DT</p>
                   </div>
                 ))}
-                </div>
               </div>
-              
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">Sous-total</span>
-                  <span>{getSubtotal()} DT</span>
+
+              <div className="border-t border-accent/20 pt-6">
+                <div className="space-y-3 mb-6">
+                  <div className="flex justify-between text-dark/80">
+                    <span>Sous-total</span>
+                    <span>{getSubtotal()} DT</span>
+                  </div>
+                  <div className="flex justify-between text-dark/80">
+                    <span>TVA (20%)</span>
+                    <span>{getTVA()} DT</span>
+                  </div>
+                  <div className="flex justify-between text-dark/80">
+                    <span>Livraison</span>
+                    <span>{getLivraisonFees() === "0.00" ? "Gratuit" : `${getLivraisonFees()} DT`}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-600">TVA (20%)</span>
-                  <span>{getTVA()} DT</span>
-                </div>
-                <div className="flex justify-between text-sm mb-4">
-                  <span className="text-gray-600">Livraison</span>
-                  <span>{getLivraisonFees() === "0.00" ? "Gratuit" : `${getLivraisonFees()} DT`}</span>
-                </div>
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>{getFinalTotal()} DT</span>
+
+                <div className="flex justify-between items-center pt-4">
+                  <span className="text-xl font-bold text-dark">Total</span>
+                  <span className="text-2xl font-bold text-primary">{getFinalTotal()} DT</span>
                 </div>
               </div>
             </div>

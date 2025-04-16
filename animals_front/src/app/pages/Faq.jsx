@@ -1,11 +1,13 @@
 "use client";
 import { Disclosure } from '@headlessui/react';
-import { FaQuestionCircle, FaPaw, FaShippingFast, FaHeart } from 'react-icons/fa';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import Navbar from "./NavbarPage";
 import { useState } from 'react';
 import ContactForm from './Contactform';
+import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking,FaQuestionCircle,FaShippingFast} from "react-icons/fa";
+import { Nunito } from "next/font/google";
 
+const nunito = Nunito({ subsets: ["latin"] });
 const FAQPage = () => {
   const [showContactForm, setShowContactForm] = useState(false);
   const faqCategories = [
@@ -88,8 +90,22 @@ const FAQPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pastel-pink/20 to-white">
-      <Navbar/>
+    <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
+                 <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+                     <Navbar />
+
+                 </div>
+                 
+                 {/* Animated background elements */}
+                 <div className="absolute top-20 right-10 opacity-10 animate-bounce">
+                     <FaDog className="w-24 h-24 text-primary" />
+                 </div>
+                 <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+                     <FaCat className="w-32 h-32 text-dark" />
+                 </div>
+                 <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
+                     <FaPaw className="w-20 h-20 text-primary" />
+                 </div>
       <section className="max-w-4xl mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-pastel-blue mb-8 flex items-center justify-center">
           <FaQuestionCircle className="mr-3 text-pastel-green"/> 
@@ -145,7 +161,7 @@ const FAQPage = () => {
           <p className="mb-6 text-black">Notre équipe répond sous 24h !</p>
           <button 
             onClick={() => setShowContactForm(true)}
-            className="inline-block px-8 py-3 bg-pastel-green text-white rounded-full hover:bg-pastel-blue transition-colors"
+            className="inline-block px-8 py-3 bg-gradient-to-b from-secondary to-white text-pastel-blue rounded-full hover:bg-pastel-blue transition-colors"
           >
             Nous Contacter
           </button>

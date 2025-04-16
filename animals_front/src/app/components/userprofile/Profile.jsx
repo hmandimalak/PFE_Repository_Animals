@@ -193,7 +193,8 @@ export default function Profile() {
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-secondary to-white">
         <Navbar />
-        <div className="max-w-7xl mx-auto mt-12 bg-white rounded-2xl shadow-xl p-10 text-dark w-full transform transition-all duration-300 hover:shadow-2xl flex flex-row">             
+
+        <div className="max-w-7xl mx-auto  bg-white rounded-2xl shadow-xl p-10 text-dark w-full transform transition-all duration-300 hover:shadow-2xl flex flex-row">             
                 {/* Sidebar */}
                 <aside className="w-64 bg-white shadow-lg  p-5 sticky top-0 h-screen">
                     <div className="flex items-center space-x-3 mb-6">
@@ -209,8 +210,8 @@ export default function Profile() {
                                 }}
                                 className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                     activeSection === "profile"
-                                        ? "bg-pastel-pink text-white shadow-md"
-                                        : "text-gray-800 hover:bg-pastel-pink hover:text-white hover:shadow-md"
+                                        ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                 }`}
                             >
                                 Informations Personnelles
@@ -221,8 +222,8 @@ export default function Profile() {
                                 onClick={() => setShowGarderieOptions(!showGarderieOptions)}
                                 className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                     activeSection === "garderie"
-                                        ? "bg-pastel-pink text-white"
-                                        : "text-gray-800 hover:bg-pastel-pink hover:text-white"
+                                       ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                 }`}
                             >
                                 Animaux en Garderie
@@ -237,8 +238,8 @@ export default function Profile() {
                                             }}
                                             className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                                 garderieType === "temporaire"
-                                                    ? "bg-pastel-pink text-white"
-                                                    : "text-gray-700 hover:bg-pastel-pink hover:text-white"
+                                                   ? "bg-pastel-pink text-dark shadow-md"
+                                                    : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                             }`}
                                         >
                                             Temporaire
@@ -252,8 +253,8 @@ export default function Profile() {
                                             }}
                                             className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                                 garderieType === "definitive"
-                                                    ? "bg-pastel-pink text-white"
-                                                    : "text-gray-700 hover:bg-pastel-pink hover:text-white"
+                                                    ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                             }`}
                                         >
                                             Définitive
@@ -270,8 +271,8 @@ export default function Profile() {
                                 }}
                                 className={`w-full text-left p-2 rounded-lg transition-all duration-300 ${
                                     activeSection === "adoptions"
-                                        ? "bg-pastel-pink text-white"
-                                        : "text-gray-800 hover:bg-pastel-pink hover:text-white"
+                                       ? "bg-pastel-pink text-dark shadow-md"
+                                        : "text-gray-800 hover:bg-primary hover:text-dark hover:shadow-md"
                                 }`}
                             >
                                 Mes Adoptions

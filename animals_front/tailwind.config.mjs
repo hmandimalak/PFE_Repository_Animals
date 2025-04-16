@@ -9,6 +9,7 @@ export default {
   theme: {
     extend: {
       colors: {
+
         primary: '#6A89A7',    // Main brand color
         secondary: '#BDDDFC',   // Light background/container
         accent: '#88BDF2',      // Interactive elements
@@ -16,5 +17,6 @@ export default {
       },
     },
   },
+
   plugins: [],
 };

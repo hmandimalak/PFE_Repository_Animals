@@ -136,31 +136,17 @@ export default function EditProfile({ setActiveSection }) {
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-secondary to-white">
-      <div className="max-w-7xl mx-auto mt-12 bg-white rounded-2xl shadow-xl p-10 text-dark w-full transform transition-all duration-300 hover:shadow-2xl">
+    <div className="space-y-8 animate-fade-in">
         <div className="mb-10 text-center space-y-2">
-          <h1 className="text-5xl font-extrabold text-primary animate-fade-in-down">
-            Modifier le Profil
-          </h1>
-          <p className="text-dark/80">Mettez à jour vos informations personnelles</p>
-          <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+            <h1 className="text-5xl font-extrabold text-primary">Modifier le Profil</h1>
+            <p className="text-dark/80">Mettez à jour vos informations personnelles</p>
+            <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
         </div>
 
-        {error && (
-          <div className="mb-8 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded-lg animate-shake">
-            <p>⚠️ {error}</p>
-          </div>
-        )}
-
-        {success && (
-          <div className="mb-8 p-4 bg-green-50 border-l-4 border-green-400 text-green-700 rounded-lg animate-fade-in">
-            <p>✅ {success}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-8">
-          {/* Left Column */}
-          <div className="space-y-6 border-r-2 border-accent/20 pr-8">
+        <form className="grid grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="space-y-6 border-r-2 border-accent/20 pr-8">
+            
             <div className="animate-slide-in-left">
               <label className="block text-sm font-semibold text-dark mb-2">
                 Photo de Profil
@@ -217,10 +203,12 @@ export default function EditProfile({ setActiveSection }) {
                 className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary transition-all"
               />
             </div>
-          </div>
 
-          {/* Right Column */}
-          <div className="space-y-6 pl-8">
+          
+           </div>
+
+            {/* Right Column */}
+            <div className="space-y-6 pl-8">
             <div className="animate-slide-in-right">
               <label className="block text-sm font-semibold text-dark mb-2">
                 Email
@@ -318,12 +306,14 @@ export default function EditProfile({ setActiveSection }) {
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Submit Button */}
+            </div>
+
+            {/* Submit Button */}
           <div className="col-span-2 mt-8 animate-fade-in-up">
             <button
               type="submit"
+              onClick={handleSubmit}
               disabled={loading}
               className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-transform shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2"
             >
@@ -341,7 +331,6 @@ export default function EditProfile({ setActiveSection }) {
             </button>
           </div>
         </form>
-      </div>
     </div>
-  );
+);
 }
