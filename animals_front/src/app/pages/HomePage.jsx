@@ -193,7 +193,7 @@ export default function Home() {
         <div className="absolute top-20 right-10 opacity-11 animate-bounce">
           <FaDog className="w-24 h-24 text-dark" />
         </div>
-        <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+        <div className="absolute bottom-40 left-18 opacity-11 animate-pulse">
           <FaCat className="w-32 h-32 text-dark" />
         </div>
         <div className="absolute top-1/3 left-20 transform -translate-y-1/2">
@@ -342,7 +342,7 @@ export default function Home() {
   
          {/* Discover More Section */}
 <div className="mt-12 space-y-6">
-  <h2 className="text-2xl font-bold text-secondary">Découvrez-en plus 🌟</h2>
+  <h2 className="text-2xl font-bold text-dark">Découvrez-en plus 🌟</h2>
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
     {/* Our Team */}
     <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105 border-t-4 border-primary">
