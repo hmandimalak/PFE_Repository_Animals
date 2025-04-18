@@ -12,7 +12,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 
-from .serializers import NotificationSerializer
+from .serializers import CommandeDetailSerializer, NotificationSerializer
 # Existing views
 def get_produits(request):
     products = Produit.objects.all()
@@ -238,3 +238,9 @@ class NotificationMarkReadView(APIView):
             return Response({"message": "Notification marked as read"}, status=status.HTTP_200_OK)
         except Notification.DoesNotExist:
             return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def mes_commandes(request):
+    commandes = Commande.objects.filter(utilisateur=request.user).order_by('-date_commande')
+    serializer = CommandeDetailSerializer(commandes, many=True)
+    return Response(serializer.data)

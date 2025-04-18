@@ -11,6 +11,7 @@ from rest_framework import viewsets
 from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework import generics
+from rest_framework.permissions import AllowAny
     
 
 
@@ -388,7 +389,7 @@ class UserAcceptedAdoptionAnimalsView(generics.ListAPIView):
 
 # views.py
 class EvenementMarcheChienUserListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] 
     
     def get(self, request):
         # Get upcoming events (current date or future)
@@ -398,23 +399,24 @@ class EvenementMarcheChienUserListView(APIView):
         return Response(serializer.data)
 
 class EvenementMarcheChienDetailsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # Change from IsAuthenticated to AllowAny
     
     def get(self, request, pk):
         try:
             evenement = EvenementMarcheChien.objects.get(pk=pk)
             serializer = EvenementMarcheChienSerializer(evenement)
             
-            # Check if user already has a request for this event
-            user_demande = DemandeEvenementMarche.objects.filter(
-                utilisateur=request.user,
-                evenement=evenement
-            ).first()
-            
+            # Only attempt to get user-specific information if user is authenticated
             demande_data = None
-            if user_demande:
-                demande_serializer = DemandeEvenementMarcheSerializer(user_demande)
-                demande_data = demande_serializer.data
+            if request.user.is_authenticated:
+                user_demande = DemandeEvenementMarche.objects.filter(
+                    utilisateur=request.user,
+                    evenement=evenement
+                ).first()
+                
+                if user_demande:
+                    demande_serializer = DemandeEvenementMarcheSerializer(user_demande)
+                    demande_data = demande_serializer.data
             
             return Response({
                 'evenement': serializer.data,

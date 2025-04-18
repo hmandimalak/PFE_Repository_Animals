@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Navbar from './NavbarPage';
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking} from "react-icons/fa";
+import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking } from "react-icons/fa";
 import { Nunito } from "next/font/google";
 
 const nunito = Nunito({ subsets: ["latin"] });
@@ -21,10 +21,10 @@ export default function EvenementMarcheList() {
   const fetchEvenements = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
+      // Remove authentication token requirement
       const response = await fetch('http://localhost:8000/api/animals/evenements/marche-chiens/', {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` },
+        // Removed the Authorization header
       });
 
       if (!response.ok) throw new Error('Échec du chargement des événements');
@@ -66,21 +66,20 @@ export default function EvenementMarcheList() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
-                     <div className="sticky top-0 w-full z-50 bg-white shadow-md">
-                         <Navbar />
-    
-                     </div>
+      <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+        <Navbar />
+      </div>
                      
-                     {/* Animated background elements */}
-                     <div className="absolute top-20 right-10 opacity-10 animate-bounce">
-                         <FaDog className="w-24 h-24 text-primary" />
-                     </div>
-                     <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
-                         <FaCat className="w-32 h-32 text-dark" />
-                     </div>
-                     <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
-                         <FaPaw className="w-20 h-20 text-primary" />
-                     </div>
+      {/* Animated background elements */}
+      <div className="absolute top-20 right-10 opacity-10 animate-bounce">
+        <FaDog className="w-24 h-24 text-primary" />
+      </div>
+      <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+        <FaCat className="w-32 h-32 text-dark" />
+      </div>
+      <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
+        <FaPaw className="w-20 h-20 text-primary" />
+      </div>
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center mb-12 space-y-4 animate-fade-in-down">
           <h1 className="text-5xl font-extrabold text-primary">Événements de Marche avec les Chiens</h1>
@@ -142,8 +141,6 @@ export default function EvenementMarcheList() {
             </div>
           ))}
         </div>
-
-        
       </div>
     </div>
   );

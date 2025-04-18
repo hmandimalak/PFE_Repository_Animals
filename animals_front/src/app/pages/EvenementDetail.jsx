@@ -4,7 +4,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Navbar from './NavbarPage';
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking} from "react-icons/fa";
+import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking } from "react-icons/fa";
 import { Nunito } from "next/font/google";
 
 const nunito = Nunito({ subsets: ["latin"] });
@@ -19,6 +19,7 @@ export default function EvenementMarcheDetail() {
   const [selectedDog, setSelectedDog] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDogs, setSelectedDogs] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const router = useRouter();
   const params = useParams();
@@ -34,6 +35,10 @@ export default function EvenementMarcheDetail() {
   };
 
   useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('access_token');
+    setIsAuthenticated(!!token);
+    
     if (eventId) fetchEventDetails(eventId);
   }, [eventId]);
 
@@ -41,35 +46,51 @@ export default function EvenementMarcheDetail() {
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`http://localhost:8000/api/animals/evenements/marche-chiens/${id}/`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      
+      // Fetch event details without authentication
+      const response = await fetch(`http://localhost:8000/api/animals/evenements/marche-chiens/${id}/`);
 
       if (!response.ok) throw new Error(`Échec du chargement: ${response.status}`);
       
       const data = await response.json();
-      setEvenement(data.evenement);
+      setEvenement(data.evenement || data); // Handle both formats
 
-      if (Array.isArray(data.evenement.chiens)) {
+      const dogIds = (data.evenement?.chiens || data.chiens || []);
+      
+      if (Array.isArray(dogIds) && dogIds.length > 0) {
         const dogDetails = await Promise.all(
-          data.evenement.chiens.map(dogId => 
-            fetch(`http://localhost:8000/api/animals/${dogId}/`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            }).then(res => res.ok ? res.json() : null)
+          dogIds.map(dogId => 
+            fetch(`http://localhost:8000/api/animals/${dogId}/`)
+            .then(res => res.ok ? res.json() : null)
           )
         );
         setFilteredDogs(dogDetails.filter(Boolean));
       }
 
-      if (data.user_demande) {
-        const dogDemandeMap = {};
-        data.user_demande.chiens.forEach(dogId => {
-          dogDemandeMap[dogId] = {
-            demandeId: data.user_demande.id,
-            status: data.user_demande.statut
-          };
-        });
-        setUserDemandes(dogDemandeMap);
+      // Only fetch user-specific data if authenticated
+      if (token) {
+        try {
+          const userResponse = await fetch(`http://localhost:8000/api/animals/evenements/marche-chiens/${id}/user-demandes/`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            if (userData.user_demande) {
+              const dogDemandeMap = {};
+              userData.user_demande.chiens.forEach(dogId => {
+                dogDemandeMap[dogId] = {
+                  demandeId: userData.user_demande.id,
+                  status: userData.user_demande.statut
+                };
+              });
+              setUserDemandes(dogDemandeMap);
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching user-specific data:", err);
+          // Non-critical error, don't display to user
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -91,10 +112,17 @@ export default function EvenementMarcheDetail() {
   };
 
   const submitRequest = async () => {
+    if (!isAuthenticated) {
+      // Save the current page URL to redirect back after login
+      localStorage.setItem('redirectAfterLogin', window.location.pathname);
+      router.push('/login');
+      return;
+    }
+    
     try {
       setSubmitting(true);
       const token = localStorage.getItem('access_token');
-      await fetch('http://localhost:8000/api/animals/demandes/marche-chiens/', {
+      const response = await fetch('http://localhost:8000/api/animals/demandes/marche-chiens/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -105,6 +133,17 @@ export default function EvenementMarcheDetail() {
           chiens: selectedDogs
         })
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 401) {
+          localStorage.setItem('redirectAfterLogin', window.location.pathname);
+          router.push('/login');
+          return;
+        }
+        throw new Error(errorData.detail || 'Une erreur est survenue');
+      }
+      
       await fetchEventDetails(eventId);
       setSuccess('Demande soumise avec succès !');
       setSelectedDogs([]);
@@ -117,6 +156,14 @@ export default function EvenementMarcheDetail() {
 
   const toggleDogSelection = (dog) => {
     if (!dog?.id || userDemandes[dog.id]) return;
+    
+    // If not authenticated, redirect to login when trying to select a dog
+    if (!isAuthenticated) {
+      localStorage.setItem('redirectAfterLogin', window.location.pathname);
+      router.push('/login');
+      return;
+    }
+    
     setSelectedDogs(prev => 
       prev.includes(dog.id) 
         ? prev.filter(id => id !== dog.id) 
@@ -125,6 +172,12 @@ export default function EvenementMarcheDetail() {
   };
 
   const cancelRequest = async (dogId) => {
+    if (!isAuthenticated) {
+      localStorage.setItem('redirectAfterLogin', window.location.pathname);
+      router.push('/login');
+      return;
+    }
+    
     try {
       setSubmitting(true);
       const token = localStorage.getItem('access_token');
@@ -152,21 +205,20 @@ export default function EvenementMarcheDetail() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
-    <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+      <div className="sticky top-0 w-full z-50 bg-white shadow-md">
         <Navbar />
-
-    </div>
-    
-    {/* Animated background elements */}
-    <div className="absolute top-20 right-10 opacity-10 animate-bounce">
+      </div>
+      
+      {/* Animated background elements */}
+      <div className="absolute top-20 right-10 opacity-10 animate-bounce">
         <FaDog className="w-24 h-24 text-primary" />
-    </div>
-    <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
+      </div>
+      <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
         <FaCat className="w-32 h-32 text-dark" />
-    </div>
-    <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
+      </div>
+      <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
         <FaPaw className="w-20 h-20 text-primary" />
-    </div>
+      </div>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <button 
           onClick={() => router.push('/marche')}
@@ -192,7 +244,7 @@ export default function EvenementMarcheDetail() {
                   📅 {formatDate(evenement.date)}
                 </div>
                 <div className="flex items-center bg-white px-4 py-2 rounded-full">
-                  🕒 {evenement.heure.substring(0, 5)}
+                  🕒 {evenement.heure?.substring(0, 5)}
                 </div>
                 <div className="flex items-center bg-white px-4 py-2 rounded-full">
                   📍 {evenement.lieu}
@@ -297,6 +349,11 @@ export default function EvenementMarcheDetail() {
                   ) : (
                     <button
                       onClick={() => {
+                        if (!isAuthenticated) {
+                          localStorage.setItem('redirectAfterLogin', window.location.pathname);
+                          router.push('/login');
+                          return;
+                        }
                         toggleDogSelection(selectedDog);
                         setIsModalOpen(false);
                       }}
@@ -305,9 +362,11 @@ export default function EvenementMarcheDetail() {
                           ? 'bg-red-500 text-white' 
                           : 'bg-primary text-white'}`}
                     >
-                      {selectedDogs.includes(selectedDog.id) 
-                        ? 'Désélectionner' 
-                        : 'Sélectionner'}
+                      {!isAuthenticated 
+                        ? 'Se connecter pour sélectionner' 
+                        : selectedDogs.includes(selectedDog.id) 
+                          ? 'Désélectionner' 
+                          : 'Sélectionner'}
                     </button>
                   )}
                 </div>

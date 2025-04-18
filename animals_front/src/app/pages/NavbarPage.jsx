@@ -5,7 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 import Image from "next/image";
 
-import { FaPaw, FaSmile, FaHeart, FaBars, FaBell ,FaUser, FaSignOutAlt,} from "react-icons/fa";
+import { FaPaw, FaSmile, FaHeart, FaBars, FaBell, FaUser, FaSignOutAlt } from "react-icons/fa";
 import Link from "next/link";
 import { authenticatedFetch } from '../../app/authInterceptor';
 
@@ -57,7 +57,6 @@ export default function Navbar() {
 
       } catch (error) {
         console.error("Fetch error:", error);
-        handleLogout();
       }
     };
 
@@ -75,8 +74,6 @@ export default function Navbar() {
     }
   };
 
-  const handleLoginClick = () => router.push("/login");
-
   const handleLogout = async () => {
     try {
       // Clear all authentication tokens
@@ -88,10 +85,10 @@ export default function Navbar() {
       document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC";
       
       await signOut({ redirect: false });
-      router.push("/login");
+      window.location.href = "/login";
     } catch (error) {
       console.error("Logout error:", error);
-      router.push("/login");
+      window.location.href = "/login";
     }
   };
 
@@ -240,17 +237,15 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={handleLoginClick}
-                  className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-full hover:bg-primary transition-colors"
-                >
-                  <FaUser className="text-lg" />
-                  <span>Connexion</span>
-                </button>
+                // Replace button with a direct link
+                <Link href="/login" passHref>
+                  <div className="flex items-center gap-2 bg-accent text-white px-4 py-2 rounded-full hover:bg-primary transition-colors cursor-pointer">
+                    <FaUser className="text-lg" />
+                    <span>Connexion</span>
+                  </div>
+                </Link>
               )}
             </div>
-
-          
 
             {/* Mobile menu button */}
             <div className="md:hidden flex items-center">
