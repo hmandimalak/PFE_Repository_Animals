@@ -13,5 +13,9 @@ urlpatterns = [
     path('commander/', views.creer_commande, name='creer_commande'),
     path('notifications/', NotificationView.as_view(), name='notifications-list'),
     path('notifications/<int:pk>/read/', NotificationMarkReadView.as_view(), name='notification-mark-read'),
+<<<<<<< HEAD
+=======
+    # Add to urlpatterns
+>>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
     path('mes-commandes/', views.mes_commandes, name='mes_commandes'),
 ]

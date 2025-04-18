@@ -193,7 +193,11 @@ export default function Home() {
         <div className="absolute top-20 right-10 opacity-11 animate-bounce">
           <FaDog className="w-24 h-24 text-dark" />
         </div>
+<<<<<<< HEAD
         <div className="absolute bottom-40 left-15 opacity-11 animate-pulse">
+=======
+        <div className="absolute bottom-40 left-18 opacity-11 animate-pulse">
+>>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
           <FaCat className="w-32 h-32 text-dark" />
         </div>
         <div className="absolute top-1/3 left-20 transform -translate-y-1/2">

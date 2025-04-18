@@ -4,10 +4,15 @@ import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Navbar from './NavbarPage';
+<<<<<<< HEAD
 import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking } from "react-icons/fa";
+=======
+import { FaPaw, FaDog, FaCat, FaMapMarkerAlt, FaCalendarAlt, FaClock, FaUsers } from "react-icons/fa";
+>>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
 import { Nunito } from "next/font/google";
 
 const nunito = Nunito({ subsets: ["latin"] });
+
 export default function EvenementMarcheList() {
   const [evenements, setEvenements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +62,8 @@ export default function EvenementMarcheList() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-secondary to-white flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="text-primary">Chargement des événements...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary mx-auto"></div>
+          <p className="text-primary font-medium text-xl">Chargement des événements...</p>
         </div>
       </div>
     );
@@ -69,7 +74,11 @@ export default function EvenementMarcheList() {
       <div className="sticky top-0 w-full z-50 bg-white shadow-md">
         <Navbar />
       </div>
+<<<<<<< HEAD
                      
+=======
+      
+>>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
       {/* Animated background elements */}
       <div className="absolute top-20 right-10 opacity-10 animate-bounce">
         <FaDog className="w-24 h-24 text-primary" />
@@ -80,66 +89,105 @@ export default function EvenementMarcheList() {
       <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
         <FaPaw className="w-20 h-20 text-primary" />
       </div>
+<<<<<<< HEAD
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="text-center mb-12 space-y-4 animate-fade-in-down">
           <h1 className="text-5xl font-extrabold text-primary">Événements de Marche avec les Chiens</h1>
           <p className="text-dark/80 text-xl">Participez à nos rencontres canines</p>
           <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+=======
+
+      <div className="container mx-auto px-4 py-12">
+        <div className="relative text-center mb-12 pb-8">
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+          <h1 className="text-5xl font-extrabold text-primary mb-4">Événements de Marche</h1>
+          <p className="text-dark/80 text-xl max-w-2xl mx-auto">Rejoignez nos balades canines et partagez des moments inoubliables avec nos compagnons à quatre pattes</p>
+>>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
-            {error}
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-8 shadow-md">
+            <div className="flex items-center">
+              <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+              </svg>
+              {error}
+            </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {evenements.length === 0 ? (
-            <div className="col-span-full bg-white rounded-2xl shadow-lg p-8 text-center">
-              <div className="text-5xl mb-4">🐕‍🦺</div>
-              <h2 className="text-xl font-semibold text-primary mb-2">Aucun événement à venir</h2>
-              <p className="text-dark/60">Revenez plus tard pour nos prochains événements</p>
+        {evenements.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-lg mx-auto">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-6">
+              <FaPaw className="w-10 h-10 text-primary" />
             </div>
-          ) : evenements.map((event) => (
-            <div 
-              key={event.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer group"
-              onClick={() => navigateToEventDetail(event.id)}
-            >
-              <div className="bg-primary text-white p-6">
-                <h2 className="text-2xl font-bold">{event.titre}</h2>
-                <p className="text-sm opacity-90 mt-2">
-                  {formatDate(event.date)} à {event.heure.substring(0, 5)}
-                </p>
-              </div>
-              <div className="p-6 space-y-4">
-                <div className="flex items-center gap-3 text-dark/80">
-                  <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>{event.lieu}</span>
+            <h2 className="text-2xl font-bold text-primary mb-3">Aucun événement à venir</h2>
+            <p className="text-dark/70">Nos prochains événements de marche seront affichés ici. Revenez bientôt!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {evenements.map((event) => (
+              <div 
+                key={event.id}
+                onClick={() => navigateToEventDetail(event.id)}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer group"
+              >
+                <div className="h-3 bg-gradient-to-r from-primary via-accent to-primary"></div>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-2xl font-bold text-primary">{event.titre}</h2>
+                    <span className="bg-secondary text-primary text-sm font-medium px-3 py-1 rounded-full">
+                      {event.chiens?.length || 0} 🐕
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center text-dark/70">
+                      <FaCalendarAlt className="w-5 h-5 text-accent mr-3" />
+                      <span>{formatDate(event.date)}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-dark/70">
+                      <FaClock className="w-5 h-5 text-accent mr-3" />
+                      <span>{event.heure.substring(0, 5)}</span>
+                    </div>
+                    
+                    <div className="flex items-center text-dark/70">
+                      <FaMapMarkerAlt className="w-5 h-5 text-accent mr-3" />
+                      <span>{event.lieu}</span>
+                    </div>
+                  </div>
+                  
+                  {event.description && (
+                    <div className="border-t border-gray-100 pt-4 mt-4">
+                      <p className="text-dark/60 line-clamp-3 italic">
+                        "{event.description}"
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
-                <div className="flex items-center gap-3 text-dark/80">
-                  <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                  </svg>
-                  <span>{event.chiens?.length || 0} participants</span>
+                <div className="p-4 bg-gray-50 group-hover:bg-primary/10 transition-colors border-t border-gray-100">
+                  <button className="w-full flex items-center justify-center gap-2 text-primary font-medium hover:text-primary/80">
+                    Voir les détails
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </button>
                 </div>
-
-                {event.description && (
-                  <p className="text-dark/60 line-clamp-3">
-                    {event.description}
-                  </p>
-                )}
-
-                <button className="w-full mt-4 bg-primary/10 text-primary hover:bg-primary/20 py-3 rounded-xl transition-colors">
-                  Voir les détails
-                </button>
               </div>
+<<<<<<< HEAD
             </div>
           ))}
+=======
+            ))}
+          </div>
+        )}
+        
+        <div className="mt-16 text-center">
+          <p className="text-dark/60">Besoin d'aide pour trouver un événement?</p>
+          <a href="#" className="text-primary font-medium hover:underline">Contactez-nous</a>
+>>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
         </div>
       </div>
     </div>
