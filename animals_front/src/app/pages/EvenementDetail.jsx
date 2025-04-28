@@ -4,11 +4,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Navbar from './NavbarPage';
-<<<<<<< HEAD
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking } from "react-icons/fa";
-=======
+
 import { FaPaw, FaDog, FaCat, FaMapMarkerAlt, FaCalendarAlt, FaClock, FaChevronLeft, FaHeart } from "react-icons/fa";
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
 import { Nunito } from "next/font/google";
 
 const nunito = Nunito({ subsets: ["latin"] });
@@ -224,12 +221,9 @@ export default function EvenementMarcheDetail() {
       <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
         <FaPaw className="w-20 h-20 text-primary" />
       </div>
-<<<<<<< HEAD
-      <div className="max-w-4xl mx-auto px-4 py-8">
-=======
 
       <div className="container mx-auto px-4 py-8">
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
         <button 
           onClick={() => router.push('/marche')}
           className="mb-6 inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors bg-white/80 px-4 py-2 rounded-full shadow-sm"
@@ -274,19 +268,7 @@ export default function EvenementMarcheDetail() {
           </div>
         ) : evenement ? (
           <div className="space-y-8">
-<<<<<<< HEAD
-            <div className="text-center space-y-4">
-              <h1 className="text-4xl font-bold text-primary">{evenement.titre}</h1>
-              <div className="flex flex-wrap justify-center gap-4 text-dark">
-                <div className="flex items-center bg-white px-4 py-2 rounded-full">
-                  📅 {formatDate(evenement.date)}
-                </div>
-                <div className="flex items-center bg-white px-4 py-2 rounded-full">
-                  🕒 {evenement.heure?.substring(0, 5)}
-                </div>
-                <div className="flex items-center bg-white px-4 py-2 rounded-full">
-                  📍 {evenement.lieu}
-=======
+
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="h-2 bg-gradient-to-r from-primary via-accent to-primary"></div>
               <div className="p-8">
@@ -305,7 +287,7 @@ export default function EvenementMarcheDetail() {
                     <FaMapMarkerAlt className="text-accent mr-3" />
                     <span className="font-medium">{evenement.lieu}</span>
                   </div>
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
                 </div>
                 
                 {evenement.description && (
@@ -507,7 +489,6 @@ export default function EvenementMarcheDetail() {
                           ? 'bg-red-500 text-white hover:bg-red-600' 
                           : 'bg-primary text-white hover:bg-primary/90'}`}
                     >
-<<<<<<< HEAD
                       {!isAuthenticated 
                         ? 'Se connecter pour sélectionner' 
                         : selectedDogs.includes(selectedDog.id) 
@@ -520,7 +501,7 @@ export default function EvenementMarcheDetail() {
                       {!selectedDogs.includes(selectedDog.id) && (
                         <FaPaw className="animate-bounce" />
                       )}
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
                     </button>
                   )}
                 </div>

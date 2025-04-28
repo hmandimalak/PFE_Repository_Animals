@@ -376,7 +376,7 @@ const handleAdoptClick = async () => {
                                             
                                             <div className="flex justify-between text-sm text-dark/60">
                                                 <span>{animal.date_naissance ? formatAge(animal.date_naissance) : "Âge inconnu"}</span>
-                                                <span>{animal.type_garde || "Refuge"}</span>
+                                                
                                             </div>
                                         </div>
                                     </div>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import Navbar from '../../pages/NavbarPage';
 import { 
   FaLock, FaEnvelope, FaPaw, FaDog, FaCat, 
   FaGoogle, FaSignInAlt, FaKey, FaArrowRight
@@ -87,7 +88,10 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent to-white py-12 relative overflow-hidden">
+    <div className={"min-h-screen bg-gradient-to-b from-secondary to-white ${nunito.className}"}>            
+    <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+        <Navbar />
+    </div>
       {/* Animated pet silhouettes in background - slightly different positioning */}
       <div className="absolute top-20 right-10 opacity-10 animate-bounce">
         <FaDog className="w-24 h-24 text-primary" />
@@ -102,7 +106,8 @@ export default function LoginForm() {
         <FaDog className="w-28 h-28 text-dark transform -rotate-12" />
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-10">
+
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="md:flex flex-row-reverse">
             {/* Right side - Animal image panel (reversed from register page) */}
@@ -203,17 +208,7 @@ export default function LoginForm() {
                   )}
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input
-                        id="remember_me"
-                        name="remember_me"
-                        type="checkbox"
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <label htmlFor="remember_me" className="ml-2 block text-sm text-dark">
-                        Se souvenir de moi
-                      </label>
-                    </div>
+                    
                     <div className="text-sm">
                       <Link
                         href="/forgot"

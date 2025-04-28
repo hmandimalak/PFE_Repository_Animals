@@ -163,7 +163,7 @@ const FAQPage = () => {
             onClick={() => setShowContactForm(true)}
             className="inline-block px-8 py-3 bg-gradient-to-b from-secondary to-white text-pastel-blue rounded-full hover:bg-pastel-blue transition-colors"
           >
-            Nous Contacter
+            Contacter nous
           </button>
         </div>
         

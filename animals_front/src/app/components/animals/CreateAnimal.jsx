@@ -137,7 +137,7 @@ const CreateAnimal = () => {
     };
 
     return (
-        <div className={`className="min-h-screen bg-gradient-to-b from-secondary to-white" ${nunito.className}`}>
+        <div className={"min-h-screen bg-gradient-to-b from-secondary to-white ${nunito.className}"}>            
             <div className="sticky top-0 w-full z-50 bg-white shadow-md">
                 <Navbar />
             </div>

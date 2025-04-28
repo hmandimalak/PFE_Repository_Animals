@@ -11,12 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
-
-<<<<<<< HEAD
 from .serializers import CommandeDetailSerializer, NotificationSerializer
-=======
-from .serializers import NotificationSerializer,CommandeDetailSerializer
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
 # Existing views
 def get_produits(request):
     products = Produit.objects.all()

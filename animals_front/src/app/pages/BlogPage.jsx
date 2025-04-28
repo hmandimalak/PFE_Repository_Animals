@@ -75,7 +75,7 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
     evenements: {
       prochain: {
         title: "Marche Canine Mensuelle 🐕",
-        date: "25 Octobre 2024 - Parc Central",
+       
         details: [
           "Inscription gratuite",
           "Parcours de 3km",
@@ -115,7 +115,7 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
       
       <main className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-5xl font-bold text-pastel-blue text-center mb-4">
-          Blog Pawfect Home
+          Blog Adopti
         </h1>
         <div className="flex justify-center mb-12">
           <FaPaw className="text-4xl text-pastel-green mx-2 transform rotate-[-15deg]" />
@@ -288,12 +288,7 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
             </div>
             <div className="flex flex-col justify-center space-y-6">
               <h3 className="text-2xl font-bold text-pastel-green">{featuredContent.evenements.prochain.title}</h3>
-              <div className="bg-pastel-blue/20 py-3 px-5 rounded-lg inline-block w-fit">
-                <p className="text-lg font-semibold text-pastel-blue flex items-center">
-                  <FaCalendarAlt className="mr-2" />
-                  {featuredContent.evenements.prochain.date}
-                </p>
-              </div>
+          
               <ul className="space-y-3">
                 {featuredContent.evenements.prochain.details.map((detail, index) => (
                   <li key={index} className="flex items-center bg-pastel-green/10 p-3 rounded-lg">
@@ -327,7 +322,7 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
       <div className="flex items-center mb-6">
         <div className="relative w-24 h-24 mr-4">
           <Image
-            src="/chat-advice.jpg"
+            src="/chaton"
             alt="Conseils chats"
             fill
             className="object-cover rounded-full"
@@ -381,7 +376,7 @@ const [selectedAnimal, setSelectedAnimal] = useState(null);
       <div className="flex items-center mb-6">
         <div className="relative w-24 h-24 mr-4">
           <Image
-            src="/chien-advice.jpg"
+            src="/chien.jpg"
             alt="Conseils chiens"
             fill
             className="object-cover rounded-full"

@@ -706,38 +706,6 @@ const Boutique = () => {
             )}
           </>
         )}
-
-        {/* Bottom Pagination */}
-        {!loading && produits.length > 0 && (
-          <div className="mt-12 flex justify-center">
-            <div className="flex items-center gap-2 bg-white rounded-full px-2 py-1 shadow-md">
-              <button 
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary/50 transition-colors"
-                disabled
-              >
-                &lt;
-              </button>
-              {[1, 2, 3].map(page => (
-                <button 
-                  key={page} 
-                  className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    page === 1 
-                      ? 'bg-primary text-white' 
-                      : 'hover:bg-secondary/50 transition-colors'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-secondary/50 transition-colors">
-                &gt;
-              </button>
-            </div>
-          </div>
-        )}
-
-        
-
         {/* Features Section */}
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-8 rounded-2xl shadow-md border border-accent/20 text-center hover:shadow-lg transition-shadow">

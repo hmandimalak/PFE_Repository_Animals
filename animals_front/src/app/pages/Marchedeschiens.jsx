@@ -4,11 +4,9 @@ import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Navbar from './NavbarPage';
-<<<<<<< HEAD
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking } from "react-icons/fa";
-=======
+
 import { FaPaw, FaDog, FaCat, FaMapMarkerAlt, FaCalendarAlt, FaClock, FaUsers } from "react-icons/fa";
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
 import { Nunito } from "next/font/google";
 
 const nunito = Nunito({ subsets: ["latin"] });
@@ -74,11 +72,8 @@ export default function EvenementMarcheList() {
       <div className="sticky top-0 w-full z-50 bg-white shadow-md">
         <Navbar />
       </div>
-<<<<<<< HEAD
-                     
-=======
-      
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
+
       {/* Animated background elements */}
       <div className="absolute top-20 right-10 opacity-10 animate-bounce">
         <FaDog className="w-24 h-24 text-primary" />
@@ -89,20 +84,14 @@ export default function EvenementMarcheList() {
       <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
         <FaPaw className="w-20 h-20 text-primary" />
       </div>
-<<<<<<< HEAD
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="text-center mb-12 space-y-4 animate-fade-in-down">
-          <h1 className="text-5xl font-extrabold text-primary">Événements de Marche avec les Chiens</h1>
-          <p className="text-dark/80 text-xl">Participez à nos rencontres canines</p>
-          <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
-=======
+
 
       <div className="container mx-auto px-4 py-12">
         <div className="relative text-center mb-12 pb-8">
           <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
           <h1 className="text-5xl font-extrabold text-primary mb-4">Événements de Marche</h1>
           <p className="text-dark/80 text-xl max-w-2xl mx-auto">Rejoignez nos balades canines et partagez des moments inoubliables avec nos compagnons à quatre pattes</p>
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
         </div>
 
         {error && (
@@ -176,10 +165,7 @@ export default function EvenementMarcheList() {
                   </button>
                 </div>
               </div>
-<<<<<<< HEAD
-            </div>
-          ))}
-=======
+
             ))}
           </div>
         )}
@@ -187,7 +173,7 @@ export default function EvenementMarcheList() {
         <div className="mt-16 text-center">
           <p className="text-dark/60">Besoin d'aide pour trouver un événement?</p>
           <a href="#" className="text-primary font-medium hover:underline">Contactez-nous</a>
->>>>>>> 552f46f45d223de8dfd76baf4f43aa2ec0fb1847
+
         </div>
       </div>
     </div>

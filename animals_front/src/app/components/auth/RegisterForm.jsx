@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
   FaUserPlus, FaLock, FaIdCard, FaEnvelope, 
-  FaPhone, FaHome, FaImage, FaCheck, FaPaw, FaDog, FaCat 
+  FaPhone, FaHome, FaImage, FaCheck, FaPaw, FaDog, FaCat ,FaEye, FaEyeSlash
 } from "react-icons/fa";
 
 export default function RegisterForm() {
@@ -23,7 +23,10 @@ export default function RegisterForm() {
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const handleChange = (e) => {
     const { name, value, type } = e.target;
 
@@ -179,7 +182,7 @@ export default function RegisterForm() {
                   Rejoignez Notre Communauté
                 </h1>
                 <p className="text-dark/70">
-                  Créez votre compte pour commencer votre aventure avec Pawfect Home
+                  Créez votre compte pour commencer votre aventure avec Adopti
                 </p>
               </div>
 
@@ -339,8 +342,10 @@ export default function RegisterForm() {
                     <input
                       id="password"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
+                      onClick={togglePasswordVisibility}
+
                       className={`w-full pl-10 pr-3 py-2 border ${
                         errors.password ? "border-red-500" : "border-secondary"
                       } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
@@ -348,6 +353,17 @@ export default function RegisterForm() {
                       value={formData.password}
                       onChange={handleChange}
                     />
+                     <button
+                                          type="button"
+                                          onClick={togglePasswordVisibility}
+                                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
+                                        >
+                                          {showPassword ? (
+                                            <FaEyeSlash className="h-5 w-5" />
+                                          ) : (
+                                            <FaEye className="h-5 w-5" />
+                                          )}
+                                        </button>
                     {errors.password && (
                       <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                     )}
@@ -360,7 +376,7 @@ export default function RegisterForm() {
                     <input
                       id="confirmPassword"
                       name="confirmPassword"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       required
                       className={`w-full pl-10 pr-3 py-2 border ${
                         errors.confirmPassword ? "border-red-500" : "border-secondary"
@@ -369,6 +385,17 @@ export default function RegisterForm() {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                     />
+                     <button
+                                          type="button"
+                                          onClick={togglePasswordVisibility}
+                                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
+                                        >
+                                          {showPassword ? (
+                                            <FaEyeSlash className="h-5 w-5" />
+                                          ) : (
+                                            <FaEye className="h-5 w-5" />
+                                          )}
+                                        </button>
                     {errors.confirmPassword && (
                       <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
                     )}
