@@ -19,6 +19,8 @@ export default function NosAnimaux() {
     const [searchQuery, setSearchQuery] = useState('');
     const [animalType, setAnimalType] = useState('');
     const [species, setSpecies] = useState('');
+    const [age, setAge] = useState('');
+    const [sexe, setSexe] = useState('');
     const [pageLoading, setPageLoading] = useState(true);
     const { data: session } = useSession();
     const searchParams = useSearchParams();
@@ -52,23 +54,34 @@ export default function NosAnimaux() {
             "Autre",
         ],
     };
+     // Age options
+     const ageOptions = [
+        { value: 'puppy', label: 'Chiot/Chaton (<1 an)' },
+        { value: 'young', label: 'Jeune (1-3 ans)' },
+        { value: 'adult', label: 'Adulte (3-8 ans)' },
+        { value: 'senior', label: 'Senior (8+ ans)' },
+    ];
 
     useEffect(() => {
         // Fetch search parameters from the URL
         const query = searchParams.get('query') || '';
         const type = searchParams.get('type') || '';
         const speciesParam = searchParams.get('species') || '';
+        const ageParam = searchParams.get('age') || '';
+        const sexeParam = searchParams.get('sexe') || '';
 
         // Set the state with the search parameters
         setSearchQuery(query);
         setAnimalType(type);
         setSpecies(speciesParam);
+        setAge(ageParam);
+        setSexe(sexeParam);
 
         // Fetch animals based on the search parameters
-        fetchAnimals(query, type, speciesParam);
+        fetchAnimals(query, type, speciesParam, ageParam, sexeParam);
     }, [searchParams]);
 
-    const fetchAnimals = async (query = '', type = '', species = '') => {
+    const fetchAnimals = async (query = '', type = '', species = '', age = '', sexe = '') => {
         setPageLoading(true);
         try {
             const url = new URL('http://127.0.0.1:8000/api/animals/search/');
@@ -93,12 +106,14 @@ export default function NosAnimaux() {
         if (searchQuery) queryParams.append("query", searchQuery);
         if (animalType) queryParams.append("type", animalType);
         if (species) queryParams.append("species", species);
+        if (age) queryParams.append("age", age);
+        if (sexe) queryParams.append("sexe", sexe);
         
         // Navigate to the same page but with search parameters
         router.push(`/nos-animaux?${queryParams.toString()}`);
         
         // Also fetch the data directly
-        fetchAnimals(searchQuery, animalType, species);
+        fetchAnimals(searchQuery, animalType, species, age, sexe);
     };
 
     const fetchAnimalDetails = async (animalId) => {
@@ -252,10 +267,11 @@ const handleAdoptClick = async () => {
 
                 {/* Main Content */}
                 <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
-                    {/* Search Section */}
-                    <div className="mb-8 bg-white rounded-xl shadow-lg border border-accent/20 transform -translate-y-8">
+                  {/* Search Section */}
+                  <div className="mb-8 bg-white rounded-xl shadow-lg border border-accent/20 transform -translate-y-8">
                         <form onSubmit={handleSearch} className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                {/* First Row */}
                                 <div className="relative">
                                     <input
                                         type="text"
@@ -297,6 +313,36 @@ const handleAdoptClick = async () => {
                                     </select>
                                     <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
                                 </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {/* Second Row - New filters */}
+                                <div className="relative">
+                                    <select
+                                        value={age}
+                                        onChange={(e) => setAge(e.target.value)}
+                                        className="w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
+                                    >
+                                        <option value="">Tous les âges</option>
+                                        {ageOptions.map((option) => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
+                                </div>
+
+                                <div className="relative">
+                                    <select
+                                        value={sexe}
+                                        onChange={(e) => setSexe(e.target.value)}
+                                        className="w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
+                                    >
+                                        <option value="">Tous les sexes</option>
+                                        <option value="M">Mâle</option>
+                                        <option value="F">Femelle</option>
+                                    </select>
+                                    <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
+                                </div>
 
                                 <button 
                                     type="submit" 
@@ -309,16 +355,16 @@ const handleAdoptClick = async () => {
                         </form>
                     </div>
 
-                    {/* Results Section */}
+
+                     {/* Results Section */}
                     <div className="mb-6">
                         <h2 className="text-2xl font-bold text-primary mb-2">
-                            {searchQuery || animalType || species ? 'Résultats de recherche' : 'Tous nos animaux'}
+                            {searchQuery || animalType || species || age || sexe ? 'Résultats de recherche' : 'Tous nos animaux'}
                         </h2>
                         <p className="text-dark/60">
                             {animals.length} {animals.length > 1 ? 'animaux trouvés' : 'animal trouvé'}
                         </p>
                     </div>
-
                     {/* Loading State */}
                     {pageLoading && (
                         <div className="flex justify-center items-center py-16">

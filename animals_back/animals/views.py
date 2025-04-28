@@ -312,6 +312,8 @@ def search_animals(request):
     query = request.GET.get('query', '')
     animal_type = request.GET.get('type', '')
     species = request.GET.get('species', '')
+    age = request.GET.get('age', '')
+    sexe = request.GET.get('sexe', '')
 
     # Build the query
     filters = Q()
@@ -321,34 +323,43 @@ def search_animals(request):
         filters &= Q(espece__iexact=animal_type)
     if species:
         filters &= Q(race__iexact=species)
+    if sexe:
+        filters &= Q(sexe=sexe)
+    if age:
+        # Age filtering logic - using date calculation
+        from datetime import date, timedelta
+        today = date.today()
+        
+        if age == 'puppy':  # Less than 1 year
+            date_limit = today - timedelta(days=365)
+            filters &= Q(date_naissance__gt=date_limit)
+        elif age == 'young':  # 1-3 years
+            date_min = today - timedelta(days=3*365)
+            date_max = today - timedelta(days=365)
+            filters &= Q(date_naissance__lte=date_max, date_naissance__gt=date_min)
+        elif age == 'adult':  # 3-8 years
+            date_min = today - timedelta(days=8*365)
+            date_max = today - timedelta(days=3*365)
+            filters &= Q(date_naissance__lte=date_max, date_naissance__gt=date_min)
+        elif age == 'senior':  # 8+ years
+            date_limit = today - timedelta(days=8*365)
+            filters &= Q(date_naissance__lte=date_limit)
 
     # Fetch filtered animals
     animals = Animal.objects.filter(filters, disponible_pour_adoption=True, type_garde='Définitive')
     animals = AnimalSerializer(animals, many=True).data
     return JsonResponse(list(animals), safe=False)
+
 def get_animal_by_id(request, animal_id):
     """
     Get a single animal by ID
     """
-    query = request.GET.get('query', '')
-    animal_type = request.GET.get('type', '')
-    species = request.GET.get('species', '')
-
-    # Build the query
-    filters = Q()
-    if query:
-        filters &= Q(nom__icontains=query)
-    if animal_type:
-        filters &= Q(espece__iexact=animal_type)
-    if species:
-        filters &= Q(race__iexact=species)
     try:
-        animal = get_object_or_404(Animal, id=animal_id).filter(filters, disponible_pour_adoption=True, type_garde='Définitive')
+        animal = get_object_or_404(Animal, id=animal_id, disponible_pour_adoption=True, type_garde='Définitive')
         animal_data = AnimalSerializer(animal).data
         return JsonResponse(animal_data)
     except Animal.DoesNotExist:
         return JsonResponse({'error': 'Animal not found'}, status=404)
-    
 class UserAcceptedTemporaryAnimalsView(generics.ListAPIView):
     serializer_class = AnimalSerializer
     permission_classes = [IsAuthenticated]
