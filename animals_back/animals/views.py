@@ -202,13 +202,15 @@ class AnimalDetailView(APIView):
 
 # Gestion des demandes de garde
 class DemandeGardeListCreateView(APIView):
+    parser_classes = [MultiPartParser, FormParser]  # Add this line
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         demandes = DemandeGarde.objects.all()
         serializer = DemandeGardeSerializer(demandes, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = DemandeGardeSerializer(data=request.data)
+        serializer = DemandeGardeSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             # Automatically assign the logged-in user to the request
             serializer.save(utilisateur=request.user)  
@@ -395,6 +397,7 @@ class UserAcceptedAdoptionAnimalsView(generics.ListAPIView):
         return Animal.objects.filter(
             historiqueadoption__utilisateur=user,        # Link to the logged-in user
             historiqueadoption__statut_nouveau="Acceptee",  # Only accepted requests
+            disponible_pour_adoption=False  # Only temporary garde
             
         ).distinct()
 
