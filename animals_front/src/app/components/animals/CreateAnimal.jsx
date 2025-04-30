@@ -140,20 +140,11 @@ const CreateAnimal = () => {
         // Validate dates
         const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
         const { date_naissance, date_reservation, date_fin, type_garde } = formData;
-<<<<<<< HEAD
-=======
-        
->>>>>>> 2b28a98fd62aeecf58690f7f746d87f8fa0be9e5
         if (date_naissance > today) {
             alert("La date de naissance doit être aujourd'hui ou une date precèdente.");
             setLoading(false);
             return;
         }
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> 2b28a98fd62aeecf58690f7f746d87f8fa0be9e5
         if (!date_naissance) {
             alert("Veuillez entrer la date de naissance.");
             setLoading(false);
