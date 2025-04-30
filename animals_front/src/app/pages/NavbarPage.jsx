@@ -191,7 +191,7 @@ export default function Navbar() {
                       {notifications.length > 0 ? (
                         notifications.map((notif) => (
                           <div
-                            key={notif.id}
+                          key={`${notif.type}-${notif.id}`} // Add type prefix to ensure uniqueness
                             className={`px-4 py-2 border-b border-secondary/50 cursor-pointer hover:bg-secondary/20 transition ${notif.lu ? 'text-dark/60' : 'text-dark font-medium'}`}
                             onClick={() => handleNotifClick(notif.id, notif.type)}
                           >
@@ -264,17 +264,17 @@ export default function Navbar() {
       <div className={`md:hidden ${isMobileMenuOpen ? "block" : "hidden"}`}>
         <div className="bg-white border-t border-secondary shadow-inner px-2 py-3 space-y-1">
           {[
-            { label: "Nos Animaux", href: "/nos-animaux" },
-            { label: "Service de Garde", href: "/garderie" },
-            { label: "Boutique", href: "/boutique" },
-            { label: "Evenements", href: "/marche" },
-            { label: "Blog", href: "/blog" },
-            { label: "Nos Services", href: "#our-services" },
-            { label: "FAQ", href: "/faq" },
+             { label: "Nos Animaux", href: "/nos-animaux", id: 1 },
+             { label: "Service de Garde", href: "/garderie", id: 2 },
+            { label: "Boutique", href: "/boutique",id :3 },
+            { label: "Evenements", href: "/marche" ,id : 4},
+            { label: "Blog", href: "/blog" ,id : 5},
+            { label: "Nos Services", href: "#our-services", id : 6 },
+            { label: "FAQ", href: "/faq", id : 7},
           ].map((link) => (
             <a
-              key={link.href}
-              href={link.href}
+              key={link.id}
+              href={link.id}
               className="block px-3 py-2 rounded-md text-base font-medium text-dark hover:bg-secondary hover:text-primary transition"
               onClick={() => setIsMobileMenuOpen(false)}
             >

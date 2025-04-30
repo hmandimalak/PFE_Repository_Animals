@@ -5,16 +5,18 @@ import { useSession } from "next-auth/react";
 import Navbar from './NavbarPage';
 import { authenticatedFetch } from '../../app/authInterceptor';
 import { useSearchParams } from 'next/navigation';
-import { Search, X, ChevronDown,} from 'lucide-react';
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking} from "react-icons/fa";
-
-import Image from 'next/image';
+import { Search, X, ChevronDown, Heart, Filter, RefreshCw, Users, Calendar } from 'lucide-react';
+import { FaPaw, FaDog, FaCat, FaHeart, FaSmile } from "react-icons/fa";
+import { motion } from 'framer-motion';
+import { Nunito } from "next/font/google";
+const nunito = Nunito({ subsets: ["latin"] });
 
 export default function NosAnimaux() {
     const [animals, setAnimals] = useState([]);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [filterOpen, setFilterOpen] = useState(false);
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [animalType, setAnimalType] = useState('');
@@ -24,8 +26,11 @@ export default function NosAnimaux() {
     const [pageLoading, setPageLoading] = useState(true);
     const { data: session } = useSession();
     const searchParams = useSearchParams();
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    
 
-    // Species options like on the homepage
+
+    // Species options
     const speciesOptions = {
         chien: [
             "Berger Allemand",
@@ -54,8 +59,9 @@ export default function NosAnimaux() {
             "Autre",
         ],
     };
-     // Age options
-     const ageOptions = [
+
+    // Age options
+    const ageOptions = [
         { value: 'puppy', label: 'Chiot/Chaton (<1 an)' },
         { value: 'young', label: 'Jeune (1-3 ans)' },
         { value: 'adult', label: 'Adulte (3-8 ans)' },
@@ -85,9 +91,14 @@ export default function NosAnimaux() {
         setPageLoading(true);
         try {
             const url = new URL('http://127.0.0.1:8000/api/animals/search/');
-            const params = { query, type, species };
-            Object.keys(params).forEach(key => params[key] && url.searchParams.append(key, params[key]));
-
+            
+            // Ensure all parameters are included in the URL
+            if (query) url.searchParams.append('query', query);
+            if (type) url.searchParams.append('type', type);
+            if (species) url.searchParams.append('species', species);
+            if (age) url.searchParams.append('age', age);
+            if (sexe) url.searchParams.append('sexe', sexe);
+            
             const response = await fetch(url);
             const data = await response.json();
             setAnimals(data);
@@ -114,6 +125,11 @@ export default function NosAnimaux() {
         
         // Also fetch the data directly
         fetchAnimals(searchQuery, animalType, species, age, sexe);
+        
+        // Close filter panel on mobile after search
+        if (window.innerWidth < 768) {
+            setFilterOpen(false);
+        }
     };
 
     const fetchAnimalDetails = async (animalId) => {
@@ -152,52 +168,50 @@ export default function NosAnimaux() {
         return null;
     };
 
-   // Update the handleAdoptClick function
-const handleAdoptClick = async () => {
-    const authToken = getAuthToken();
+    const handleAdoptClick = async () => {
+        const authToken = getAuthToken();
 
-    if (!authToken) {
-        alert("Vous devez être connecté pour adopter un animal.");
-        localStorage.setItem('redirectAfterLogin', window.location.pathname);
-        router.push('/login');
-        return;
-    }
-
-    try {
-        const requestBody = {
-            animal: selectedAnimal.id,
-        };
-
-        const response = await authenticatedFetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-            },
-            body: JSON.stringify(requestBody),
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            alert('Demande d\'adoption envoyée avec succès!');
-            closeModal();
-        } else {
-            const errorData = await response.json();
-            if (response.status === 401) {
-                alert('Votre session a expiré. Veuillez vous reconnecter.');
-                router.push('/login');
-            } else if (response.status === 400 && errorData.detail?.includes("existe déjà")) {
-                alert(errorData.detail || 'Une erreur est survenue. Veuillez réessayer.');
-            } else {
-                alert('Vous avez déjà une demande d\'adoption en cours pour cet animal.');
-
-            }
+        if (!authToken) {
+            alert("Vous devez être connecté pour adopter un animal.");
+            localStorage.setItem('redirectAfterLogin', window.location.pathname);
+            router.push('/login');
+            return;
         }
-    } catch (error) {
-        console.error('Network error:', error);
-        alert('Erreur de connexion. Veuillez vérifier votre connexion internet.');
-    }
-};
+
+        try {
+            const requestBody = {
+                animal: selectedAnimal.id,
+            };
+
+            const response = await authenticatedFetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setShowSuccessModal(true); 
+                closeModal();
+            } else {
+                const errorData = await response.json();
+                if (response.status === 401) {
+                    alert('Votre session a expiré. Veuillez vous reconnecter.');
+                    router.push('/login');
+                } else if (response.status === 400 && errorData.detail?.includes("existe déjà")) {
+                    alert(errorData.detail || 'Une erreur est survenue. Veuillez réessayer.');
+                } else {
+                    alert('Vous avez déjà une demande d\'adoption en cours pour cet animal.');
+                }
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            alert('Erreur de connexion. Veuillez vérifier votre connexion internet.');
+        }
+    };
 
     // Function to format age in a more friendly way
     const formatAge = (dateString) => {
@@ -233,142 +247,304 @@ const handleAdoptClick = async () => {
         return ageParts.join(' et ') || 'Nouveau-né';
     };
 
+    const resetFilters = () => {
+        setSearchQuery('');
+        setAnimalType('');
+        setSpecies('');
+        setAge('');
+        setSexe('');
+        router.push('/nos-animaux');
+    };
+
+    // Handle applying active filter pill styles
+    const getFilterCount = () => {
+        let count = 0;
+        if (animalType) count++;
+        if (species) count++;
+        if (age) count++;
+        if (sexe) count++;
+        if (searchQuery) count++;
+        return count;
+    };
+
+    const filterCount = getFilterCount();
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
-            {/* Fixed Navbar at top */}
-            <div className="sticky top-0 w-full z-50 bg-white shadow-md">
-                <Navbar />
+        <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
+        {/* Fixed Navbar at top */}
+        <div className="sticky top-0 w-full z-50 bg-white shadow-md">
+            <Navbar />
+        </div>
+        
+        
+        {/* Background animated elements */}
+        
+
+        <div className="absolute bottom-40 left-18 opacity-0.5 animate-pulse">
+            <FaCat className="w-32 h-32 text-primary" />
+        </div>
+
+        <div className="absolute top-1/3 left-20 transform -translate-y-1/2">
+            <FaPaw className="w-16 h-16 text-primary animate-pulse" />
+        </div>
+        
+
+        <div className="absolute top-1/2 right-20 transform -translate-y-1/2">
+            <FaPaw className="w-16 h-16 text-primary animate-pulse" />
+        </div>
+        <div className="absolute top-20 right-10 opacity- animate-bounce">
+            <FaDog className="w-24 h-24 text-primary" />
+        </div>
+        
+            {/* Hero Section with Parallax Effect */}
+        <div className="relative h-32 md:h-40 overflow-hidden">
+            {/* Content Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center px-2">
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center mb-4 space-y-4"
+                >
+                    <h1 className="text-5xl font-extrabold text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-dark">
+                        Nos Adorables Compagnons
+                    </h1>
+                    <p className="text-dark/80 text-xl">Un regard, une rencontre, une histoire d'amour. Découvrez nos petits trésors prêts à combler votre vie de bonheur.</p>
+                    <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
+                </motion.div>
             </div>
+        </div>
             
-            {/* Main Content with animated background */}
-            <div className="min-h-screen bg-gradient-to-br from-accent to-white relative overflow-hidden">
-                {/* Animated background elements */}
-                <div className="absolute top-20 right-10 opacity-10 animate-bounce">
-                    <FaDog className="w-24 h-24 text-primary" />
-                </div>
-                <div className="absolute bottom-40 left-20 opacity-10 animate-pulse">
-                    <FaCat className="w-32 h-32 text-dark" />
-                </div>
-                <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
-                    <span className="text-6xl">🐾</span>
-                </div>
-            
-                {/* Compact Header Section */}
-                <div className="bg-primary bg-opacity-90 text-white py-8">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="max-w-2xl">
-                                <h1 className="text-3xl md:text-4xl font-bold mb-2">Nos Protégés</h1>
-                                <p className="text-white/80">Chaque animal mérite un foyer chaleureux. Découvrez nos compagnons disponibles pour l'adoption.</p>
-                            </div>
+            {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
+            {/* Filter Toggle Button (Mobile Only) */}
+            <div className="md:hidden mb-4">
+                <button 
+                    onClick={() => setFilterOpen(!filterOpen)}
+                    className="w-full bg-white shadow-md rounded-lg px-4 py-3 flex items-center justify-between border border-secondary/30 text-primary font-medium"
+                >
+                    <div className="flex items-center gap-2">
+                        <Filter size={18} />
+                        <span>Filtres</span>
+                        {filterCount > 0 && (
+                            <span className="bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {filterCount}
+                            </span>
+                        )}
+                    </div>
+                    <ChevronDown size={18} className={`transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+                </button>
+            </div>
+                
+                {/* Search Section */}
+                <div className={`mb-8 ${filterOpen || window.innerWidth >= 768 ? 'block' : 'hidden'} md:block`}>
+                    <div className="bg-white rounded-2xl shadow-lg border border-accent/20 overflow-hidden transform transition-all">
+                        <div className="bg-primary bg-opacity-10 p-5 border-b border-accent/20">
+                            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+                                <Search size={20} /> 
+                                <span>Recherchez l'animal idéal</span>
+                            </h3>
                         </div>
+                        
+                        <form onSubmit={handleSearch} className="p-5">
+                            {/* Search input */}
+
+                            {/* Filters row */}
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-5">
+                                <div className="relative">
+                                    <label className="block text-sm font-medium text-dark/60 mb-1.5 ml-1">Type d'animal</label>
+                                    <div className="relative">
+                                        <select
+                                            value={animalType}
+                                            onChange={(e) => {
+                                                setAnimalType(e.target.value);
+                                                setSpecies(''); // Reset species when animal type changes
+                                            }}
+                                            className="w-full px-4 py-3 border-2 border-secondary/40 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
+                                        >
+                                            <option value="">Tous les types</option>
+                                            <option value="chien">🐶 Chien</option>
+                                            <option value="chat">🐱 Chat</option>
+                                        </select>
+                                        <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <label className="block text-sm font-medium text-dark/60 mb-1.5 ml-1">Race</label>
+                                    <div className="relative">
+                                        <select
+                                            value={species}
+                                            onChange={(e) => setSpecies(e.target.value)}
+                                            disabled={!animalType}
+                                            className={`w-full px-4 py-3 border-2 border-secondary/40 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary appearance-none ${!animalType ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                                        >
+                                            <option value="">Toutes les races</option>
+                                            {animalType && speciesOptions[animalType]?.map((option) => (
+                                                <option key={option} value={option}>{option}</option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <label className="block text-sm font-medium text-dark/60 mb-1.5 ml-1">Âge</label>
+                                    <div className="relative">
+                                        <select
+                                            value={age}
+                                            onChange={(e) => setAge(e.target.value)}
+                                            className="w-full px-4 py-3 border-2 border-secondary/40 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
+                                        >
+                                            <option value="">Tous les âges</option>
+                                            {ageOptions.map((option) => (
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            ))}
+                                        </select>
+                                        <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <label className="block text-sm font-medium text-dark/60 mb-1.5 ml-1">Sexe</label>
+                                    <div className="relative">
+                                        <select
+                                            value={sexe}
+                                            onChange={(e) => setSexe(e.target.value)}
+                                            className="w-full px-4 py-3 border-2 border-secondary/40 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
+                                        >
+                                            <option value="">Tous les sexes</option>
+                                            <option value="M">Mâle</option>
+                                            <option value="F">Femelle</option>
+                                        </select>
+                                        <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
+                                    </div>
+                                    
+                                </div>
+                                {/* Rechercher Button */}
+    <div className="flex items-end">
+      <button 
+        type="submit" 
+        className="w-full bg-primary text-white px-6 py-3 rounded-xl hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+      >
+        <Search size={20} />
+        <span>Rechercher</span>
+      </button>
+    </div>
+  </div>
+</form>
+                        {/* Active filters pills */}
+                        {filterCount > 0 && (
+                            <div className="px-5 pb-5 flex flex-wrap gap-2">
+                                {animalType && (
+                                    <div className="inline-flex items-center bg-primary/10 text-primary rounded-full px-3 py-1.5 text-sm">
+                                        {animalType === 'chien' ? '🐶 Chien' : '🐱 Chat'}
+                                        <button 
+                                            onClick={() => setAnimalType('')}
+                                            className="ml-2 p-0.5 hover:bg-primary/20 rounded-full"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                                {species && (
+                                    <div className="inline-flex items-center bg-primary/10 text-primary rounded-full px-3 py-1.5 text-sm">
+                                        {species}
+                                        <button 
+                                            onClick={() => setSpecies('')}
+                                            className="ml-2 p-0.5 hover:bg-primary/20 rounded-full"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                                {age && (
+                                    <div className="inline-flex items-center bg-primary/10 text-primary rounded-full px-3 py-1.5 text-sm">
+                                        {ageOptions.find(option => option.value === age)?.label}
+                                        <button 
+                                            onClick={() => setAge('')}
+                                            className="ml-2 p-0.5 hover:bg-primary/20 rounded-full"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                                {sexe && (
+                                    <div className="inline-flex items-center bg-primary/10 text-primary rounded-full px-3 py-1.5 text-sm">
+                                        {sexe === 'M' ? 'Mâle' : 'Femelle'}
+                                        <button 
+                                            onClick={() => setSexe('')}
+                                            className="ml-2 p-0.5 hover:bg-primary/20 rounded-full"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                                {searchQuery && (
+                                    <div className="inline-flex items-center bg-primary/10 text-primary rounded-full px-3 py-1.5 text-sm">
+                                        <Search size={14} className="mr-1" />
+                                        "{searchQuery}"
+                                        <button 
+                                            onClick={() => setSearchQuery('')}
+                                            className="ml-2 p-0.5 hover:bg-primary/20 rounded-full"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
+                {showSuccessModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-dark/70 backdrop-blur-sm z-50 animate-fade-in">
+    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+      <div className="bg-gradient-to-r from-primary to-accent p-6 text-white">
+        <h2 className="text-2xl font-bold">Succès!</h2>
+      </div>
+      
+      <div className="p-6 space-y-4 text-center">
+        <div className="text-6xl">🎉</div>
+        <h3 className="text-xl font-semibold text-dark">
+          Demande d'adoption envoyée!
+        </h3>
+        <p className="text-dark/70">
+          Nous avons bien reçu votre demande et vous contacterons sous 48h.
+        </p>
+      </div>
+      
+      <div className="bg-primary/10 p-4 flex justify-center gap-4">
+        <button
+          onClick={() => setShowSuccessModal(false)}
+          className="px-6 py-2 bg-primary text-white rounded-full hover:bg-accent transition-colors"
+        >
+          Fermer
+        </button>
+        
+      </div>
+    </div>
+  </div>
+)}
+                
+                {/* Results Section */}
+                <div className="mb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 className="text-2xl md:text-3xl font-bold text-primary">
+                                {searchQuery || animalType || species || age || sexe ? 'Résultats de recherche' : 'Nos animaux à adopter'}
+                            </h2>
+                            <p className="text-dark/60 mt-1">
+                                {animals.length} {animals.length > 1 ? 'animaux trouvés' : 'animal trouvé'}
+                            </p>
+                        </div>
 
-                {/* Main Content */}
-                <div className="max-w-7xl mx-auto px-4 py-8 relative z-10">
-                  {/* Search Section */}
-                  <div className="mb-8 bg-white rounded-xl shadow-lg border border-accent/20 transform -translate-y-8">
-                        <form onSubmit={handleSearch} className="p-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                {/* First Row */}
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Rechercher par nom..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                                    />
-                                    <Search size={20} className="absolute left-3 top-3 text-dark/40" />
-                                </div>
-                                
-                                <div className="relative">
-                                    <select
-                                        value={animalType}
-                                        onChange={(e) => {
-                                            setAnimalType(e.target.value);
-                                            setSpecies(''); // Reset species when animal type changes
-                                        }}
-                                        className="w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
-                                    >
-                                        <option value="">Tous les types</option>
-                                        <option value="chien">🐶 Chien</option>
-                                        <option value="chat">🐱 Chat</option>
-                                    </select>
-                                    <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
-                                </div>
-
-                                <div className="relative">
-                                    <select
-                                        value={species}
-                                        onChange={(e) => setSpecies(e.target.value)}
-                                        disabled={!animalType}
-                                        className={`w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none ${!animalType ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                                    >
-                                        <option value="">Toutes les races</option>
-                                        {animalType && speciesOptions[animalType]?.map((option) => (
-                                            <option key={option} value={option}>{option}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {/* Second Row - New filters */}
-                                <div className="relative">
-                                    <select
-                                        value={age}
-                                        onChange={(e) => setAge(e.target.value)}
-                                        className="w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
-                                    >
-                                        <option value="">Tous les âges</option>
-                                        {ageOptions.map((option) => (
-                                            <option key={option.value} value={option.value}>{option.label}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
-                                </div>
-
-                                <div className="relative">
-                                    <select
-                                        value={sexe}
-                                        onChange={(e) => setSexe(e.target.value)}
-                                        className="w-full px-4 py-3 border-2 border-secondary rounded-lg focus:ring-2 focus:ring-primary focus:border-primary appearance-none"
-                                    >
-                                        <option value="">Tous les sexes</option>
-                                        <option value="M">Mâle</option>
-                                        <option value="F">Femelle</option>
-                                    </select>
-                                    <ChevronDown size={20} className="absolute right-3 top-3 text-dark/40 pointer-events-none" />
-                                </div>
-
-                                <button 
-                                    type="submit" 
-                                    className="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-accent transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
-                                >
-                                    <Search size={20} />
-                                    <span>Rechercher</span>
-                                </button>
-                            </div>
-                        </form>
                     </div>
-
-
-                     {/* Results Section */}
-                    <div className="mb-6">
-                        <h2 className="text-2xl font-bold text-primary mb-2">
-                            {searchQuery || animalType || species || age || sexe ? 'Résultats de recherche' : 'Tous nos animaux'}
-                        </h2>
-                        <p className="text-dark/60">
-                            {animals.length} {animals.length > 1 ? 'animaux trouvés' : 'animal trouvé'}
-                        </p>
-                    </div>
+                    
                     {/* Loading State */}
                     {pageLoading && (
-                        <div className="flex justify-center items-center py-16">
-                            <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mb-4"></div>
+                            <p className="text-dark/60">Chargement des animaux...</p>
                         </div>
                     )}
 
@@ -377,27 +553,30 @@ const handleAdoptClick = async () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {animals.length > 0 ? (
                                 animals.map(animal => (
-                                    <div 
+                                    <motion.div 
                                         key={animal.id} 
-                                        className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.4 }}
+                                        className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-102 group border border-secondary/10"
                                         onClick={() => fetchAnimalDetails(animal.id)}
                                     >
-                                        <div className="relative h-56">
+                                        <div className="relative h-64">
                                             {animal.image ? (
                                                 <img 
                                                     src={`http://127.0.0.1:8000${animal.image}`} 
                                                     alt={animal.nom} 
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center bg-secondary/30">
-                                                    <span className="text-4xl">🐾</span>
+                                                    <span className="text-5xl">🐾</span>
                                                 </div>
                                             )}
                                             
                                             {/* Animal type badge */}
-                                            <div className="absolute top-3 left-3">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                            <div className="absolute top-4 left-4 z-10">
+                                                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
                                                     animal.espece.toLowerCase() === 'chien' 
                                                         ? 'bg-primary text-white' 
                                                         : 'bg-accent text-dark'
@@ -406,56 +585,71 @@ const handleAdoptClick = async () => {
                                                 </span>
                                             </div>
                                             
+                                            {/* Adopt button overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-dark/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                <button className="px-6 py-2.5 bg-white text-primary rounded-full font-medium transform translate-y-8 group-hover:translate-y-0 transition-transform duration-300 flex items-center gap-2 hover:bg-primary hover:text-white">
+                                                    <FaHeart className="text-sm" />
+                                                    <span>Adopter</span>
+                                                </button>
+                                            </div>
+                                            
                                             {/* Name overlay */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-dark/80 to-transparent">
-                                                <h3 className="text-lg font-bold text-white">{animal.nom}</h3>
+                                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-dark/90 to-transparent">
+                                                <h3 className="text-xl font-bold text-white">{animal.nom}</h3>
+                                                <p className="text-white/80 text-sm">{animal.race}</p>
                                             </div>
                                         </div>
                                         
                                         <div className="p-4">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <span className="text-dark font-medium">{animal.race}</span>
-                                                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${animal.sexe === 'M' ? 'bg-primary' : 'bg-accent'} text-white text-sm`}>
-                                                    {animal.sexe === 'M' ? '♂' : '♀'}
-                                                </span>
-                                            </div>
-                                            
-                                            <div className="flex justify-between text-sm text-dark/60">
-                                                <span>{animal.date_naissance ? formatAge(animal.date_naissance) : "Âge inconnu"}</span>
+                                            <div className="flex justify-between items-center mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full ${animal.sexe === 'M' ? 'bg-primary/10 text-primary' : 'bg-accent/10 text-accent'} text-sm font-medium`}>
+                                                        {animal.sexe === 'M' ? '♂' : '♀'}
+                                                    </span>
+                                                    <span className="text-dark/80">{animal.sexe === 'M' ? 'Mâle' : 'Femelle'}</span>
+                                                </div>
+                                                
+                                    
                                                 
                                             </div>
+                                            
+                                            <div className="grid grid-cols-2 gap-3 mt-3">
+                                                <div className="flex items-center gap-2 text-dark/70 text-sm">
+                                                    <Calendar size={16} className="text-primary/70" />
+                                                    <span>{animal.date_naissance ? formatAge(animal.date_naissance) : "Âge inconnu"}</span>
+                                                </div>
+                                                
+                                                                                              
+                                            </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 ))
                             ) : (
                                 <div className="col-span-full">
-                                    <div className="bg-white rounded-xl shadow-md p-8 text-center">
-                                        <div className="mx-auto mb-4 bg-secondary/30 rounded-full h-16 w-16 flex items-center justify-center">
-                                            <Search size={24} className="text-dark/40" />
+                                    <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+                                        <div className="mx-auto mb-6 bg-secondary/30 rounded-full h-20 w-20 flex items-center justify-center">
+                                            <Search size={32} className="text-dark/40" />
                                         </div>
-                                        <h3 className="text-xl font-bold text-dark mb-2">Aucun animal trouvé</h3>
-                                        <p className="text-dark/60 mb-4">Essayez d'autres critères de recherche.</p>
+                                        <h3 className="text-2xl font-bold text-dark mb-3">Aucun animal trouvé</h3>
+                                        <p className="text-dark/60 mb-6 max-w-md mx-auto">
+                                           Nous n'avons pas trouvé d'animaux correspondant à vos critères. Essayez de modifier vos filtres pour voir plus de résultats.
+                                        </p>
                                         <button 
-                                            onClick={() => {
-                                                setSearchQuery('');
-                                                setAnimalType('');
-                                                setSpecies('');
-                                                router.push('/nos-animaux');
-                                            }}
-                                            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-accent transition-colors"
+                                            onClick={resetFilters}
+                                            className="bg-primary text-white px-6 py-3 rounded-xl hover:bg-accent transition-colors shadow-md flex items-center gap-2 mx-auto"
                                         >
-                                            Voir tous les animaux
+                                            <RefreshCw size={18} />
+                                            <span>Voir tous les animaux</span>
                                         </button>
                                     </div>
                                 </div>
                             )}
                         </div>
                     )}
-
                     {/* Footer */}
                     <div className="flex justify-center mt-12">
-                        <div className="px-4 py-2 bg-primary/20 rounded-full text-xs text-primary font-medium flex items-center">
-                            <span className="mr-2">🐾</span> Adopti © 2025
+                        <div className="px-5 py-3 bg-primary/10 rounded-full text-sm text-primary font-medium flex items-center">
+                            <span className="mr-2">🐾</span> Adopti © 2025 | Tous droits réservés
                         </div>
                     </div>
                 </div>
@@ -557,6 +751,42 @@ const handleAdoptClick = async () => {
                     </div>
                 )}
             </div>
+            
+            {/* Add required CSS for animations */}
+            <style jsx global>{`
+                @keyframes float {
+                    0% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                    100% { transform: translateY(0); }
+                }
+                
+                @keyframes fade-in {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                .animate-float {
+                    animation: float 3s ease-in-out infinite;
+                }
+                
+                .animate-float-delay {
+                    animation: float 3.5s ease-in-out infinite;
+                    animation-delay: 0.5s;
+                }
+                
+                .animate-float-slow {
+                    animation: float 4s ease-in-out infinite;
+                    animation-delay: 1s;
+                }
+                
+                .animate-fade-in {
+                    animation: fade-in 0.3s ease-out;
+                }
+                
+                .scale-102 {
+                    transform: scale(1.02);
+                }
+            `}</style>
         </div>
     );
 }

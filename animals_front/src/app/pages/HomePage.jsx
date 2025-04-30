@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Nunito } from "next/font/google";
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking} from "react-icons/fa";
+import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking,FaMapMarkerAlt,FaPhone,FaEnvelope,FaClock,FaLink,FaEnvelopeOpen, FaPaperPlane,FaFacebook, FaTwitter,FaInstagram,FaYoutube} from "react-icons/fa";
 import { useSession, signOut } from "next-auth/react";
 import Navbar from "./NavbarPage";
 import { authenticatedFetch } from '../../app/authInterceptor'
@@ -187,6 +187,7 @@ export default function Home() {
         <Navbar />
       </div>
       
+      
       {/* Main Content */}
       <div className="relative overflow-hidden">
       {/* Animated background elements */}
@@ -345,6 +346,32 @@ export default function Home() {
 <div className="mt-12 space-y-6">
   <h2 className="text-2xl font-bold text-dark">Découvrez-en plus 🌟</h2>
   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+     {/* Know More About Us */}
+     <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105 border-t-4 border-accent">
+      <h3 className="text-xl font-semibold text-dark">
+        Découvrez qui nous sommes
+      </h3>
+      <p className="mt-2 text-dark/70">
+        Notre mission et notre vision pour le monde animal.
+      </p>
+      <button
+        onClick={() => setSelectedSection(selectedSection === 'about' ? null : 'about')}
+        className="mt-4 px-4 py-2 bg-primary text-white rounded-full hover:bg-accent transition flex items-center shadow-md"
+      >
+        <FaHeart className="mr-2" /> 
+        {selectedSection === 'about' ? 'Fermer' : 'En savoir plus'}
+      </button>
+      {selectedSection === 'about' && (
+        <div className="mt-4 p-4 bg-secondary/10 rounded-lg">
+          <h4 className="font-bold mb-2 text-primary">Notre Histoire</h4>
+          <p className="text-sm text-dark/80">
+            Fondée en 2020, Adopti a déjà sauvé plus de 10 000 animaux. 
+            Notre réseau de 50 refuges partenaires et notre plateforme innovante
+            révolutionnent l'adoption responsable en France.
+          </p>
+        </div>
+      )}
+    </div>
     {/* Our Team */}
     <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105 border-t-4 border-primary">
       <h3 className="text-xl font-semibold text-dark">Notre équipe</h3>
@@ -353,7 +380,8 @@ export default function Home() {
       </p>
       <button
         onClick={() => setSelectedSection(selectedSection === 'team' ? null : 'team')}
-        className="mt-4 px-4 py-2 bg-primary text-white rounded-full hover:bg-accent transition flex items-center shadow-md"
+        className="mt-4 px-4 py-2 bg-accent text-white rounded-full hover:bg-primary transition flex items-center shadow-md"
+       
       >
         <FaPaw className="mr-2" /> 
         {selectedSection === 'team' ? 'Fermer' : 'En savoir plus'}
@@ -370,32 +398,7 @@ export default function Home() {
       )}
     </div>
 
-    {/* Know More About Us */}
-    <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105 border-t-4 border-accent">
-      <h3 className="text-xl font-semibold text-dark">
-        Découvrez qui nous sommes
-      </h3>
-      <p className="mt-2 text-dark/70">
-        Notre mission et notre vision pour le monde animal.
-      </p>
-      <button
-        onClick={() => setSelectedSection(selectedSection === 'about' ? null : 'about')}
-        className="mt-4 px-4 py-2 bg-accent text-white rounded-full hover:bg-primary transition flex items-center shadow-md"
-      >
-        <FaHeart className="mr-2" /> 
-        {selectedSection === 'about' ? 'Fermer' : 'En savoir plus'}
-      </button>
-      {selectedSection === 'about' && (
-        <div className="mt-4 p-4 bg-secondary/10 rounded-lg">
-          <h4 className="font-bold mb-2 text-primary">Notre Histoire</h4>
-          <p className="text-sm text-dark/80">
-            Fondée en 2020, Adopti a déjà sauvé plus de 10 000 animaux. 
-            Notre réseau de 50 refuges partenaires et notre plateforme innovante
-            révolutionnent l'adoption responsable en France.
-          </p>
-        </div>
-      )}
-    </div>
+  
 
     {/* Adoption Process */}
     <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105 border-t-4 border-dark">
@@ -482,12 +485,120 @@ export default function Home() {
             </div>
           </div>
   
-          {/* Footer */}
-          <div className="flex justify-center mt-8">
-            <div className="px-4 py-2 bg-primary/20 rounded-full text-xs text-primary font-medium flex items-center">
-              <FaPaw className="mr-2" /> Adopti © 2025
-            </div>
-          </div>
+          {/* Footer Component - Add before the final closing div */}
+<div className="mt-16 bg-gray-100 border-t-4 border-primary">
+  <div className="max-w-6xl mx-auto px-4 py-8">
+    {/* Footer Top - Main Sections */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      {/* Contact Information */}
+      <div>
+        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+          <FaMapMarkerAlt className="mr-2 text-primary" /> Contact
+        </h3>
+        <ul className="space-y-3 text-dark/80">
+          <li className="flex items-start">
+            <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
+            <span>123 Rue des Animaux, 75001 Paris, France</span>
+          </li>
+          <li className="flex items-center">
+            <FaPhone className="mr-2 text-primary flex-shrink-0" />
+            <span>01 23 45 67 89</span>
+          </li>
+          <li className="flex items-center">
+            <FaEnvelope className="mr-2 text-primary flex-shrink-0" />
+            <span>contact@adopti.fr</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Horaires */}
+      <div>
+        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+          <FaClock className="mr-2 text-primary" /> Horaires
+        </h3>
+        <ul className="space-y-2 text-dark/80">
+          <li>Lundi - Vendredi: 9h - 19h</li>
+          <li>Samedi: 10h - 18h</li>
+          <li>Dimanche: 10h - 16h</li>
+          <li className="text-primary font-semibold mt-2">
+            Permanence téléphonique 24h/24
+          </li>
+        </ul>
+      </div>
+
+      {/* Liens Rapides */}
+      <div>
+        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+          <FaLink className="mr-2 text-primary" /> Liens Rapides
+        </h3>
+        <ul className="space-y-2 text-dark/80">
+          <li>
+            <button className="hover:text-primary flex items-center">
+              <FaPaw className="mr-2 text-xs" /> Nos animaux
+            </button>
+          </li>
+          <li>
+            <button className="hover:text-primary flex items-center">
+              <FaPaw className="mr-2 text-xs" /> Faire un don
+            </button>
+          </li>
+          <li>
+            <button className="hover:text-primary flex items-center">
+              <FaPaw className="mr-2 text-xs" /> Devenir bénévole
+            </button>
+          </li>
+          <li>
+            <button className="hover:text-primary flex items-center">
+              <FaPaw className="mr-2 text-xs" /> Mentions légales
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      {/* Newsletter */}
+      <div>
+        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+          <FaEnvelopeOpen className="mr-2 text-primary" /> Newsletter
+        </h3>
+        <p className="text-dark/80 mb-3">Recevez nos actualités et promotions</p>
+        <div className="flex">
+          <input
+            type="email"
+            placeholder="Votre email"
+            className="px-3 py-2 rounded-l-lg border border-accent focus:outline-none focus:ring-1 focus:ring-primary w-full"
+          />
+          <button className="bg-primary text-white px-3 py-2 rounded-r-lg hover:bg-accent transition">
+            <FaPaperPlane />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Social Media */}
+    <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
+      {[
+        { icon: FaFacebook, label: "Facebook" },
+        { icon: FaTwitter, label: "Twitter" },
+        { icon: FaInstagram, label: "Instagram" },
+        { icon: FaYoutube, label: "YouTube" },
+      ].map((social, index) => (
+        <button 
+          key={index} 
+          className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
+          aria-label={social.label}
+        >
+          <social.icon />
+        </button>
+      ))}
+    </div>
+
+    {/* Copyright */}
+    <div className="text-center pt-4 border-t border-dark/10 text-dark/70">
+      <p>© 2025 Adopti - Association pour la protection animale - SIRET: 123 456 789 00012</p>
+      <p className="text-xs mt-2">Tous droits réservés - Site développé avec ❤️ pour les animaux</p>
+    </div>
+  </div>
+</div>
         </div>
       </div>
   
