@@ -45,7 +45,10 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeGarde
         fields = '__all__'
-        extra_kwargs = {'statut': {'required': False}} 
+        extra_kwargs = {'statut': {'required': False},
+                                    'utilisateur': {'required': False}  # Add this line
+} 
+        
 
     def create(self, validated_data):
         request = self.context['request']
@@ -67,10 +70,10 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
 
         return instance
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def init(self, *args, kwargs):
+        super().init(*args, **kwargs)
         self.fields['type_garde'].choices = [('Temporaire', 'Temporaire'), ('Définitive', 'Définitive')]
-    
+
     def get_image_url(self, obj):
         if obj.image:
             return f"{settings.MEDIA_URL}{obj.image.name}"
