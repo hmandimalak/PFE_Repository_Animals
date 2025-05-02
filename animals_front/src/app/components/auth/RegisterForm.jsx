@@ -53,7 +53,7 @@ export default function RegisterForm() {
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email invalide";
     }
-    if (!formData.telephone || formData.telephone.length < 8) {
+    if (!formData.telephone || formData.telephone.length < 8|| formData.telephone.length > 8) {
       newErrors.telephone = "Numéro de téléphone invalide";
     }
     if (!formData.adresse) newErrors.adresse = "L'adresse est requise";
