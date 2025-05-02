@@ -67,9 +67,12 @@ export default function EditProfile({ setActiveSection }) {
         setPreview(URL.createObjectURL(files[0]));
       }
     } else {
-      setUser({ ...user, [name]: value });
+      const newValue =
+        name === "telephone" ? value.replace(/\D/g, "") : value;
+      setUser({ ...user, [name]: newValue });
     }
   };
+  
 
   const handlePasswordChange = (e) => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
@@ -92,6 +95,13 @@ export default function EditProfile({ setActiveSection }) {
     formData.append("email", user.email);
     formData.append("telephone", user.telephone);
     formData.append("adresse", user.adresse);
+    
+    if (!user.telephone || user.telephone.length < 8|| user.telephone.length > 8) {
+      setError("Numéro de téléphone invalide.");
+      alert("Numéro de téléphone invalide ")
+      return;
+    }
+    
     if (user.profilepicture) {
       formData.append("profilepicture", user.profilepicture);
     }
@@ -104,6 +114,7 @@ export default function EditProfile({ setActiveSection }) {
       formData.append("current_password", passwords.currentPassword);
       formData.append("new_password", passwords.newPassword);
     }
+    
 
     fetch("http://127.0.0.1:8000/api/auth/profile/update/", {
       method: "PUT",
@@ -229,12 +240,15 @@ export default function EditProfile({ setActiveSection }) {
                 Téléphone
               </label>
               <input
-                type="text"
-                name="telephone"
-                value={user.telephone}
-                onChange={handleChange}
-                className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary transition-all"
-              />
+              type="text"
+              name="telephone"
+              value={user.telephone}
+              onChange={handleChange}
+              pattern="[0-9]{8,}"
+              maxLength={15}
+              className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary transition-all"
+            />
+
             </div>
 
             <div className="animate-slide-in-right delay-200">

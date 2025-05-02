@@ -174,7 +174,6 @@ export default function NosAnimaux() {
         if (!authToken) {
             alert("Vous devez être connecté pour adopter un animal.");
             localStorage.setItem('redirectAfterLogin', window.location.pathname);
-            router.push('/login');
             return;
         }
 

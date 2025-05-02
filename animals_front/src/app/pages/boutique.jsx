@@ -187,7 +187,7 @@ const Boutique = () => {
       }, 3000);
       
       localStorage.setItem('redirectAfterLogin', window.location.pathname);
-      router.push('/login');
+      alert("vous devez connecter pour ajouter un produit au panier");
       return;
     }
     
@@ -247,7 +247,6 @@ const Boutique = () => {
     if (!authToken) {
       alert("Veuillez vous connecter pour commander des articles.");
       localStorage.setItem('redirectAfterLogin', window.location.pathname);
-      router.push('/login');
       return;
     }
     

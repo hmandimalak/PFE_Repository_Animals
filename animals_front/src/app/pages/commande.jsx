@@ -277,7 +277,7 @@ const Commande = () => {
               <Link href="/boutique" className="bg-primary hover:bg-primary/90 text-white py-2 px-6 rounded-xl transition-colors">
                 Continuer les achats
               </Link>
-              <Link href="/mes-commandes" className="bg-accent/10 hover:bg-accent/20 text-dark py-2 px-6 rounded-xl transition-colors">
+              <Link href="/profile" className="bg-accent/10 hover:bg-accent/20 text-dark py-2 px-6 rounded-xl transition-colors">
                 Voir mes commandes
               </Link>
             </div>
