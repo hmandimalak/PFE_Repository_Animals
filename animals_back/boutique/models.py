@@ -2,6 +2,11 @@ from django.db import models
 from django.conf import settings
 
 class Produit(models.Model):
+    ANIMAUX = [
+        ('Chien', 'Chien'),
+        ('Chat', 'Chat'),
+        ('Les deux', 'Les deux'),
+    ]
     CATEGORIES = [
         ('Nutrition', 'Nutrition'),
         ('Accessoires', 'Accessoires'),
@@ -13,8 +18,10 @@ class Produit(models.Model):
     prix = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
     categorie = models.CharField(max_length=20, choices=CATEGORIES, default='Nutrition')
-    image_url = models.URLField(blank=True, null=True)
+    image = models.ImageField(upload_to='products/')
     date_ajout = models.DateTimeField(auto_now_add=True)
+    animal = models.CharField(max_length=10, choices=ANIMAUX, default='Chien')
+
 
     def save(self, *args, **kwargs):
         if not self.serial_number:

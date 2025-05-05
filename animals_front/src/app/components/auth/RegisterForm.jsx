@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+
 import { 
   FaUserPlus, FaLock, FaIdCard, FaEnvelope, 
   FaPhone, FaHome, FaImage, FaCheck, FaPaw, FaDog, FaCat ,FaEye, FaEyeSlash
@@ -27,6 +30,7 @@ export default function RegisterForm() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  
   const handleChange = (e) => {
     const { name, value, type } = e.target;
 
@@ -43,6 +47,14 @@ export default function RegisterForm() {
     }
   };
 
+  // Special handler for phone input
+  const handlePhoneChange = (value) => {
+    setFormData({
+      ...formData,
+      telephone: value
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -53,7 +65,7 @@ export default function RegisterForm() {
     if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email invalide";
     }
-    if (!formData.telephone || formData.telephone.length < 8|| formData.telephone.length > 8) {
+    if (!formData.telephone || formData.telephone.length < 8) {
       newErrors.telephone = "Numéro de téléphone invalide";
     }
     if (!formData.adresse) newErrors.adresse = "L'adresse est requise";
@@ -293,21 +305,25 @@ export default function RegisterForm() {
                     )}
                   </div>
 
+                  {/* Phone Input Component */}
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                       <FaPhone className="h-5 w-5 text-primary" />
                     </div>
-                    <input
-                      id="telephone"
-                      name="telephone"
-                      type="text"
-                      required
-                      className={`w-full pl-10 pr-3 py-2 border ${
-                        errors.telephone ? "border-red-500" : "border-secondary"
-                      } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
-                      placeholder="Téléphone +216"
+                    <PhoneInput
+                      country={'tn'}
                       value={formData.telephone}
-                      onChange={handleChange}
+                      onChange={handlePhoneChange}
+                      inputProps={{
+                        name: 'telephone',
+                        id: 'telephone',
+                        required: true,
+                        className: `w-full pl-10 pr-3 py-2 border ${
+                          errors.telephone ? "border-red-500" : "border-secondary"
+                        } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`
+                      }}
+                      containerClass="w-full"
+                      buttonClass="hidden"
                     />
                     {errors.telephone && (
                       <p className="text-red-500 text-xs mt-1">{errors.telephone}</p>
@@ -344,8 +360,6 @@ export default function RegisterForm() {
                       name="password"
                       type={showPassword ? "text" : "password"}
                       required
-                      onClick={togglePasswordVisibility}
-
                       className={`w-full pl-10 pr-3 py-2 border ${
                         errors.password ? "border-red-500" : "border-secondary"
                       } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
@@ -353,17 +367,17 @@ export default function RegisterForm() {
                       value={formData.password}
                       onChange={handleChange}
                     />
-                     <button
-                                          type="button"
-                                          onClick={togglePasswordVisibility}
-                                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
-                                        >
-                                          {showPassword ? (
-                                            <FaEyeSlash className="h-5 w-5" />
-                                          ) : (
-                                            <FaEye className="h-5 w-5" />
-                                          )}
-                                        </button>
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="h-5 w-5" />
+                      ) : (
+                        <FaEye className="h-5 w-5" />
+                      )}
+                    </button>
                     {errors.password && (
                       <p className="text-red-500 text-xs mt-1">{errors.password}</p>
                     )}
@@ -385,17 +399,17 @@ export default function RegisterForm() {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                     />
-                     <button
-                                          type="button"
-                                          onClick={togglePasswordVisibility}
-                                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
-                                        >
-                                          {showPassword ? (
-                                            <FaEyeSlash className="h-5 w-5" />
-                                          ) : (
-                                            <FaEye className="h-5 w-5" />
-                                          )}
-                                        </button>
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
+                    >
+                      {showPassword ? (
+                        <FaEyeSlash className="h-5 w-5" />
+                      ) : (
+                        <FaEye className="h-5 w-5" />
+                      )}
+                    </button>
                     {errors.confirmPassword && (
                       <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
                     )}

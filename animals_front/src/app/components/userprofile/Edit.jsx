@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaKey, FaPen ,FaSave} from "react-icons/fa"; // Import the key and pen icons
+import { FaKey, FaPen, FaSave } from "react-icons/fa"; // Import the key and pen icons
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 
 export default function EditProfile({ setActiveSection }) {
   const [user, setUser] = useState({
@@ -60,19 +62,27 @@ export default function EditProfile({ setActiveSection }) {
   }, [router]);
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    if (type === "file") {
-      if (files.length > 0) {
-        setUser({ ...user, [name]: files[0] });
-        setPreview(URL.createObjectURL(files[0]));
+    // Check if e is a direct value (from PhoneInput) or an event object
+    if (typeof e === 'string') {
+      // This is the phone number value directly
+      setUser({ ...user, telephone: e });
+    } else if (e && e.target) {
+      // This is a regular input event
+      const { name, value, type, files } = e.target;
+      if (type === "file") {
+        if (files.length > 0) {
+          setUser({ ...user, [name]: files[0] });
+          setPreview(URL.createObjectURL(files[0]));
+        }
+      } else {
+        setUser({ ...user, [name]: value });
       }
-    } else {
-      const newValue =
-        name === "telephone" ? value.replace(/\D/g, "") : value;
-      setUser({ ...user, [name]: newValue });
     }
   };
   
+  const handlePhoneChange = (value) => {
+    setUser({ ...user, telephone: value });
+  };
 
   const handlePasswordChange = (e) => {
     setPasswords({ ...passwords, [e.target.name]: e.target.value });
@@ -96,12 +106,6 @@ export default function EditProfile({ setActiveSection }) {
     formData.append("telephone", user.telephone);
     formData.append("adresse", user.adresse);
     
-    if (!user.telephone || user.telephone.length < 8|| user.telephone.length > 8) {
-      setError("Numéro de téléphone invalide.");
-      alert("Numéro de téléphone invalide ")
-      return;
-    }
-    
     if (user.profilepicture) {
       formData.append("profilepicture", user.profilepicture);
     }
@@ -115,7 +119,6 @@ export default function EditProfile({ setActiveSection }) {
       formData.append("new_password", passwords.newPassword);
     }
     
-
     fetch("http://127.0.0.1:8000/api/auth/profile/update/", {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
@@ -154,7 +157,19 @@ export default function EditProfile({ setActiveSection }) {
             <div className="h-1 w-24 bg-accent mx-auto rounded-full" />
         </div>
 
-        <form className="grid grid-cols-2 gap-8">
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+            {success}
+          </div>
+        )}
+
+        <form className="grid grid-cols-2 gap-8" onSubmit={handleSubmit}>
             {/* Left Column */}
             <div className="space-y-6 border-r-2 border-accent/20 pr-8">
             
@@ -239,16 +254,17 @@ export default function EditProfile({ setActiveSection }) {
               <label className="block text-sm font-semibold text-dark mb-2">
                 Téléphone
               </label>
-              <input
-              type="text"
-              name="telephone"
-              value={user.telephone}
-              onChange={handleChange}
-              pattern="[0-9]{8,}"
-              maxLength={15}
-              className="mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary transition-all"
-            />
-
+              <PhoneInput
+                country={'tn'}
+                value={user.telephone}
+                onChange={handlePhoneChange}
+                inputProps={{
+                  required: true,
+                  className:"mt-1 w-full px-4 py-3 border-2 border-accent/30 rounded-xl focus:ring-2 focus:ring-primary transition-all"
+                }}
+                containerClass="w-full"
+                buttonClass="hidden"
+              />
             </div>
 
             <div className="animate-slide-in-right delay-200">
@@ -327,7 +343,6 @@ export default function EditProfile({ setActiveSection }) {
           <div className="col-span-2 mt-8 animate-fade-in-up">
             <button
               type="submit"
-              onClick={handleSubmit}
               disabled={loading}
               className="w-full py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 hover:scale-[1.02] transition-transform shadow-lg hover:shadow-primary/30 flex items-center justify-center gap-2"
             >
@@ -346,5 +361,5 @@ export default function EditProfile({ setActiveSection }) {
           </div>
         </form>
     </div>
-);
+  );
 }

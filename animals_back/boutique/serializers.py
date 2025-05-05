@@ -19,11 +19,11 @@ class CommandeSerializer(serializers.ModelSerializer):
 
 class ArticlesCommandeSerializer(serializers.ModelSerializer):
     nom = serializers.CharField(source='produit.nom')
-    image_url = serializers.CharField(source='produit.image_url')
+    image = serializers.CharField(source='produit.image')
     prix = serializers.DecimalField(source='prix_unitaire', max_digits=10, decimal_places=2)
     class Meta:
         model = ArticlesCommande
-        fields = ['id', 'nom', 'image_url', 'quantite', 'prix']
+        fields = ['id', 'nom', 'image', 'quantite', 'prix']
 
 
 class CommandeDetailSerializer(serializers.ModelSerializer):
