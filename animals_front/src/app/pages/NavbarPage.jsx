@@ -148,7 +148,6 @@ export default function Navbar() {
               { label: "Boutique", href: "/boutique" },
               { label: "Evenements", href: "/marche" },
               { label: "Blog", href: "/blog" },
-              { label: "Nos Services", href: "/#our-services" },
               { label: "FAQ", href: "/faq" },
             ].map((link) => (
               <a
@@ -269,7 +268,6 @@ export default function Navbar() {
             { label: "Boutique", href: "/boutique",id :3 },
             { label: "Evenements", href: "/marche" ,id : 4},
             { label: "Blog", href: "/blog" ,id : 5},
-            { label: "Nos Services", href: "#our-services", id : 6 },
             { label: "FAQ", href: "/faq", id : 7},
           ].map((link) => (
             <a

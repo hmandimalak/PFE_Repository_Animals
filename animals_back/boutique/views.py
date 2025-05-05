@@ -19,9 +19,12 @@ def get_produits(request):
     
     # Apply category filter
     categorie = request.GET.get('categorie')
+    animal = request.GET.get('animal')
+
     if categorie:
         products = products.filter(categorie=categorie)
-    
+    if animal:
+        products = products.filter(animal=animal)
     # Apply search
     search = request.GET.get('search')
     if search:
@@ -33,11 +36,11 @@ def get_produits(request):
         products = products.order_by(ordering)
     
     # Return values as list
-    product_values = products.values('id', 'nom', 'description', 'prix', 'image_url', 'categorie')
+    product_values = products.values('id', 'nom', 'description', 'prix', 'image', 'categorie')
     return JsonResponse(list(product_values), safe=False)
 
 def produit_detail(request, produit_id):
-    product = Produit.objects.filter(id=produit_id).values('id', 'nom', 'description', 'prix', 'image_url', 'categorie').first()
+    product = Produit.objects.filter(id=produit_id).values('id', 'nom', 'description', 'prix', 'image', 'categorie').first()
     if product:
         return JsonResponse(product)
     else:
@@ -57,7 +60,7 @@ def get_panier(request):
             'id': article.produit.id,
             'nom': article.produit.nom,
             'prix': float(article.produit.prix),
-            'image_url': article.produit.image_url,
+            'image': article.produit.image,
             'quantity': article.quantite
         })
     
@@ -128,7 +131,7 @@ def update_quantite(request, produit_id):
                 'id': produit.id,
                 'nom': produit.nom,
                 'prix': float(produit.prix),
-                'image_url': produit.image_url,
+                'image': produit.image,
                 'quantity': quantity
             }
         })

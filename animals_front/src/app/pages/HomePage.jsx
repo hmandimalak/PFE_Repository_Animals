@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Nunito } from "next/font/google";
-import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight,FaHome,FaShoppingBag,FaWalking,FaMapMarkerAlt,FaPhone,FaEnvelope,FaClock,FaLink,FaEnvelopeOpen, FaPaperPlane,FaFacebook, FaTwitter,FaInstagram,FaYoutube} from "react-icons/fa";
+import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaLink, FaEnvelopeOpen, FaPaperPlane, FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaSearch } from "react-icons/fa";
 import { useSession, signOut } from "next-auth/react";
 import Navbar from "./NavbarPage";
 import { authenticatedFetch } from '../../app/authInterceptor'
@@ -14,11 +14,10 @@ const nunito = Nunito({ subsets: ["latin"] });
 export default function Home() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedAnimal, setSelectedAnimal] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [animalType, setAnimalType] = useState(""); // 'cat' or 'dog'
+  const [animalType, setAnimalType] = useState(""); // 'chat' or 'chien'
   const [species, setSpecies] = useState(""); // Specific species (e.g., 'Persian', 'Labrador')
   const [searchResults, setSearchResults] = useState([]); // Store search results
   const scrollContainerRef = useRef(null);
@@ -87,6 +86,7 @@ export default function Home() {
         console.error("Invalid token", error);
       }
     }
+    
     const container = scrollContainerRef.current;
     if (container) {
       container.addEventListener('wheel', handleScroll, { passive: false });
@@ -103,7 +103,6 @@ export default function Home() {
     try {
       // Build query parameters dynamically
       const queryParams = new URLSearchParams();
-      if (searchQuery) queryParams.append("query", searchQuery);
       if (animalType) queryParams.append("type", animalType);
       if (species) queryParams.append("species", species);
   
@@ -122,6 +121,22 @@ export default function Home() {
     } catch (error) {
       console.error("Error searching animals:", error);
     }
+  };
+
+  const handleAnimalTypeSelect = (type) => {
+    if (animalType === type) {
+      // If clicking the already selected type, deselect it
+      setAnimalType("");
+      setSpecies(""); // Also clear the species when deselecting type
+    } else {
+      // Select the new type and clear species
+      setAnimalType(type);
+      setSpecies("");
+    }
+  };
+
+  const handleSpeciesSelect = (breed) => {
+    setSpecies(breed === species ? "" : breed);
   };
 
   const handleAdoptClick = async () => {
@@ -150,7 +165,6 @@ export default function Home() {
   const handleSeeAllResults = () => {
     // Redirect to the animaux page with search query as URL parameters
     const queryParams = new URLSearchParams();
-    if (searchQuery) queryParams.append("query", searchQuery);
     if (animalType) queryParams.append("type", animalType);
     if (species) queryParams.append("species", species);
 
@@ -199,11 +213,11 @@ export default function Home() {
           <FaCat className="w-32 h-32 text-dark" />
         </div>
         <div className="absolute top-1/3 left-20 transform -translate-y-1/2">
-    <FaPaw className="w-16 h-16 text-primary animate-pulse" />
-</div>
+          <FaPaw className="w-16 h-16 text-primary animate-pulse" />
+        </div>
         <div className="absolute top-1/2 right-20 transform -translate-y-1/2">
-    <FaPaw className="w-16 h-16 text-dark animate-pulse" />
-</div>
+          <FaPaw className="w-16 h-16 text-dark animate-pulse" />
+        </div>
   
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -213,44 +227,72 @@ export default function Home() {
                 Bienvenue, {getCurrentUser()}! 🐾
               </h1>
   
-              {/* Search Bar */}
-              <div className="w-full max-w-md space-y-4">
-                <input
-                  type="text"
-                  placeholder="Rechercher un animal..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2 rounded-full border border-accent focus:outline-none focus:ring-2 focus:ring-primary shadow-md"
-                />
-                <select
-                  value={animalType}
-                  onChange={(e) => setAnimalType(e.target.value)}
-                  className="w-full px-4 py-2 rounded-full border border-accent focus:outline-none focus:ring-2 focus:ring-primary shadow-md"
-                >
-                  <option value="">Type d'animal</option>
-                  <option value="chien">Chien</option>
-                  <option value="chat">Chat</option>
-                </select>
-                {animalType && (
-                  <select
-                    value={species}
-                    onChange={(e) => setSpecies(e.target.value)}
-                    className="w-full px-4 py-2 rounded-full border border-accent focus:outline-none focus:ring-2 focus:ring-primary shadow-md"
+              {/* New Button-based Search UI */}
+              <div className="w-full max-w-md space-y-6">
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold text-dark mb-4">Je recherche un...</h2>
+                  
+                  {/* Animal Type Buttons */}
+                  <div className="flex justify-center space-x-4 mb-6">
+                    <button
+                      onClick={() => handleAnimalTypeSelect("chien")}
+                      className={`flex flex-col items-center justify-center px-6 py-4 rounded-xl shadow-md transition-all ${
+                        animalType === "chien" 
+                          ? "bg-primary text-white scale-105" 
+                          : "bg-white text-dark hover:bg-primary/10"
+                      }`}
+                    >
+                      <FaDog className={`text-3xl ${animalType === "chien" ? "text-white" : "text-primary"} mb-2`} />
+                      <span className="font-medium">Chien</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleAnimalTypeSelect("chat")}
+                      className={`flex flex-col items-center justify-center px-6 py-4 rounded-xl shadow-md transition-all ${
+                        animalType === "chat" 
+                          ? "bg-accent text-white scale-105" 
+                          : "bg-white text-dark hover:bg-accent/10"
+                      }`}
+                    >
+                      <FaCat className={`text-3xl ${animalType === "chat" ? "text-white" : "text-accent"} mb-2`} />
+                      <span className="font-medium">Chat</span>
+                    </button>
+                  </div>
+                  
+                  {/* Species/Breed Selection Buttons - Only show if animal type is selected */}
+                  {animalType && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-medium text-dark mb-3">Race</h3>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {speciesOptions[animalType]?.map((breed) => (
+                          <button
+                            key={breed}
+                            onClick={() => handleSpeciesSelect(breed)}
+                            className={`px-3 py-1 rounded-full text-sm transition-all ${
+                              species === breed
+                                ? animalType === "chien" 
+                                  ? "bg-primary text-white" 
+                                  : "bg-accent text-white"
+                                : "bg-gray-100 text-dark hover:bg-gray-200"
+                            }`}
+                          >
+                            {breed}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Search Button */}
+                  <button
+                    onClick={handleSearch}
+                    className="flex items-center justify-center mx-auto px-6 py-3 bg-dark text-white rounded-full hover:bg-primary transition duration-300 shadow-md"
+                    disabled={!animalType}
                   >
-                    <option value="">Sélectionner une race</option>
-                    {speciesOptions[animalType]?.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <button
-                  onClick={handleSearch}
-                  className="w-full px-4 py-2 bg-dark text-white rounded-full hover:bg-primary transition duration-300 shadow-md"
-                >
-                  Rechercher
-                </button>
+                    <FaSearch className="mr-2" />
+                    Rechercher
+                  </button>
+                </div>
               </div>
             </div>
   
@@ -279,6 +321,20 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-dark mb-6 border-l-4 border-primary pl-4">
                 Résultats de recherche
               </h2>
+              
+              {/* Search filters display */}
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                {animalType && (
+                  <span className={`px-3 py-1 rounded-full text-sm text-white ${animalType === "chien" ? "bg-primary" : "bg-accent"}`}>
+                    {animalType === "chien" ? "Chien" : "Chat"}
+                  </span>
+                )}
+                {species && (
+                  <span className="px-3 py-1 rounded-full text-sm bg-gray-200 text-dark">
+                    {species}
+                  </span>
+                )}
+              </div>
               
               {/* Scrollable Container */}
               <div 

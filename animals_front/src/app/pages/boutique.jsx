@@ -46,6 +46,7 @@ const CategoryIcon = ({ category }) => {
   }
 };
 
+
 const Boutique = () => {
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,7 @@ const Boutique = () => {
               id: item.id,
               nom: item.nom,
               prix: item.prix,
-              image_url: item.image_url,
+              image: item.image,
               quantity: item.quantity
             }));
             setCartItems(formattedCart);
@@ -271,8 +272,7 @@ const Boutique = () => {
     console.log("View details for:", produit.id);
     // router.push(`/produit/${produit.id}`);
   };
-  
-
+    
   const CartIcon = () => (
     <div className="fixed right-6 top-24 z-50">
       <motion.button
@@ -334,7 +334,7 @@ const Boutique = () => {
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary/50">
                     <img 
-                      src={item.image_url} 
+                      src={item.image} 
                       alt={item.nom} 
                       className="w-full h-full object-cover"
                       onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
@@ -625,7 +625,7 @@ const Boutique = () => {
                   >
                     <div className="relative h-60">
                       <img
-                        src={produit.image_url}
+                        src={produit.image}
                         alt={produit.nom}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
