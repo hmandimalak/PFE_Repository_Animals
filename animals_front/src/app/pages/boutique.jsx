@@ -75,54 +75,69 @@ const Boutique = () => {
     setShowFilters(!showFilters);
   };
 
-  useEffect(() => {
-    setIsClient(true);
-    fetch('http://127.0.0.1:8000/api/boutique/produits/')
-      .then((response) => response.json())
-      .then((data) => {
-        setProduits(data);
-        setLoading(false);
+// Updated cart fetching logic
+useEffect(() => {
+  setIsClient(true);
+  fetch('http://127.0.0.1:8000/api/boutique/produits/')
+    .then((response) => response.json())
+    .then((data) => {
+      setProduits(data);
+      setLoading(false);
+    })
+    .catch((error) => {
+      console.error('Error fetching produits:', error);
+      setLoading(false);
+    });
+
+  // Improved cart fetching logic with better error handling
+  const authToken = getAuthToken(session);
+  if (authToken) {
+    // Use regular fetch with authorization header instead of authenticatedFetch
+    fetch('http://127.0.0.1:8000/api/boutique/panier/', {
+      method: 'GET',
+      headers: {
+        'Authorization': authToken,
+        'Content-Type': 'application/json'
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
       })
-      .catch((error) => {
-        console.error('Error fetching produits:', error);
-        setLoading(false);
-      });
-
-    const authToken = getAuthToken(session);
-    if (authToken) {
-      authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/')
-        .then(response => response.json())
-        .then(data => {
-          if (data && Array.isArray(data)) {
-            const formattedCart = data.map(item => ({
-              id: item.id,
-              nom: item.nom,
-              prix: item.prix,
-              image: item.image,
-              quantity: item.quantity
-            }));
-            setCartItems(formattedCart);
-          }
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching cart:', error);
-          const savedCart = localStorage.getItem('cart');
-          if (savedCart) setCartItems(JSON.parse(savedCart));
-        });
-    } else {
-      if (typeof window !== "undefined") {
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          const formattedCart = data.map(item => ({
+            id: item.id,
+            nom: item.nom,
+            prix: item.prix,
+            image: item.image,
+            quantity: item.quantity
+          }));
+          setCartItems(formattedCart);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching cart:', error);
+        // Fallback to localStorage if API call fails
         const savedCart = localStorage.getItem('cart');
-        if (savedCart && session) setCartItems(JSON.parse(savedCart));
-      }
-    }
-
-    // Load wishlist from localStorage
+        if (savedCart) setCartItems(JSON.parse(savedCart));
+      });
+  } else {
+    // Not authenticated, use localStorage for cart
     if (typeof window !== "undefined") {
-      const savedWishlist = localStorage.getItem('wishlist');
-      if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) setCartItems(JSON.parse(savedCart));
     }
-  }, [session]);
+  }
+
+  // Load wishlist from localStorage
+  if (typeof window !== "undefined") {
+    const savedWishlist = localStorage.getItem('wishlist');
+    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
+  }
+}, [session]);
 
   useEffect(() => {
     if (isClient && cartItems.length > 0 && typeof window !== "undefined") {
@@ -333,12 +348,14 @@ const Boutique = () => {
               >
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary/50">
-                    <img 
-                      src={item.image} 
-                      alt={item.nom} 
-                      className="w-full h-full object-cover"
-                      onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
-                    />
+                    <img
+                    src={item.image.startsWith('http') 
+                      ? item.image 
+                      : `http://127.0.0.1:8000/${item.image}`}
+                    alt={item.nom}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
+                  />
                   </div>
                   <div>
                     <p className="font-medium text-dark">{item.nom}</p>
@@ -624,12 +641,14 @@ const Boutique = () => {
                     className="bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group"
                   >
                     <div className="relative h-60">
-                      <img
-                        src={produit.image}
-                        alt={produit.nom}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
-                      />
+                    <img
+                    src={produit.image.startsWith('http') 
+                      ? produit.image 
+                      : `http://127.0.0.1:8000/media/${produit.image}`}
+                    alt={produit.nom}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
+                  />
                       
                       {/* Category Badge */}
                       <div className="absolute top-3 left-3 bg-primary/90 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">

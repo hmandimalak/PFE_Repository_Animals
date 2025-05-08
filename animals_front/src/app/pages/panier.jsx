@@ -39,7 +39,7 @@ const Panier = () => {
               id: item.id,
               nom: item.nom,
               prix: item.prix,
-              image_url: item.image_url,
+              image: item.image,
               quantity: item.quantity
             }));
             setCartItems(formattedCart);
@@ -166,11 +166,14 @@ const Panier = () => {
                     className="flex flex-col sm:flex-row items-center justify-between p-6 bg-secondary/10 rounded-xl transition-all hover:shadow-md"
                   >
                     <div className="flex items-center mb-4 sm:mb-0 w-full sm:w-auto">
-                      <img 
-                        src={item.image_url || '/default-image.jpg'} 
-                        alt={item.nom}
-                        className="w-24 h-24 object-cover rounded-lg mr-6"
-                      />
+                     <img
+                  src={item.image.startsWith('http') 
+                    ? item.image 
+                    :`http://127.0.0.1:8000/${item.image}`}
+                  alt={item.nom}
+                  className="w-24 h-24 object-cover rounded-lg mr-6"
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
+                />
                       <div className="flex-grow">
                         <h3 className="text-lg font-semibold text-dark">{item.nom}</h3>
                         <p className="text-primary font-medium">{item.prix} DT</p>

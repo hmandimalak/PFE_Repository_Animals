@@ -20,7 +20,6 @@ class Produit(models.Model):
     categorie = models.CharField(max_length=20, choices=CATEGORIES, default='Nutrition')
     image = models.ImageField(upload_to='products/')
     date_ajout = models.DateTimeField(auto_now_add=True)
-    animal = models.CharField(max_length=10, choices=ANIMAUX, default='Chien')
 
 
     def save(self, *args, **kwargs):
