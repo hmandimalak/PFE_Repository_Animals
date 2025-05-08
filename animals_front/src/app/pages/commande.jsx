@@ -52,7 +52,7 @@ const Commande = () => {
               id: item.id,
               nom: item.nom,
               prix: item.prix,
-              image_url: item.image_url,
+              image: item.image,
               quantity: item.quantity
             }));
             setCartItems(formattedCart);
@@ -425,11 +425,14 @@ const Commande = () => {
                 {cartItems.map(item => (
                   <div key={item.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <img 
-                        src={item.image_url} 
-                        alt={item.nom} 
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
+                    <img
+                  src={item.image.startsWith('http') 
+                    ? item.image 
+                    :`http://127.0.0.1:8000/${item.image}`}
+                  alt={item.nom}
+                  className="w-24 h-24 object-cover rounded-lg mr-6"
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
+                />
                       <div>
                         <h4 className="font-medium text-dark">{item.nom}</h4>
                         <div className="flex items-center gap-2 mt-1">

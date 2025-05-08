@@ -47,24 +47,27 @@ def produit_detail(request, produit_id):
         return JsonResponse({'error': 'Product not found'}, status=404)
 
 # New cart views
+
+
 @api_view(['GET'])
 @login_required
 def get_panier(request):
     """Get the current user's cart"""
     panier, created = Panier.objects.get_or_create(utilisateur=request.user)
     articles = ArticlesPanier.objects.filter(panier=panier)
-    
+
     cart_items = []
     for article in articles:
         cart_items.append({
             'id': article.produit.id,
             'nom': article.produit.nom,
             'prix': float(article.produit.prix),
-            'image': article.produit.image,
+            'image': article.produit.image.url if article.produit.image else None,
             'quantity': article.quantite
         })
-    
+
     return Response(cart_items)
+
 
 @api_view(['POST'])
 @login_required
