@@ -47,6 +47,8 @@ def produit_detail(request, produit_id):
         return JsonResponse({'error': 'Product not found'}, status=404)
 
 # New cart views
+
+
 @api_view(['GET'])
 @login_required
 def get_panier(request):
@@ -65,6 +67,7 @@ def get_panier(request):
         })
 
     return Response(cart_items)
+
 
 @api_view(['POST'])
 @login_required

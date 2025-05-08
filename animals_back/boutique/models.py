@@ -2,11 +2,6 @@ from django.db import models
 from django.conf import settings
 
 class Produit(models.Model):
-    ANIMAUX = [
-        ('Chien', 'Chien'),
-        ('Chat', 'Chat'),
-        ('Les deux', 'Les deux'),
-    ]
     CATEGORIES = [
         ('Nutrition', 'Nutrition'),
         ('Accessoires', 'Accessoires'),
@@ -20,6 +15,10 @@ class Produit(models.Model):
     categorie = models.CharField(max_length=20, choices=CATEGORIES, default='Nutrition')
     image = models.ImageField(upload_to='products/')
     date_ajout = models.DateTimeField(auto_now_add=True)
+<<<<<<< HEAD
+=======
+    
+>>>>>>> a7247e12484ef9eb06e44cc17e282b60a93a99ac
 
 
     def save(self, *args, **kwargs):

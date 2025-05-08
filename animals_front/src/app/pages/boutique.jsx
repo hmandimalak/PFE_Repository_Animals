@@ -348,14 +348,16 @@ useEffect(() => {
               >
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-secondary/50">
-                    <img
-                    src={item.image.startsWith('http') 
-                      ? item.image 
-                      : `http://127.0.0.1:8000/${item.image}`}
-                    alt={item.nom}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
-                  />
+
+                  <img
+                  src={item.image.startsWith('http') 
+                    ? item.image 
+                    :`http://127.0.0.1:8000/${item.image}`}
+                  alt={item.nom}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
+                />
+
                   </div>
                   <div>
                     <p className="font-medium text-dark">{item.nom}</p>
@@ -642,13 +644,14 @@ useEffect(() => {
                   >
                     <div className="relative h-60">
                     <img
-                    src={produit.image.startsWith('http') 
-                      ? produit.image 
-                      : `http://127.0.0.1:8000/media/${produit.image}`}
-                    alt={produit.nom}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
-                  />
+
+                  src={produit.image.startsWith('http') 
+                    ? produit.image 
+                    : `http://127.0.0.1:8000/media/${produit.image}`}
+                  alt={produit.nom}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
+                />
                       
                       {/* Category Badge */}
                       <div className="absolute top-3 left-3 bg-primary/90 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
