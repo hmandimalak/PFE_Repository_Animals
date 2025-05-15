@@ -351,69 +351,63 @@ export default function RegisterForm() {
                     )}
                   </div>
 
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-5 w-5 text-primary" />
-                    </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      className={`w-full pl-10 pr-3 py-2 border ${
-                        errors.password ? "border-red-500" : "border-secondary"
-                      } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
-                      placeholder="Mot de passe"
-                      value={formData.password}
-                      onChange={handleChange}
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
-                    >
-                      {showPassword ? (
-                        <FaEyeSlash className="h-5 w-5" />
-                      ) : (
-                        <FaEye className="h-5 w-5" />
-                      )}
-                    </button>
-                    {errors.password && (
-                      <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-                    )}
-                  </div>
+                  {/* Password Field */}
+<div className="relative">
+  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <FaLock className="h-5 w-5 text-primary" />
+  </div>
+  <input
+    id="password"
+    name="password"
+    type={showPassword ? "text" : "password"}
+    required
+    className={`w-full pl-10 pr-10 py-2 border ${
+      errors.password ? "border-red-500" : "border-secondary"
+    } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all`}
+    placeholder="Mot de passe"
+    value={formData.password}
+    onChange={handleChange}
+  />
+  <button
+    type="button"
+    onClick={togglePasswordVisibility}
+    className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors z-10"
+  >
+    {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
+  </button>
+  {errors.password && (
+    <p className="text-red-500 text-xs mt-1 absolute">{errors.password}</p>
+  )}
+</div>
 
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-5 w-5 text-primary" />
-                    </div>
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      className={`w-full pl-10 pr-3 py-2 border ${
-                        errors.confirmPassword ? "border-red-500" : "border-secondary"
-                      } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
-                      placeholder="Confirmation mot de passe"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
-                    >
-                      {showPassword ? (
-                        <FaEyeSlash className="h-5 w-5" />
-                      ) : (
-                        <FaEye className="h-5 w-5" />
-                      )}
-                    </button>
-                    {errors.confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-                    )}
-                  </div>
+{/* Confirm Password Field */}
+<div className="relative">
+  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <FaLock className="h-5 w-5 text-primary" />
+  </div>
+  <input
+    id="confirmPassword"
+    name="confirmPassword"
+    type={showPassword ? "text" : "password"}
+    required
+    className={`w-full pl-10 pr-10 py-2 border ${
+      errors.confirmPassword ? "border-red-500" : "border-secondary"
+    } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all`}
+    placeholder="Confirmation mot de passe"
+    value={formData.confirmPassword}
+    onChange={handleChange}
+  />
+  <button
+    type="button"
+    onClick={togglePasswordVisibility}
+    className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors z-10"
+  >
+    {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
+  </button>
+  {errors.confirmPassword && (
+    <p className="text-red-500 text-xs mt-1 absolute">{errors.confirmPassword}</p>
+  )}
+</div>
                 </div>
 
                 {/* Pet lover badge */}

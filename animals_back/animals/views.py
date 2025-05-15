@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from .models import Animal, DemandeEvenementMarche, DemandeGarde, DemandeAdoption, EvenementMarcheChien,Notification
-from .serializers import AnimalSerializer, DemandeEvenementMarcheSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer, EvenementMarcheChienSerializer,NotificationSerializer
+from .models import Animal, DemandeEvenementMarche, DemandeGarde, DemandeAdoption, EvenementMarcheChien,Notification,Adoption
+from .serializers import AnimalSerializer, DemandeEvenementMarcheSerializer, DemandeGardeSerializer, DemandeAdoptionSerializer, EvenementMarcheChienSerializer,NotificationSerializer,AdoptionSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import viewsets
@@ -36,6 +36,11 @@ class AnimalListCreateView(APIView):
                 'type_garde': animal.type_garde,
                 'image': animal.image  # Copy the image from Animal
             }
+            # after demande_garde_data = { … } and before serializer = DemandeGardeSerializer(...)
+            if demande_garde_data['type_garde'] == 'Temporaire':
+                demande_garde_data['date_reservation'] = request.data.get('date_reservation')
+                demande_garde_data['date_fin']         = request.data.get('date_fin')
+
 
 
             #Pass the request context to the serializer
@@ -212,10 +217,8 @@ class DemandeGardeListCreateView(APIView):
     def post(self, request):
         serializer = DemandeGardeSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            # Automatically assign the logged-in user to the request
-            serializer.save(utilisateur=request.user)  
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()  # No manual override needed
+            return Response(serializer.data, status=201)
     
 
 
@@ -368,11 +371,9 @@ class UserAcceptedTemporaryAnimalsView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        # Filter animals based on historical garde requests that were accepted
         return Animal.objects.filter(
-            historiquegarderie__utilisateur=user,        # Link to the logged-in user
-            historiquegarderie__statut_nouveau="Acceptee",  # Only accepted requests
-            historiquegarderie__type_garde="Temporaire"  # Only temporary garde
+            garderie__utilisateur=user,
+            garderie__type_garde='Temporaire',
         ).distinct()
     
 class UserAcceptedDefinitiveAnimalsView(generics.ListAPIView):
@@ -381,11 +382,9 @@ class UserAcceptedDefinitiveAnimalsView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        # Filter animals based on historical garde requests that were accepted
         return Animal.objects.filter(
-            historiquegarderie__utilisateur=user,        # Link to the logged-in user
-            historiquegarderie__statut_nouveau="Acceptee",  # Only accepted requests
-            historiquegarderie__type_garde="Définitive"  # Only temporary garde
+            garderie__utilisateur=user,
+            garderie__type_garde='Définitive'
         ).distinct()
 class UserAcceptedAdoptionAnimalsView(generics.ListAPIView):
     serializer_class = AnimalSerializer
@@ -393,13 +392,8 @@ class UserAcceptedAdoptionAnimalsView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        # Filter animals based on historical garde requests that were accepted
-        return Animal.objects.filter(
-            historiqueadoption__utilisateur=user,        # Link to the logged-in user
-            historiqueadoption__statut_nouveau="Acceptee",  # Only accepted requests
-            disponible_pour_adoption=False  # Only temporary garde
-            
-        ).distinct()
+        # Get all animals that were adopted by the user via the Adoption model
+        return Animal.objects.filter(adoptions__utilisateur=user).distinct()
 
 # views.py
 class EvenementMarcheChienUserListView(APIView):

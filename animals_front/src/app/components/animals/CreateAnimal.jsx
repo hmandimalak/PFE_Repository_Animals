@@ -44,6 +44,8 @@ const CreateAnimal = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedAdoptedAnimal, setSelectedAdoptedAnimal] = useState(null);
     const [formMode, setFormMode] = useState('new'); // 'new' or 'existing'
+    const [hasAdoptedAnimals, setHasAdoptedAnimals] = useState(false);
+
 
     const existing = {
         fetchAdoptedAnimals: async () => {
@@ -61,23 +63,22 @@ const CreateAnimal = () => {
         },
     };
     useEffect(() => {
-        // Fetch adopted animals when component mounts
-        const fetchAnimals = async () => {
-            setIsLoading(true);
-            try {
-                const animals = await existing.fetchAdoptedAnimals();
-                setAdoptedAnimals(animals || []);
-            } catch (error) {
-                console.error("Error fetching adopted animals:", error);
-                setAdoptedAnimals([]);
-            } finally {
-                setIsLoading(false);
+        const checkAdoptedAnimals = async () => {
+            // Only try to fetch if user is authenticated
+            if (status === 'authenticated') {
+                try {
+                    const animals = await existing.fetchAdoptedAnimals();
+                    setAdoptedAnimals(animals);
+                    setHasAdoptedAnimals(animals.length > 0);
+                } catch (error) {
+                    console.error("Error checking adopted animals:", error);
+                    setHasAdoptedAnimals(false);
+                }
             }
         };
-        
-        fetchAnimals();
-    }, []);
 
+        checkAdoptedAnimals();
+    }, [status, session]);
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
         if (type === 'file') {
@@ -120,6 +121,29 @@ const CreateAnimal = () => {
                 photo: null,
             });
         }
+        if (mode === 'existing') {
+        const token = localStorage.getItem("access_token") || session?.accessToken;
+        // Redirect if not authenticated
+        if (!token) {
+            alert("Veuillez vous connecter pour accéder à vos animaux adoptés.");
+            router.push('/login');
+            return;
+        }
+        // Fetch adopted animals only when authenticated
+        setIsLoading(true);
+        existing.fetchAdoptedAnimals()
+            .then((animals) => {
+                setAdoptedAnimals(animals || []);
+            })
+            .catch((error) => {
+                console.error("Error fetching adopted animals:", error);
+                setAdoptedAnimals([]);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }
+    setFormMode(mode);
     };
 
     const handleSubmit = async (e) => {
@@ -190,12 +214,17 @@ const CreateAnimal = () => {
             formDataObj.append('type_garde', formData.type_garde);
             
             // For temporary garde, include dates
+            // right before you form the FormData for new-animal
             if (formData.type_garde === 'Temporaire') {
-                formDataObj.append('date_reservation', formData.date_reservation);
-                if (formData.date_fin) {
-                    formDataObj.append('date_fin', formData.date_fin);
-                }
+            if (!formData.date_reservation || !formData.date_fin) {
+                alert("Les deux dates sont requises pour une garde temporaire.");
+                setLoading(false);
+                return;
             }
+            formDataObj.append('date_reservation', formData.date_reservation);
+            formDataObj.append('date_fin',         formData.date_fin);
+            }   
+
             
             // Only add photo if provided for existing animal
             if (formData.photo) {
@@ -248,6 +277,10 @@ const CreateAnimal = () => {
             if (formData.photo) {
                 formDataObj.append('image', formData.photo);
             }
+            // in CreateAnimal.jsx, inside existing-animal branch
+            formDataObj.append('date_reservation', formData.date_reservation);
+            formDataObj.append('date_fin',         formData.date_fin);
+
             
             // API endpoint for new animal creation
             const apiUrl = 'http://localhost:8000/api/animals/animaux/';
@@ -347,84 +380,84 @@ const CreateAnimal = () => {
                                 </div>
                             )}
                             
-                            {/* Toggle between new animal and existing adopted animal */}
-                            <div className="mb-6">
-                                <div className="flex items-center justify-center bg-primary/10 p-2 rounded-xl">
-                                    <button
-                                        type="button"
-                                        onClick={() => switchMode('new')}
-                                        className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
-                                            formMode === 'new' 
-                                                ? 'bg-primary text-white shadow-md' 
-                                                : 'text-primary/90 hover:bg-primary/20'
-                                        }`}
-                                    >
-                                        <FaPlusCircle />
-                                        <span>Nouvel Animal</span>
-                                    </button>
-                                    
-                                    <button
-                                        type="button"
-                                        onClick={() => switchMode('existing')}
-                                        className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
-                                            formMode === 'existing' 
-                                                ? 'bg-primary text-white shadow-md' 
-                                                : 'text-primary/90 hover:bg-primary/20'
-                                        }`}
-                                        disabled={adoptedAnimals.length === 0}
-                                    >
-                                        <FaList />
-                                        <span>Animal Existant</span>
-                                    </button>
+ {/* Toggle between new animal and existing adopted animal */}
+            <div className="mb-6">
+                <div className="flex items-center justify-center bg-primary/10 p-2 rounded-xl">
+                    <button
+                        type="button"
+                        onClick={() => switchMode('new')}
+                        className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
+                            formMode === 'new' 
+                                ? 'bg-primary text-white shadow-md' 
+                                : 'text-primary/90 hover:bg-primary/20'
+                        }`}
+                    >
+                        <FaPlusCircle />
+                        <span>Nouvel Animal</span>
+                    </button>
+                    
+                    <button
+                        type="button"
+                        onClick={() => switchMode('existing')}
+                        className={`flex-1 py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-all ${
+                            formMode === 'existing' 
+                                ? 'bg-primary text-white shadow-md' 
+                                : 'text-primary/90 hover:bg-primary/20'
+                        }`}
+                        disabled={hasAdoptedAnimals}
+                    >
+                        <FaList />
+                        <span>Animal Existant</span>
+                    </button>
+                </div>
+            </div>
+            
+            {/* Adopted Animals Selection */}
+            {formMode === 'existing' && (
+                <div className="mb-6 animate-fade-in">
+                    <label className="block text-sm font-semibold text-dark mb-3">
+                        Sélectionnez un de vos animaux
+                    </label>
+                    
+                    {isLoading ? (
+                        <div className="flex justify-center py-8">
+                            <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        </div>
+                    ) : adoptedAnimals.length === 0 ? (
+                        <div className="p-6 text-center bg-primary/5 rounded-xl border border-primary/20">
+                            <p className="text-dark/70">Vous n'avez pas encore d'animaux adoptés.</p>
+                            <button 
+                                onClick={() => switchMode('new')}
+                                className="mt-3 text-primary hover:underline"
+                            >
+                                Créer un nouvel animal
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-2">
+                            {adoptedAnimals.map((animal) => (
+                                <div 
+                                    key={animal.id}
+                                    onClick={() => handleAdoptedAnimalSelect(animal)}
+                                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all flex items-center space-x-3 ${
+                                        selectedAdoptedAnimal?.id === animal.id
+                                            ? 'border-primary bg-primary/10 shadow-md'
+                                            : 'border-accent/30 hover:border-primary/40'
+                                    }`}
+                                >
+                                    <div className="flex-shrink-0 w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center text-2xl">
+                                        {getAnimalEmoji(animal.espece)}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold">{animal.nom}</h3>
+                                        <p className="text-sm text-dark/70">{animal.race} • {animal.sexe === 'M' ? 'Mâle' : 'Femelle'}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            {/* Adopted Animals Selection */}
-                            {formMode === 'existing' && (
-                                <div className="mb-6 animate-fade-in">
-                                    <label className="block text-sm font-semibold text-dark mb-3">
-                                        Sélectionnez un de vos animaux
-                                    </label>
-                                    
-                                    {isLoading ? (
-                                        <div className="flex justify-center py-8">
-                                            <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                        </div>
-                                    ) : adoptedAnimals.length === 0 ? (
-                                        <div className="p-6 text-center bg-primary/5 rounded-xl border border-primary/20">
-                                            <p className="text-dark/70">Vous n'avez pas encore d'animaux adoptés.</p>
-                                            <button 
-                                                onClick={() => switchMode('new')}
-                                                className="mt-3 text-primary hover:underline"
-                                            >
-                                                Créer un nouvel animal
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto p-2">
-                                            {adoptedAnimals.map((animal) => (
-                                                <div 
-                                                    key={animal.id}
-                                                    onClick={() => handleAdoptedAnimalSelect(animal)}
-                                                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all flex items-center space-x-3 ${
-                                                        selectedAdoptedAnimal?.id === animal.id
-                                                            ? 'border-primary bg-primary/10 shadow-md'
-                                                            : 'border-accent/30 hover:border-primary/40'
-                                                    }`}
-                                                >
-                                                    <div className="flex-shrink-0 w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center text-2xl">
-                                                        {getAnimalEmoji(animal.espece)}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold">{animal.nom}</h3>
-                                                        <p className="text-sm text-dark/70">{animal.race} • {animal.sexe === 'M' ? 'Mâle' : 'Femelle'}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
                             <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

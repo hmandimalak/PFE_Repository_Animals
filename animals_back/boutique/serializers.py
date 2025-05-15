@@ -4,10 +4,22 @@ from .models import ArticlesCommande, Commande, Notification, Produit
 
 ### 📦 Serializer Produit ###
 class ProduitSerializer(serializers.ModelSerializer):
-    class Meta:
-        ordering = ['id']  # Default ordering by ID
-        model = Produit
-        fields = '__all__'
+     is_discount_active = serializers.SerializerMethodField()
+     prix_promotion      = serializers.SerializerMethodField()
+ 
+     class Meta:
+         model  = Produit
+         fields = [
+             'id', 'nom', 'description', 'prix', 'prix_promotion',
+             'stock', 'categorie', 'image', 'is_discount_active',
+             'discount_percent', 'date_ajout'
+         ]
+
+     def get_is_discount_active(self, obj):
+        return obj.is_discount_active  # Map backend field to frontend field
+
+     def get_prix_promotion(self, obj):
+        return obj.prix_promotion  # Expose computed property
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification

@@ -7,6 +7,7 @@ import { Nunito } from "next/font/google";
 import { FaPaw, FaDog, FaCat, FaGoogle, FaHeart, FaSmile, FaArrowRight, FaHome, FaShoppingBag, FaWalking, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaLink, FaEnvelopeOpen, FaPaperPlane, FaFacebook, FaTwitter, FaInstagram, FaYoutube, FaSearch } from "react-icons/fa";
 import { useSession, signOut } from "next-auth/react";
 import Navbar from "./NavbarPage";
+import Link from "next/link";
 import { authenticatedFetch } from '../../app/authInterceptor'
 
 const nunito = Nunito({ subsets: ["latin"] });
@@ -545,7 +546,7 @@ export default function Home() {
 <div className="mt-16 bg-gray-100 border-t-4 border-primary">
   <div className="max-w-6xl mx-auto px-4 py-8">
     {/* Footer Top - Main Sections */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
       {/* Contact Information */}
       <div>
         <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
@@ -554,11 +555,11 @@ export default function Home() {
         <ul className="space-y-3 text-dark/80">
           <li className="flex items-start">
             <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
-            <span>123 Rue des Animaux, 75001 Paris, France</span>
+            <span>123 Rue des Animaux, 8000 Nabeul, Tunisie</span>
           </li>
           <li className="flex items-center">
             <FaPhone className="mr-2 text-primary flex-shrink-0" />
-            <span>01 23 45 67 89</span>
+            <span>95 888 751</span>
           </li>
           <li className="flex items-center">
             <FaEnvelope className="mr-2 text-primary flex-shrink-0" />
@@ -573,9 +574,9 @@ export default function Home() {
           <FaClock className="mr-2 text-primary" /> Horaires
         </h3>
         <ul className="space-y-2 text-dark/80">
-          <li>Lundi - Vendredi: 9h - 19h</li>
-          <li>Samedi: 10h - 18h</li>
-          <li>Dimanche: 10h - 16h</li>
+          <li>Lundi - Vendredi: 9h - 18h</li>
+          <li>Samedi: 9h - 13h</li>
+          <li>Dimanche: 9h - 16h</li>
           <li className="text-primary font-semibold mt-2">
             Permanence téléphonique 24h/24
           </li>
@@ -583,70 +584,61 @@ export default function Home() {
       </div>
 
       {/* Liens Rapides */}
-      <div>
-        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
-          <FaLink className="mr-2 text-primary" /> Liens Rapides
-        </h3>
-        <ul className="space-y-2 text-dark/80">
-          <li>
-            <button className="hover:text-primary flex items-center">
-              <FaPaw className="mr-2 text-xs" /> Nos animaux
-            </button>
-          </li>
-          <li>
-            <button className="hover:text-primary flex items-center">
-              <FaPaw className="mr-2 text-xs" /> Faire un don
-            </button>
-          </li>
-          <li>
-            <button className="hover:text-primary flex items-center">
-              <FaPaw className="mr-2 text-xs" /> Devenir bénévole
-            </button>
-          </li>
-          <li>
-            <button className="hover:text-primary flex items-center">
-              <FaPaw className="mr-2 text-xs" /> Mentions légales
-            </button>
-          </li>
-        </ul>
-      </div>
+<div>
+  <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+    <FaLink className="mr-2 text-primary" /> Liens Rapides
+  </h3>
+  <ul className="space-y-2 text-dark/80">
+    <li>
+      <Link href="/nos-animaux" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Nos animaux
+      </Link>
+    </li>
+    <li>
+      <Link href="/garderie" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Service garde
+      </Link>
+    </li>
+    <li>
+      <Link href="/boutique" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Notre boutique
+      </Link>
+    </li>
+    <li>
+      <Link href="/marche" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Evennements
+      </Link>
+    </li>
+  </ul>
+</div>
 
-      {/* Newsletter */}
-      <div>
-        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
-          <FaEnvelopeOpen className="mr-2 text-primary" /> Newsletter
-        </h3>
-        <p className="text-dark/80 mb-3">Recevez nos actualités et promotions</p>
-        <div className="flex">
-          <input
-            type="email"
-            placeholder="Votre email"
-            className="px-3 py-2 rounded-l-lg border border-accent focus:outline-none focus:ring-1 focus:ring-primary w-full"
-          />
-          <button className="bg-primary text-white px-3 py-2 rounded-r-lg hover:bg-accent transition">
-            <FaPaperPlane />
-          </button>
-        </div>
-      </div>
+     
     </div>
 
     {/* Social Media */}
-    <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
-      {[
-        { icon: FaFacebook, label: "Facebook" },
-        { icon: FaTwitter, label: "Twitter" },
-        { icon: FaInstagram, label: "Instagram" },
-        { icon: FaYoutube, label: "YouTube" },
-      ].map((social, index) => (
-        <button 
-          key={index} 
-          className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
-          aria-label={social.label}
-        >
-          <social.icon />
-        </button>
-      ))}
-    </div>
+   <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
+  {[
+    { 
+      icon: FaFacebook, 
+      label: "Facebook", 
+      href: "https://www.facebook.com/mouez.benyounes/ " 
+    },
+    { icon: FaTwitter, label: "Twitter", href: "https://x.com/benyounesbaha1?t=NhqlO6UTZxdumgHQQ4YcMQ&s=09" },
+    { icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/baha_benyounes0/" },
+    { icon: FaYoutube, label: "YouTube", href: "https://www.youtube.com/@ben_younesbaha3194" },
+  ].map((social, index) => (
+    <a
+      key={index}
+      href={social.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
+      aria-label={social.label}
+    >
+      <social.icon />
+    </a>
+  ))}
+</div>
 
     {/* Copyright */}
     <div className="text-center pt-4 border-t border-dark/10 text-dark/70">

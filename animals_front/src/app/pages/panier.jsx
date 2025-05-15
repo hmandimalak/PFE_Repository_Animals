@@ -22,42 +22,49 @@ const Panier = () => {
   const router = useRouter();
   const { data: session } = useSession();
 
-  useEffect(() => {
-    setIsClient(true);
-    setLoading(true);
-
-    const authToken = getAuthToken();
-    if (authToken) {
-      authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/')
-        .then(response => {
-          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-          return response.json();
-        })
-        .then(data => {
-          if (data && Array.isArray(data)) {
-            const formattedCart = data.map(item => ({
-              id: item.id,
-              nom: item.nom,
-              prix: item.prix,
-              image: item.image,
-              quantity: item.quantity
-            }));
+// Fetch product list and apply discounts to cart items
+useEffect(() => {
+  setIsClient(true);
+  setLoading(true);
+  const authToken = getAuthToken();
+  if (authToken) {
+    // Fetch cart items
+    authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/')
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+      })
+      .then(cartData => {
+        // Fetch product list to check discount status
+        return fetch('http://127.0.0.1:8000/api/boutique/produits/')
+          .then(res => res.json())
+          .then(productData => {
+            const formattedCart = cartData.map(item => {
+              const product = productData.find(p => p.id === item.id);
+              const effectivePrice = product?.is_discount_active
+                ? parseFloat(product.prix_promotion)
+                : parseFloat(product?.prix || item.prix);
+              return {
+                ...item,
+                prix: effectivePrice
+              };
+            });
             setCartItems(formattedCart);
-          }
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching cart:', error);
-          const savedCart = localStorage.getItem('cart');
-          if (savedCart) setCartItems(JSON.parse(savedCart));
-          setLoading(false);
-        });
-    } else {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) setCartItems(JSON.parse(savedCart));
-      setLoading(false);
-    }
-  }, [session]);
+            setLoading(false);
+          });
+      })
+      .catch(error => {
+        console.error('Error fetching cart:', error);
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) setCartItems(JSON.parse(savedCart));
+        setLoading(false);
+      });
+  } else {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) setCartItems(JSON.parse(savedCart));
+    setLoading(false);
+  }
+}, [session]);
 
   useEffect(() => {
     if (isClient) localStorage.setItem('cart', JSON.stringify(cartItems));
@@ -101,9 +108,9 @@ const Panier = () => {
     }
   };
 
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.prix * item.quantity), 0).toFixed(2);
-  };
+const getTotalPrice = () => {
+  return cartItems.reduce((total, item) => total + (parseFloat(item.prix) * item.quantity), 0).toFixed(2);
+};
 
  
 
@@ -176,8 +183,10 @@ const Panier = () => {
                 />
                       <div className="flex-grow">
                         <h3 className="text-lg font-semibold text-dark">{item.nom}</h3>
-                        <p className="text-primary font-medium">{item.prix} DT</p>
-                      </div>
+<p className="text-primary font-medium">{item.prix} DT</p>
+<p className="text-xl font-bold text-primary">
+  {(item.prix * item.quantity).toFixed(2)} DT
+</p>                      </div>
                     </div>
                     
                     <div className="flex items-center w-full sm:w-auto justify-between sm:justify-normal">

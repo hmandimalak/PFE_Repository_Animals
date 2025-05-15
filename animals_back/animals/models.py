@@ -72,13 +72,22 @@ class DemandeGarde(models.Model):
     message = models.TextField(blank=True, null=True)
     type_garde = models.CharField(max_length=20, choices=TYPE_GARDE_CHOICES, default='Temporaire') 
     image = models.ImageField(upload_to='animaux/', blank=True, null=True)
+    date_reservation = models.DateField(blank=False, null=False)  # Change to NOT NULL
+    date_fin = models.DateField(blank=False, null=False)  # Change to NOT NULL
 
 
 
     def __str__(self):
         return f"Demande de garde pour {self.animal.nom} par {self.utilisateur.nom} ({self.statut})"
 
+class Adoption(models.Model):
+    animal = models.ForeignKey('Animal', on_delete=models.CASCADE, related_name='adoptions')
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='adoptions')
+    date_adoption = models.DateTimeField(auto_now_add=True)
+    message = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return f"Adoption de {self.animal.nom} par {self.utilisateur.nom} le {self.date_adoption.strftime('%d/%m/%Y')}"
 class DemandeAdoption(models.Model):
     STATUS_CHOICES = [
         ('En attente', 'En attente'),
@@ -104,7 +113,26 @@ class DemandeAdoption(models.Model):
 
     def __str__(self):
         return f"Demande d'adoption pour {self.animal.nom} par {self.utilisateur.nom} ({self.statut})"
-
+class Garderie(models.Model):
+    """Model to track active animal fosterings"""
+    animal = models.OneToOneField('Animal', on_delete=models.CASCADE, related_name='garderie')
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='garderie')
+    date_debut = models.DateField(auto_now_add=True)
+    date_fin = models.DateField()
+    image = models.ImageField(upload_to='animaux/', blank=True, null=True)
+    type_garde = models.CharField(
+        max_length=20, 
+        choices=Animal.TYPE_GARDE_CHOICES,
+        default='Temporaire'
+    )
+    
+    
+    def __str__(self):
+        return f"Garderie de {self.animal.nom} par {self.utilisateur.nom} jusqu'au {self.date_fin}"
+    
+    class Meta:
+        verbose_name = "Garderie"
+        verbose_name_plural = "Garderies"
 class HistoriqueDemandeGarde(models.Model):
     TYPE_GARDE_CHOICES = [
         ('Temporaire', 'Temporaire'),
@@ -119,6 +147,7 @@ class HistoriqueDemandeGarde(models.Model):
         null=True,
         blank=True
     )
+    
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     statut_precedent = models.CharField(max_length=50)
     statut_nouveau = models.CharField(max_length=50)

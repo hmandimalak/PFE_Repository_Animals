@@ -63,11 +63,24 @@ const api = {
   }
 };
 
-// Helper functions
-const getImageUrl = (imagePath) => {
+// utils/api.js (or wherever you keep your helpers)
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+
+export const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
-  return imagePath.startsWith('http') ? imagePath : `http://127.0.0.1:8000${imagePath}`;
+  // If it’s already a full URL, just return it
+  if (imagePath.startsWith("http")) {
+    return imagePath;
+  }
+  // Otherwise, make sure it includes /media/, then prefix your Django host
+  // imagePath might already include "/media", so we guard against duplicating it
+  const cleanPath = imagePath.startsWith("/media/")
+    ? imagePath
+    : `/media${imagePath.startsWith("/") ? "" : "/"}${imagePath}`;
+  return `${API_BASE}${cleanPath}`;
 };
+
 
 export default function Profile() {
   const router = useRouter();
@@ -604,7 +617,7 @@ export default function Profile() {
                               <div key={item.id} className="flex items-center justify-between py-2">
                                 <div className="flex items-center gap-4">
                                 <img 
-                                        src={item.image_url || '/placeholder-product.jpg'} 
+                                        src={getImageUrl(item.image)|| '/placeholder-product.jpg'} 
                                         alt={item.nom} 
                                         className="w-16 h-16 rounded-lg object-cover"
                                       />

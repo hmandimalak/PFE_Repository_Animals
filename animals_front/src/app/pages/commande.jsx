@@ -33,66 +33,68 @@ const Commande = () => {
 
   const { data: session } = useSession();
 
-  useEffect(() => {
-    setIsClient(true);
-    setLoading(true);
+useEffect(() => {
+  setIsClient(true);
+  setLoading(true);
 
-    // Fetch user's cart
-    const authToken = getAuthToken();
-    if (authToken) {
-      // Fetch cart items
-      authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/')
-        .then(response => {
-          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-          return response.json();
-        })
-        .then(data => {
-          if (data && Array.isArray(data)) {
-            const formattedCart = data.map(item => ({
-              id: item.id,
-              nom: item.nom,
-              prix: item.prix,
-              image: item.image,
-              quantity: item.quantity
-            }));
-            setCartItems(formattedCart);
-          }
-          setLoading(false);
-        })
-        .catch(error => {
-          console.error('Error fetching cart:', error);
-          const savedCart = localStorage.getItem('cart');
-          if (savedCart) setCartItems(JSON.parse(savedCart));
-          setLoading(false);
-        });
-        
-      // Fetch user profile for address data
-      authenticatedFetch('http://127.0.0.1:8000/api/auth/profile/')
-        .then(response => {
-          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-          return response.json();
-        })
-        .then(data => {
-          if (data) {
-            setAddressData({
-              nom: data.nom || '',
-              prenom: data.prenom || '',
-              adresse: data.adresse || '',
-              code_postal: data.code_postal || '',
-              ville: data.ville || '',
-              telephone: data.telephone || ''
+  const authToken = getAuthToken();
+  if (authToken) {
+    // Fetch cart items
+    authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/')
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+      })
+      .then(cartData => {
+        // Fetch product list to check discount status
+        return fetch('http://127.0.0.1:8000/api/boutique/produits/')
+          .then(res => res.json())
+          .then(productData => {
+            const formattedCart = cartData.map(item => {
+              const product = productData.find(p => p.id === item.id);
+              const effectivePrice = product?.is_discount_active
+                ? parseFloat(product.prix_promotion)
+                : parseFloat(product?.prix || item.prix);
+              return {
+                ...item,
+                prix: effectivePrice
+              };
             });
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching user profile:', error);
+            setCartItems(formattedCart);
+          });
+      })
+      .catch(error => {
+        console.error('Error fetching cart:', error);
+        const savedCart = localStorage.getItem('cart');
+        if (savedCart) setCartItems(JSON.parse(savedCart));
+      })
+      .finally(() => setLoading(false));
+
+    // Fetch user profile for address data
+    authenticatedFetch('http://127.0.0.1:8000/api/auth/profile/')
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        setAddressData({
+          nom: data.nom || '',
+          prenom: data.prenom || '',
+          adresse: data.adresse || '',
+          code_postal: data.code_postal || '',
+          ville: data.ville || '',
+          telephone: data.telephone || ''
         });
-    } else {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) setCartItems(JSON.parse(savedCart));
-      setLoading(false);
-    }
-  }, [session]);
+      })
+      .catch(error => {
+        console.error('Error fetching user profile:', error);
+      });
+  } else {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) setCartItems(JSON.parse(savedCart));
+    setLoading(false);
+  }
+}, [session]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -102,83 +104,69 @@ const Commande = () => {
     }));
   };
 
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.prix * item.quantity), 0).toFixed(2);
-  };
 
-  const getSubtotal = () => {
-    return (parseFloat(getTotalPrice()) * 0.8).toFixed(2);
-  };
-
-  const getTVA = () => {
-    return (parseFloat(getTotalPrice()) * 0.2).toFixed(2);
-  };
 
   const getLivraisonFees = () => {
     const total = parseFloat(getTotalPrice());
     return total >= 20 ? "0.00" : "5";
   };
 
-  const getFinalTotal = () => {
-    const total = parseFloat(getTotalPrice());
-    const livraison = total >= 50 ? 0 : 4.99;
-    return (total + livraison).toFixed(2);
-  };
+const getTotalPrice = () => {
+  return cartItems.reduce((total, item) => total + (parseFloat(item.prix) * item.quantity), 0).toFixed(2);
+};
 
-  const handleSubmitOrder = async (e) => {
-    e.preventDefault();
-    
-    if (!addressData.nom || !addressData.prenom || !addressData.adresse || !addressData.code_postal || !addressData.ville || !addressData.telephone) {
-      alert("Veuillez remplir toutes les informations de livraison");
-      return;
-    }
-    
-    const authToken = getAuthToken();
-    if (!authToken) {
-      alert("Vous devez être connecté pour passer une commande.");
-      localStorage.setItem('redirectAfterLogin', '/commande');
-      return;
-    }
-    
-    setProcessingOrder(true);
-    
-    try {
-      // Create order with address and payment method
-      const response = await authenticatedFetch('http://127.0.0.1:8000/api/boutique/commander/', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({
-          adresse_livraison: `${addressData.prenom} ${addressData.nom}, ${addressData.adresse}, ${addressData.code_postal} ${addressData.ville}`,
-          telephone: addressData.telephone,
-          methode_paiement: 'livraison'
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Order error details:', errorData);
-        alert(`Error: ${JSON.stringify(errorData)}`);
-        throw new Error(`Error: ${response.status}`);
-      }
-      
-      // Get response data
-      const data = await response.json();
-      
-      // Clear cart
-      localStorage.removeItem('cart');
-      setCartItems([]);
-      
-      // Show success message without redirect
-      setOrderSuccess(true);
-      setOrderNumber(data.numero_commande);
-      setProcessingOrder(false);
-    } catch (error) {
-      console.error('Error creating order:', error);
-      setProcessingOrder(false);
-    }
-  };
+const getSubtotal = () => {
+  return (parseFloat(getTotalPrice()) * 0.8).toFixed(2);
+};
+
+const getTVA = () => {
+  return (parseFloat(getTotalPrice()) * 0.2).toFixed(2);
+};
+
+const getFinalTotal = () => {
+  const total = parseFloat(getTotalPrice());
+  const livraison = total >= 50 ? 0 : 4.99;
+  return (total + livraison).toFixed(2);
+};
+
+const handleSubmitOrder = async (e) => {
+  e.preventDefault();
+  const authToken = getAuthToken();
+  if (!authToken) {
+    alert("Vous devez être connecté pour passer une commande.");
+    return;
+  }
+  setProcessingOrder(true);
+
+  try {
+    const response = await authenticatedFetch('http://127.0.0.1:8000/api/boutique/commander/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adresse_livraison: `${addressData.prenom} ${addressData.nom}, ${addressData.adresse}, ${addressData.code_postal} ${addressData.ville}`,
+        telephone: addressData.telephone,
+        methode_paiement: 'livraison',
+        items: cartItems.map(item => ({
+          produit_id: item.id,
+          quantity: item.quantity,
+          prix: item.prix // Send the discounted price
+        }))
+      })
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const data = await response.json();
+    localStorage.removeItem('cart');
+    setCartItems([]);
+    setOrderSuccess(true);
+    setOrderNumber(data.numero_commande);
+  } catch (error) {
+    console.error('Error creating order:', error);
+    alert("Une erreur s'est produite lors de la validation de la commande.");
+  } finally {
+    setProcessingOrder(false);
+  }
+};
 
   const handleRemoveItem = async (productId) => {
     try {

@@ -17,7 +17,7 @@ class BlogContent(models.Model):
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+   
     class Meta:
         ordering = ['order']
         verbose_name = 'Blog Section'
@@ -36,6 +36,7 @@ class BlogPost(models.Model):
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
     
     class Meta:
         ordering = ['-created_at']

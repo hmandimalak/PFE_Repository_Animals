@@ -1,9 +1,10 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   FaTrash, FaShoppingCart, FaSearch, 
   FaDog, FaCat, FaBone, FaShower, FaPaw,
-  FaChevronRight, FaHeart, FaStar,FaFilter
+  FaChevronRight, FaHeart, FaStar, FaFilter
 } from 'react-icons/fa';
 import Link from 'next/link';
 import Navbar from './NavbarPage';
@@ -60,6 +61,9 @@ const Boutique = () => {
   const [wishlist, setWishlist] = useState([]);
   const { data: session } = useSession();
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+
 
   // Function to calculate total items in the cart
   const getTotalItems = () => {
@@ -80,70 +84,47 @@ useEffect(() => {
   setIsClient(true);
   fetch('http://127.0.0.1:8000/api/boutique/produits/')
     .then((response) => response.json())
-    .then((data) => {
-      setProduits(data);
-      setLoading(false);
-    })
-    .catch((error) => {
-      console.error('Error fetching produits:', error);
-      setLoading(false);
-    });
+    .then((productData) => {
+      setProduits(productData);
 
-  // Improved cart fetching logic with better error handling
+  // Check if user is authenticated
   const authToken = getAuthToken(session);
-  if (authToken) {
-    // Use regular fetch with authorization header instead of authenticatedFetch
-    fetch('http://127.0.0.1:8000/api/boutique/panier/', {
-      method: 'GET',
-      headers: {
-        'Authorization': authToken,
-        'Content-Type': 'application/json'
-      },
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data && Array.isArray(data)) {
-          const formattedCart = data.map(item => ({
-            id: item.id,
-            nom: item.nom,
-            prix: item.prix,
-            image: item.image,
-            quantity: item.quantity
-          }));
-          setCartItems(formattedCart);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching cart:', error);
-        // Fallback to localStorage if API call fails
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) setCartItems(JSON.parse(savedCart));
-      });
-  } else {
-    // Not authenticated, use localStorage for cart
-    if (typeof window !== "undefined") {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) setCartItems(JSON.parse(savedCart));
-    }
-  }
+  setIsAuthenticated(!!authToken);
 
-  // Load wishlist from localStorage
-  if (typeof window !== "undefined") {
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
-  }
+ if (authToken) {
+        authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        })
+        .then(response => response.json())
+        .then(cartData => {
+          const formattedCart = cartData.map(cartItem => {
+            const product = productData.find(p => p.id === cartItem.id);
+            const effectivePrice = product?.is_discount_active
+            ? parseFloat(product.prix_promotion)
+            : parseFloat(product?.prix || cartItem.prix);
+
+            return {
+              ...cartItem,
+              prix: effectivePrice
+            };
+          });
+          setCartItems(formattedCart);
+        })
+        .catch(error => {
+          console.error('Error fetching cart:', error);
+          const savedCart = localStorage.getItem('cart');
+          if (savedCart) setCartItems(JSON.parse(savedCart));
+        });
+      }
+    });
 }, [session]);
 
   useEffect(() => {
-    if (isClient && cartItems.length > 0 && typeof window !== "undefined") {
+    if (isClient && cartItems.length > 0 && typeof window !== "undefined" && isAuthenticated) {
       localStorage.setItem('cart', JSON.stringify(cartItems));
     }
-  }, [cartItems, isClient]);
+  }, [cartItems, isClient, isAuthenticated]);
 
   useEffect(() => {
     if (isClient && wishlist.length > 0 && typeof window !== "undefined") {
@@ -189,72 +170,59 @@ useEffect(() => {
     }
   };
 
-  const handleAddToCart = async (produit, e) => {
-    if (e) e.stopPropagation();
-    
-    const authToken = getAuthToken(session);
-    if (!authToken) {
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-6 right-6 bg-dark text-white py-3 px-6 rounded-lg shadow-lg z-50 animate-bounce';
-      toast.textContent = 'Veuillez vous connecter pour ajouter des articles au panier';
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
-      
-      localStorage.setItem('redirectAfterLogin', window.location.pathname);
-      alert("vous devez connecter pour ajouter un produit au panier");
-      return;
-    }
-    
-    const existingItem = cartItems.find(item => item.id === produit.id);
-    const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
-    
-    // Optimistic UI update
-    if (existingItem) {
-      setCartItems(cartItems.map(item => item.id === produit.id ? { ...item, quantity: newQuantity } : item));
-    } else {
-      setCartItems([...cartItems, { ...produit, quantity: 1 }]);
-    }
-    
-    // Show mini toast notification
-    const toast = document.createElement('div');
-    toast.className = 'fixed bottom-6 right-6 bg-primary text-white py-3 px-6 rounded-lg shadow-lg z-50 flex items-center gap-2';
-    toast.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Produit ajouté au panier`;
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-      toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-      setTimeout(() => toast.remove(), 500);
-    }, 2000);
-    
-    try {
-      await authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/ajouter/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ produit_id: produit.id, quantity: 1 }),
-      });
-    } catch (error) {
-      console.error('Network error:', error);
-      // Rollback UI on error
-      if (existingItem) {
-        setCartItems(cartItems.map(item => item.id === produit.id ? { ...item, quantity: existingItem.quantity } : item));
-      } else {
-        setCartItems(cartItems.filter(item => item.id !== produit.id));
-      }
-      alert('Erreur de connexion. Veuillez vérifier votre connexion internet.');
-    }
-  };
+const handleAddToCart = async (produit, e) => {
+  if (e) e.stopPropagation();
+  const authToken = getAuthToken(session);
+  if (!authToken) {
+    alert("vous devez connecter pour ajouter un produit au panier");
+    return;
+  }
 
-  const toggleWishlist = (produit, e) => {
-    if (e) e.stopPropagation();
-    
-    if (wishlist.includes(produit.id)) {
-      setWishlist(wishlist.filter(id => id !== produit.id));
+  const effectivePrice = produit.is_discount_active
+    ? parseFloat(produit.prix_promotion)
+    : parseFloat(produit.prix);
+
+  const existingItem = cartItems.find(item => item.id === produit.id);
+  const newQuantity = existingItem ? existingItem.quantity + 1 : 1;
+
+  // Optimistically update UI
+  if (existingItem) {
+    setCartItems(cartItems.map(item => 
+      item.id === produit.id 
+        ? { ...item, quantity: newQuantity } 
+        : item
+    ));
+  } else {
+    setCartItems([...cartItems, { 
+      ...produit, 
+      quantity: 1,
+      prix: effectivePrice
+    }]);
+  }
+
+  try {
+    await authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/ajouter/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ produit_id: produit.id, quantity: 1 }),
+    });
+  } catch (error) {
+    console.error('Network error:', error);
+    // Revert UI on error
+    if (existingItem) {
+      setCartItems(cartItems.map(item => 
+        item.id === produit.id 
+          ? { ...item, quantity: existingItem.quantity } 
+          : item
+      ));
     } else {
-      setWishlist([...wishlist, produit.id]);
+      setCartItems(cartItems.filter(item => item.id !== produit.id));
     }
-  };
+    alert('Erreur de connexion. Veuillez vérifier votre connexion internet.');
+  }
+};
+
+ 
 
   const handleDirectCheckout = async (produit, e) => {
     if (e) e.stopPropagation();
@@ -293,11 +261,18 @@ useEffect(() => {
       <motion.button
         whileTap={{ scale: 0.95 }}
         whileHover={{ scale: 1.05 }}
-        onClick={() => setCartOpen(!cartOpen)}
+        onClick={() => {
+          if (isAuthenticated) {
+            setCartOpen(!cartOpen);
+          } else {
+            alert("Veuillez vous connecter pour accéder au panier");
+            localStorage.setItem('redirectAfterLogin', window.location.pathname);
+          }
+        }}
         className="relative bg-primary text-white p-4 rounded-full shadow-xl hover:bg-primary/90 transition-all"
       >
         <FaShoppingCart className="w-6 h-6" />
-        {cartItems.length > 0 && (
+        {isAuthenticated && cartItems.length > 0 && (
           <motion.span 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -458,6 +433,7 @@ useEffect(() => {
   };
 
   return (
+    
      <div className={`min-h-screen bg-gradient-to-b from-secondary via-secondary/30 to-white ${nunito.className}`}>
                  <div className="sticky top-0 w-full z-50 bg-white shadow-md">
                      <Navbar />
@@ -475,7 +451,7 @@ useEffect(() => {
                  <div className="absolute top-60 right-1/4 opacity-10 animate-bounce delay-300">
                      <FaPaw className="w-20 h-20 text-primary" />
                  </div>
-      {cartOpen && <MiniCart />}
+      {isAuthenticated && cartOpen && <MiniCart />}
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <motion.div 
@@ -644,7 +620,6 @@ useEffect(() => {
                   >
                     <div className="relative h-60">
                     <img
-
                   src={produit.image.startsWith('http') 
                     ? produit.image 
                     : `http://127.0.0.1:8000/media/${produit.image}`}
@@ -658,20 +633,15 @@ useEffect(() => {
                         <CategoryIcon category={produit.categorie} />
                         {produit.categorie}
                       </div>
+                       {/* Discount Badge */}
+        {produit.is_discount_active && (
+  <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-medium">
+    -{produit.discount_percent}%
+  </div>
+)}
                       
-                      {/* Wishlist Button */}
-                      <button
-                        onClick={(e) => toggleWishlist(produit, e)}
-                        className="absolute top-3 right-3 bg-white/90 text-dark p-2 rounded-full shadow-md hover:bg-white transition-colors"
-                      >
-                        <FaHeart 
-                          className={`w-4 h-4 ${
-                            wishlist.includes(produit.id) 
-                              ? 'text-red-500' 
-                              : 'text-dark/40'
-                          }`} 
-                        />
-                      </button>
+                      
+                    
                       
                       {/* Quick action buttons that appear on hover */}
                       <div className="absolute inset-0 bg-dark/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
@@ -688,18 +658,6 @@ useEffect(() => {
                     </div>
                     
                     <div className="p-4 space-y-3">
-                      {/* Product Rating */}
-                      <div className="flex items-center gap-1 text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <FaStar 
-                            key={i} 
-                            className={`w-4 h-4 ${i < Math.floor(Math.random() * 2) + 4 ? 'text-yellow-400' : 'text-gray-300'}`} 
-                          />
-                        ))}
-                        <span className="text-dark/60 text-sm ml-1">
-                          ({Math.floor(Math.random() * 100) + 1})
-                        </span>
-                      </div>
                       {/* Product Name */}
                       <h3 className="text-xl font-bold text-dark group-hover:text-primary transition-colors">{produit.nom}</h3>
                       
@@ -707,11 +665,29 @@ useEffect(() => {
                       <p className="text-dark/60 text-sm line-clamp-2">
                         {produit.description || 'Aucune description disponible pour ce produit. Contactez-nous pour plus d\'informations.'}
                       </p>
+                                      {produit.is_discount_active && (
+  <div className="absolute top-3 right-3 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-medium">
+    -{produit.discount_percent}%
+  </div>
+)}
+     
                       
                       <div className="flex justify-between items-center mt-4">
-                        <span className="text-2xl font-bold text-primary">
-                          {parseFloat(produit.prix).toFixed(2)} DT
-                        </span>
+{produit.is_discount_active ? (
+  <div className="flex flex-col">
+    <span className="text-xl font-bold text-primary">
+      {parseFloat(produit.prix_promotion).toFixed(2)} DT
+    </span>
+    <span className="text-sm text-dark/60 line-through">
+      {parseFloat(produit.prix).toFixed(2)} DT
+    </span>
+  </div>
+) : (
+  <span className="text-xl font-bold text-primary">
+    {parseFloat(produit.prix).toFixed(2)} DT
+  </span>
+)}
+
                         <button
                           onClick={(e) => handleAddToCart(produit, e)}
                           className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2 group"
@@ -720,7 +696,7 @@ useEffect(() => {
                           <span className="hidden sm:inline">Ajouter</span>
                         </button>
                       </div>
-                    </div>
+                     </div>
                   </motion.div>
                 ))}
               </div>
@@ -773,54 +749,6 @@ useEffect(() => {
         </svg>
       </button>
 
-      {/* Custom global CSS for scrollbar */}
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #88BDF2;
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #6A89A7;
-        }
-        
-        /* Animation classes */
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fade-in-up {
-          animation: fadeInUp 0.5s ease-out;
-        }
-        
-        @keyframes fadeInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fade-in-down {
-          animation: fadeInDown 0.5s ease-out;
-        }
-      `}</style>
     </div>
   );
 };

@@ -11,7 +11,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
-from .serializers import CommandeDetailSerializer, NotificationSerializer
+from .serializers import CommandeDetailSerializer, NotificationSerializer, ProduitSerializer
+from decimal import Decimal
+from django.db import transaction
 
 # Existing views
 def get_produits(request):
@@ -36,8 +38,8 @@ def get_produits(request):
         products = products.order_by(ordering)
     
     # Return values as list
-    product_values = products.values('id', 'nom', 'description', 'prix', 'image', 'categorie')
-    return JsonResponse(list(product_values), safe=False)
+    serializer = ProduitSerializer(products, many=True, context={'request': request})
+    return JsonResponse(serializer.data, safe=False)
 
 def produit_detail(request, produit_id):
     product = Produit.objects.filter(id=produit_id).values('id', 'nom', 'description', 'prix', 'image', 'categorie').first()
@@ -168,37 +170,41 @@ def creer_commande(request):
     """
     Create a new order from the cart items and reduce product inventory
     """
-    # Get request data
     data = request.data
     adresse_livraison = data.get('adresse_livraison', '')
     telephone = data.get('telephone', '')
     methode_paiement = data.get('methode_paiement', 'livraison')
     
-    # Get user's cart
     try:
         panier = Panier.objects.get(utilisateur=request.user)
     except Panier.DoesNotExist:
         return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    # Get all cart items
     articles = ArticlesPanier.objects.filter(panier=panier).select_related('produit')
     
     if not articles:
         return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Use transaction to ensure database consistency
     with transaction.atomic():
-        # Check inventory before proceeding
+        # Validate inventory first
         for article in articles:
             if article.produit.stock < article.quantite:
                 return Response({
                     'error': f'Not enough stock for {article.produit.nom}. Available: {article.produit.stock}'
                 }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Calculate total price
-        total_prix = sum(article.produit.prix * article.quantite for article in articles)
-        
-        # Create the order
+
+        # Calculate total price with discounts
+        total_prix = Decimal('0')
+        for article in articles:
+            produit = article.produit
+            if produit.is_discount_active:
+                prix = produit.prix_promotion  # Uses discounted price
+            else:
+                prix = produit.prix  # Regular price
+            
+            total_prix += prix * article.quantite
+
+        # Create order
         commande = Commande.objects.create(
             utilisateur=request.user,
             total_prix=total_prix,
@@ -208,18 +214,26 @@ def creer_commande(request):
             methode_paiement=methode_paiement
         )
         
-        # Create order items and reduce inventory
+        # Create order items with individual prices
         for article in articles:
-            # Create order item
+            produit = article.produit
+            if produit.is_discount_active:
+                prix_unitaire = produit.prix_promotion
+            else:
+                prix_unitaire = produit.prix
+            
             ArticlesCommande.objects.create(
                 commande=commande,
-                produit=article.produit,
+                produit=produit,
                 quantite=article.quantite,
-                prix_unitaire=article.produit.prix  # Store current price
+                prix_unitaire=prix_unitaire  # Store exact price at order time
             )
             
-           
-        # Empty the cart
+            # Reduce inventory
+            produit.stock -= article.quantite
+            produit.save()
+
+        # Clear cart
         articles.delete()
         
         return Response({

@@ -5,10 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import Navbar from '../../pages/NavbarPage';
-import { 
-  FaLock, FaEnvelope, FaPaw, FaDog, FaCat, 
-  FaGoogle, FaSignInAlt, FaKey, FaArrowRight
-} from "react-icons/fa";
+import { FaLock, FaEnvelope, FaPaw, FaDog, FaCat, FaGoogle, FaSignInAlt, FaKey, FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -18,6 +15,7 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const { data: session } = useSession();
 
   const handleChange = (e) => {
@@ -45,6 +43,9 @@ export default function LoginForm() {
       setLoading(false);
     }
   };
+  const togglePasswordVisibility = () => {
+  setShowPassword(!showPassword);
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -185,21 +186,38 @@ export default function LoginForm() {
                     />
                   </div>
 
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaLock className="h-5 w-5 text-primary" />
-                    </div>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      className="w-full pl-10 pr-3 py-3 border-2 border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                      placeholder="Mot de passe"
-                      value={formData.password}
-                      onChange={handleChange}
-                    />
-                  </div>
+<div className="relative">
+  {/* Left Icon */}
+  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <FaLock className="h-5 w-5 text-primary" />
+  </div>
+
+  {/* Password Input */}
+  <input
+    id="password"
+    name="password"
+    type={showPassword ? "text" : "password"}
+    required
+    className="w-full pl-10 pr-10 py-3 border-2 border-primary/30 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+    placeholder="Mot de passe"
+    value={formData.password}
+    onChange={handleChange}
+  />
+
+  {/* Toggle Button */}
+  <button
+    type="button"
+    onClick={togglePasswordVisibility}
+    className="absolute inset-y-0 right-0 pr-3 flex items-center text-primary hover:text-accent transition-colors"
+    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+  >
+    {showPassword ? (
+      <FaEyeSlash className="h-5 w-5" />
+    ) : (
+      <FaEye className="h-5 w-5" />
+    )}
+  </button>
+</div>
                 
                   {error && (
                     <div className="bg-red-50 border-l-4 border-red-500 text-red-600 px-4 py-3 rounded-lg text-sm">

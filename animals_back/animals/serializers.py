@@ -1,6 +1,6 @@
 # animals/serializers.py
 from rest_framework import serializers
-from .models import Animal, DemandeEvenementMarche, DemandeGarde, DemandeAdoption, EvenementMarcheChien,Notification
+from .models import Animal, DemandeEvenementMarche, DemandeGarde, DemandeAdoption, EvenementMarcheChien,Notification,Adoption
 from django.conf import settings
 
 
@@ -46,7 +46,7 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
         model = DemandeGarde
         fields = '__all__'
         extra_kwargs = {'statut': {'required': False},
-                                    'utilisateur': {'required': False}  # Add this line
+                        'utilisateur': {'required': False}  # Add this line
 } 
         
 
@@ -54,17 +54,15 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
         request = self.context['request']
         utilisateur = request.user
         validated_data['utilisateur'] = utilisateur
-        # Pop out the image from validated_data if present
+
         image = validated_data.pop('image', None)
+
+        # Create the instance with all validated data including date_reservation and date_fin
         instance = DemandeGarde.objects.create(**validated_data)
 
-        # If no image was provided via the request but you want to copy it from the animal,
-        # you can retrieve it from the animal instance (assuming it was already saved)
         if not image and instance.animal.image:
-            # Copy the file from animal to DemandeGarde
             instance.image.save(instance.animal.image.name, instance.animal.image.file, save=True)
         elif image:
-            # If image was provided, it will already be handled
             instance.image = image
             instance.save()
 
@@ -86,7 +84,12 @@ class DemandeGardeSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 from .models import DemandeAdoption
+class AdoptionSerializer(serializers.ModelSerializer):
+    animal = AnimalSerializer()
 
+    class Meta:
+        model = Adoption
+        fields = ['id', 'animal', 'utilisateur', 'date_adoption', 'message']
 class DemandeAdoptionSerializer(serializers.ModelSerializer):
     animal = serializers.PrimaryKeyRelatedField(queryset=Animal.objects.all())  # Expecting animal_id
     utilisateur = serializers.StringRelatedField()  # Or another serializer for the user if needed
