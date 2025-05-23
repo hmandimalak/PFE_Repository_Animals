@@ -233,66 +233,98 @@ export default function Home() {
                 <div className="text-center">
                   <h2 className="text-xl font-semibold text-dark mb-4">Je recherche un...</h2>
                   
-                  {/* Animal Type Buttons */}
-                  <div className="flex justify-center space-x-4 mb-6">
-                    <button
-                      onClick={() => handleAnimalTypeSelect("chien")}
-                      className={`flex flex-col items-center justify-center px-6 py-4 rounded-xl shadow-md transition-all ${
-                        animalType === "chien" 
-                          ? "bg-primary text-white scale-105" 
-                          : "bg-white text-dark hover:bg-primary/10"
-                      }`}
-                    >
-                      <FaDog className={`text-3xl ${animalType === "chien" ? "text-white" : "text-primary"} mb-2`} />
-                      <span className="font-medium">Chien</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => handleAnimalTypeSelect("chat")}
-                      className={`flex flex-col items-center justify-center px-6 py-4 rounded-xl shadow-md transition-all ${
-                        animalType === "chat" 
-                          ? "bg-accent text-white scale-105" 
-                          : "bg-white text-dark hover:bg-accent/10"
-                      }`}
-                    >
-                      <FaCat className={`text-3xl ${animalType === "chat" ? "text-white" : "text-accent"} mb-2`} />
-                      <span className="font-medium">Chat</span>
-                    </button>
-                  </div>
+                  {/* Animal Type Selection */}
+{/* Animal Type Selection - Enhanced Version */}
+{/* Animal Type Selection - Larger Icon Style */}
+<div className="flex justify-center space-x-8 mb-6">
+  {["chien", "chat"].map((type) => {
+    const isDog = type === "chien";
+    const isActive = animalType === type;
+    
+    return (
+      <button
+        key={type}
+        onClick={() => handleAnimalTypeSelect(type)}
+        className={`
+          flex flex-col items-center justify-center
+          p-4
+          transition-all duration-300
+          ${isActive ? "scale-110" : "hover:scale-105"}
+          ${isDog 
+            ? isActive ? "text-white" : "text-primary" 
+            : isActive ? "text-white" : "text-accent"}
+          relative
+        `}
+        aria-label={type === "chien" ? "Sélectionner chien" : "Sélectionner chat"}
+      >
+        <div className={`mb-2 transform transition-transform ${isActive ? "scale-110" : "scale-100"}`}>
+          {isDog ? (
+            <FaDog className={`text-5xl ${isActive ? "text-white" : "text-primary"}`} />
+          ) : (
+            <FaCat className={`text-5xl ${isActive ? "text-white" : "text-accent"}`} />
+          )}
+        </div>
+        {isActive && (
+          <div className="absolute -bottom-2">
+            <div className="w-3 h-3 rounded-full bg-white"></div>
+          </div>
+        )}
+      </button>
+    );
+  })}
+</div>
                   
-                  {/* Species/Breed Selection Buttons - Only show if animal type is selected */}
-                  {animalType && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-medium text-dark mb-3">Race</h3>
-                      <div className="flex flex-wrap justify-center gap-2">
-                        {speciesOptions[animalType]?.map((breed) => (
-                          <button
-                            key={breed}
-                            onClick={() => handleSpeciesSelect(breed)}
-                            className={`px-3 py-1 rounded-full text-sm transition-all ${
-                              species === breed
-                                ? animalType === "chien" 
-                                  ? "bg-primary text-white" 
-                                  : "bg-accent text-white"
-                                : "bg-gray-100 text-dark hover:bg-gray-200"
-                            }`}
-                          >
-                            {breed}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                 {/* Species/Breed Selection */}
+{animalType && (
+  <div className="mb-6 text-center">
+    <h3 className="text-lg font-medium text-dark mb-4">Race</h3>
+    <div className="flex flex-wrap justify-center gap-3">
+      {speciesOptions[animalType]?.map((breed) => {
+        const isSelected = species === breed;
+        const breedBg = isSelected
+          ? (animalType === "chien" ? "bg-primary" : "bg-accent")
+          : "bg-gray-100";
+        const breedText = isSelected ? "text-white" : "text-dark";
+
+        return (
+          <button
+            key={breed}
+            onClick={() => handleSpeciesSelect(breed)}
+            className={`
+              px-4 py-1 rounded-full text-sm font-medium
+              transition-all transform
+              hover:scale-102
+              ${breedBg} ${breedText}
+            `}
+          >
+            {breed}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+)}
+
                   
                   {/* Search Button */}
-                  <button
-                    onClick={handleSearch}
-                    className="flex items-center justify-center mx-auto px-6 py-3 bg-dark text-white rounded-full hover:bg-primary transition duration-300 shadow-md"
-                    disabled={!animalType}
-                  >
-                    <FaSearch className="mr-2" />
-                    Rechercher
-                  </button>
+                  <div className="text-center">
+  <button
+    onClick={handleSearch}
+    disabled={!animalType}
+    className={`
+      inline-flex items-center justify-center
+      px-8 py-3
+      rounded-full
+      shadow-lg hover:shadow-xl
+      transform transition duration-300
+      ${animalType ? "bg-dark hover:bg-primary" : "bg-gray-200 cursor-not-allowed"}
+      text-white
+    `}
+  >
+    <FaSearch className="mr-3 text-lg" />
+    Rechercher
+  </button>
+</div>
                 </div>
               </div>
             </div>

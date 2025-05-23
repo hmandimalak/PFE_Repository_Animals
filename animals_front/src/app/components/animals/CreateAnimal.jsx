@@ -265,7 +265,7 @@ const CreateAnimal = () => {
             // For new animal creation
             // Add all form fields except photo
             for (const key in formData) {
-                if (key !== 'photo') {
+                if (key !== 'photo' && key !== 'date_reservation' && key !== 'date_fin') {
                     formDataObj.append(key, formData[key]);
                 }
             }
@@ -278,8 +278,10 @@ const CreateAnimal = () => {
                 formDataObj.append('image', formData.photo);
             }
             // in CreateAnimal.jsx, inside existing-animal branch
+            if (formData.type_garde === 'Temporaire') {
             formDataObj.append('date_reservation', formData.date_reservation);
-            formDataObj.append('date_fin',         formData.date_fin);
+            formDataObj.append('date_fin', formData.date_fin);
+        }
 
             
             // API endpoint for new animal creation
