@@ -28,9 +28,9 @@ export default function Navbar() {
       try {
         // Fetch user profile and notifications in parallel
         const [profileResponse, animalResponse, boutiqueResponse] = await Promise.all([
-          authenticatedFetch("http://127.0.0.1:8000/api/auth/profile/"),
-          authenticatedFetch("http://127.0.0.1:8000/api/animals/notifications/"),
-          authenticatedFetch("http://127.0.0.1:8000/api/boutique/notifications/")
+          authenticatedFetch("http://127.0.0.1:8001/api/auth/profile/"),
+          authenticatedFetch("http://127.0.0.1:8001/api/animals/notifications/"),
+          authenticatedFetch("http://127.0.0.1:8001/api/boutique/notifications/")
         ]);
 
         // Handle profile response
@@ -94,7 +94,7 @@ export default function Navbar() {
 
   const handleNotifClick = async (notifId, notificationType) => {
     try {
-      const endpoint = `http://127.0.0.1:8000/api/${notificationType}/notifications/${notifId}/read/`;
+      const endpoint = `http://127.0.0.1:8001/api/${notificationType}/notifications/${notifId}/read/`;
       await authenticatedFetch(endpoint, { method: "PUT" });
 
       setNotifications(prev => 
@@ -143,6 +143,7 @@ export default function Navbar() {
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-1">
             {[
+              { label: "Accueil", href: "/" },
               { label: "Nos Animaux", href: "/nos-animaux" },
               { label: "Service de Garde", href: "/garderie" },
               { label: "Boutique", href: "/boutique" },

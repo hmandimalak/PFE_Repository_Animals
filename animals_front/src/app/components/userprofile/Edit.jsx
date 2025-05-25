@@ -33,7 +33,7 @@ export default function EditProfile({ setActiveSection }) {
       return;
     }
 
-    fetch("http://127.0.0.1:8000/api/auth/profile/", {
+    fetch("http://127.0.0.1:8001/api/auth/profile/", {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -119,7 +119,7 @@ export default function EditProfile({ setActiveSection }) {
       formData.append("new_password", passwords.newPassword);
     }
     
-    fetch("http://127.0.0.1:8000/api/auth/profile/update/", {
+    fetch("http://127.0.0.1:8001/api/auth/profile/update/", {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,

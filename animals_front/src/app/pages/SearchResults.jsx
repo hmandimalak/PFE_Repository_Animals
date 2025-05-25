@@ -14,7 +14,7 @@ export default function setSearchResults() {
   useEffect(() => {
     const fetchAnimalDetails = async () => {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/animals/${id}/`);
+        const response = await fetch(`http://127.0.0.1:8001/api/animals/${id}/`);
         if (!response.ok) {
           throw new Error("Failed to fetch animal details");
         }
@@ -53,7 +53,7 @@ export default function setSearchResults() {
           {/* Animal Image */}
           <div className="relative h-96 w-full mb-6">
             <Image
-              src={`http://127.0.0.1:8000${animal.image}`}
+              src={`http://127.0.0.1:8001${animal.image}`}
               alt={animal.nom}
               layout="fill"
               objectFit="cover"

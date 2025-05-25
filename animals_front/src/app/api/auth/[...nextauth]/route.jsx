@@ -28,7 +28,7 @@ const handler = NextAuth({
             throw new Error("No ID token available");
           }
 
-          const response = await fetch("http://localhost:8000/api/auth/google/", {
+          const response = await fetch("http://localhost:8001/api/auth/google/", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

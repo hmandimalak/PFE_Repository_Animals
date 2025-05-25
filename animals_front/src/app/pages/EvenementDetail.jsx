@@ -50,7 +50,7 @@ export default function EvenementMarcheDetail() {
       const token = localStorage.getItem('access_token');
       
       // Fetch event details without authentication
-      const response = await fetch(`http://localhost:8000/api/animals/evenements/marche-chiens/${id}/`);
+      const response = await fetch(`http://localhost:8001/api/animals/evenements/marche-chiens/${id}/`);
 
       if (!response.ok) throw new Error(`Échec du chargement: ${response.status}`);
       
@@ -62,7 +62,7 @@ export default function EvenementMarcheDetail() {
       if (Array.isArray(dogIds) && dogIds.length > 0) {
         const dogDetails = await Promise.all(
           dogIds.map(dogId => 
-            fetch(`http://localhost:8000/api/animals/${dogId}/`)
+            fetch(`http://localhost:8001/api/animals/${dogId}/`)
             .then(res => res.ok ? res.json() : null)
           )
         );
@@ -72,7 +72,7 @@ export default function EvenementMarcheDetail() {
       // Only fetch user-specific data if authenticated
       if (token) {
         try {
-          const userResponse = await fetch(`http://localhost:8000/api/animals/evenements/marche-chiens/${id}/user-demandes/`, {
+          const userResponse = await fetch(`http://localhost:8001/api/animals/evenements/marche-chiens/${id}/user-demandes/`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -104,7 +104,7 @@ export default function EvenementMarcheDetail() {
   const fetchAnimalDetails = async (dog) => {
     if (!dog?.id) return;
     try {
-      const response = await fetch(`http://localhost:8000/api/animals/${dog.id}/`);
+      const response = await fetch(`http://localhost:8001/api/animals/${dog.id}/`);
       const data = await response.json();
       setSelectedDog(data);
       setIsModalOpen(true);
@@ -124,7 +124,7 @@ export default function EvenementMarcheDetail() {
     try {
       setSubmitting(true);
       const token = localStorage.getItem('access_token');
-      const response = await fetch('http://localhost:8000/api/animals/demandes/marche-chiens/', {
+      const response = await fetch('http://localhost:8001/api/animals/demandes/marche-chiens/', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -183,7 +183,7 @@ export default function EvenementMarcheDetail() {
     try {
       setSubmitting(true);
       const token = localStorage.getItem('access_token');
-      await fetch(`http://localhost:8000/api/animals/demandes/marche-chiens/${userDemandes[dogId].demandeId}/`, {
+      await fetch(`http://localhost:8001/api/animals/demandes/marche-chiens/${userDemandes[dogId].demandeId}/`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -340,7 +340,7 @@ export default function EvenementMarcheDetail() {
                         <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                           {dog.image ? (
                             <img
-                              src={`http://localhost:8000${dog.image}`}
+                              src={`http://localhost:8001${dog.image}`}
                               alt={dog.nom}
                               className="w-full h-full object-cover"
                             />
@@ -420,7 +420,7 @@ export default function EvenementMarcheDetail() {
                   <div className="relative h-64 rounded-xl overflow-hidden bg-gray-100">
                     {selectedDog.image ? (
                       <img
-                        src={`http://localhost:8000${selectedDog.image}`}
+                        src={`http://localhost:8001${selectedDog.image}`}
                         alt={selectedDog.nom}
                         className="w-full h-full object-cover"
                       />

@@ -16,7 +16,7 @@ const BlogPostDetail = () => {
     const fetchData = async () => {
       try {
         // Fetch post by slug
-        const postResponse = await fetch(`http://127.0.0.1:8000/api/blog-posts/${slug}/`);
+        const postResponse = await fetch(`http://127.0.0.1:8001/api/blog-posts/${slug}/`);
         
         if (!postResponse.ok) {
           throw new Error('Post not found');
@@ -28,7 +28,7 @@ const BlogPostDetail = () => {
         // Fetch related sections based on post content
         // This is where you would determine which sections might be related to this post
         // For example, if the post mentions "garde" services, you'd fetch garde sections
-        const sectionsResponse = await fetch('http://127.0.0.1:8000/api/blog-content/?is_active=true');
+        const sectionsResponse = await fetch('http://127.0.0.1:8001/api/blog-content/?is_active=true');
         
         if (sectionsResponse.ok) {
           const sectionsData = await sectionsResponse.json();
@@ -80,7 +80,7 @@ const BlogPostDetail = () => {
       {/* Featured image */}
       <div className="mb-8 rounded-lg overflow-hidden h-80 relative">
         <img 
-          src={`http://127.0.0.1:8000${post.featured_image}`} 
+          src={`http://127.0.0.1:8001${post.featured_image}`} 
           alt={post.title}
           className="w-full h-full object-cover"
         />

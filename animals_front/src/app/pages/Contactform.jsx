@@ -41,7 +41,7 @@ const ContactForm = ({ onClose }) => {
         
         try {
           // Try to fetch user data to confirm the token is valid
-          const response = await authenticatedFetch('http://127.0.0.1:8000/api/auth/user/');
+          const response = await authenticatedFetch('http://127.0.0.1:8001/api/auth/user/');
           
           if (response.ok) {
             const userData = await response.json();
@@ -52,7 +52,7 @@ const ContactForm = ({ onClose }) => {
           } else {
             // Fallback to profile endpoint if user endpoint fails
             try {
-              const profileResponse = await authenticatedFetch('http://127.0.0.1:8000/api/auth/profile/');
+              const profileResponse = await authenticatedFetch('http://127.0.0.1:8001/api/auth/profile/');
               if (profileResponse.ok) {
                 const profileData = await profileResponse.json();
                 setUserEmail(profileData.email);
@@ -114,7 +114,7 @@ const ContactForm = ({ onClose }) => {
       const emailToUse = userEmail || (session?.user?.email || '');
       
       // Use the authenticatedFetch with the complete data including the email
-      const response = await authenticatedFetch('http://127.0.0.1:8000/api/auth/contact/', {
+      const response = await authenticatedFetch('http://127.0.0.1:8001/api/auth/contact/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

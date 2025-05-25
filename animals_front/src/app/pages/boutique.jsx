@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { 
   FaTrash, FaShoppingCart, FaSearch, 
   FaDog, FaCat, FaBone, FaShower, FaPaw,
-  FaChevronRight, FaHeart, FaStar, FaFilter
+  FaChevronRight, FaHeart, FaStar, FaFilter,FaArrowRight, FaList, FaPlusCircle ,FaMapMarkerAlt,FaHome,FaPhone,FaEnvelope,FaClock,FaLink,FaFacebook,FaTwitter,FaInstagram,FaYoutube
+
 } from 'react-icons/fa';
 import Link from 'next/link';
 import Navbar from './NavbarPage';
@@ -82,7 +83,7 @@ const Boutique = () => {
 // Updated cart fetching logic
 useEffect(() => {
   setIsClient(true);
-  fetch('http://127.0.0.1:8000/api/boutique/produits/')
+  fetch('http://127.0.0.1:8001/api/boutique/produits/')
     .then((response) => response.json())
     .then((productData) => {
       setProduits(productData);
@@ -92,7 +93,7 @@ useEffect(() => {
   setIsAuthenticated(!!authToken);
 
  if (authToken) {
-        authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/', {
+        authenticatedFetch('http://127.0.0.1:8001/api/boutique/panier/', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         })
@@ -135,7 +136,7 @@ useEffect(() => {
   const fetchProduits = async () => {
     try {
       setLoading(true);
-      let url = 'http://127.0.0.1:8000/api/boutique/produits/';
+      let url = 'http://127.0.0.1:8001/api/boutique/produits/';
       const params = new URLSearchParams();
       if (filterCategory) params.append('categorie', filterCategory);
       if (searchTerm) params.append('search', searchTerm);
@@ -161,7 +162,7 @@ useEffect(() => {
     const authToken = getAuthToken(session);
     if (authToken) {
       try {
-        await authenticatedFetch(`http://127.0.0.1:8000/api/boutique/panier/supprimer/${productId}/`, {
+        await authenticatedFetch(`http://127.0.0.1:8001/api/boutique/panier/supprimer/${productId}/`, {
           method: 'DELETE'
         });
       } catch (error) {
@@ -201,7 +202,7 @@ const handleAddToCart = async (produit, e) => {
   }
 
   try {
-    await authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/ajouter/', {
+    await authenticatedFetch('http://127.0.0.1:8001/api/boutique/panier/ajouter/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ produit_id: produit.id, quantity: 1 }),
@@ -236,7 +237,7 @@ const handleAddToCart = async (produit, e) => {
     
     try {
       // First, add the product to cart
-      await authenticatedFetch('http://127.0.0.1:8000/api/boutique/panier/ajouter/', {
+      await authenticatedFetch('http://127.0.0.1:8001/api/boutique/panier/ajouter/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ produit_id: produit.id, quantity: 1 }),
@@ -284,7 +285,59 @@ const handleAddToCart = async (produit, e) => {
       </motion.button>
     </div>
   );
+const handleQuantityChange = async (productId, change) => {
+  const authToken = getAuthToken(session);
+  if (!authToken) return;
 
+  try {
+    // Créer une copie temporaire pour l'UI optimiste
+    const tempCart = cartItems.map(item => {
+      if (item.id === productId) {
+        const newQuantity = item.quantity + change;
+        return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
+      }
+      return item;
+    });
+    
+    // Mise à jour optimiste immédiate
+    setCartItems(tempCart);
+
+    // Envoyer la requête API
+    await authenticatedFetch(
+      `http://127.0.0.1:8001/api/boutique/panier/update/${productId}/`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: tempCart.find(i => i.id === productId).quantity }),
+      }
+    );
+
+    // Recharger le panier depuis le serveur
+    const cartResponse = await authenticatedFetch('http://127.0.0.1:8001/api/boutique/panier/');
+    const cartData = await cartResponse.json();
+    
+    // Mettre à jour avec les données fraîches
+    const productResponse = await fetch('http://127.0.0.1:8001/api/boutique/produits/');
+    const productData = await productResponse.json();
+
+    const formattedCart = cartData.map(item => {
+      const product = productData.find(p => p.id === item.id);
+      return {
+        ...item,
+        prix: product?.is_discount_active 
+          ? parseFloat(product.prix_promotion)
+          : parseFloat(product?.prix || item.prix)
+      };
+    });
+
+    setCartItems(formattedCart);
+
+  } catch (error) {
+    console.error('Error:', error);
+    // Revenir à l'état précédent en cas d'erreur
+    setCartItems(cartItems);
+  }
+};
   const MiniCart = () => (
     <motion.div 
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -327,7 +380,7 @@ const handleAddToCart = async (produit, e) => {
                   <img
                   src={item.image.startsWith('http') 
                     ? item.image 
-                    :`http://127.0.0.1:8000/${item.image}`}
+                    :`http://127.0.0.1:8001/${item.image}`}
                   alt={item.nom}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
@@ -338,29 +391,25 @@ const handleAddToCart = async (produit, e) => {
                     <p className="font-medium text-dark">{item.nom}</p>
                     <div className="flex items-center gap-3 mt-1">
                       <div className="flex border border-accent/30 rounded-lg overflow-hidden">
-                        <button 
-                          className="px-2 py-1 bg-secondary/30 text-dark/70 hover:bg-secondary"
-                          onClick={() => {
-                            if (item.quantity > 1) {
-                              setCartItems(cartItems.map(cartItem => 
-                                cartItem.id === item.id 
-                                  ? { ...cartItem, quantity: cartItem.quantity - 1 } 
-                                  : cartItem
-                              ));
-                            }
-                          }}
-                        >-</button>
-                        <span className="px-3 py-1">{item.quantity}</span>
-                        <button 
-                          className="px-2 py-1 bg-secondary/30 text-dark/70 hover:bg-secondary"
-                          onClick={() => {
-                            setCartItems(cartItems.map(cartItem => 
-                              cartItem.id === item.id 
-                                ? { ...cartItem, quantity: cartItem.quantity + 1 } 
-                                : cartItem
-                            ));
-                          }}
-                        >+</button>
+                       <button 
+  className="px-2 py-1 bg-secondary/30 text-dark/70 hover:bg-secondary"
+  onClick={(e) => {
+    e.stopPropagation();
+    if (item.quantity > 1) {
+      handleQuantityChange(item.id, -1);
+    }
+  }}
+>-</button>
+
+<span className="px-3 py-1">{item.quantity}</span>
+
+<button 
+  className="px-2 py-1 bg-secondary/30 text-dark/70 hover:bg-secondary"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleQuantityChange(item.id, 1);
+  }}
+>+</button>
                       </div>
                       <p className="text-sm font-semibold text-primary">{(item.prix * item.quantity).toFixed(2)}DT</p>
                     </div>
@@ -622,7 +671,7 @@ const handleAddToCart = async (produit, e) => {
                     <img
                   src={produit.image.startsWith('http') 
                     ? produit.image 
-                    : `http://127.0.0.1:8000/media/${produit.image}`}
+                    : `http://127.0.0.1:8001/media/${produit.image}`}
                   alt={produit.nom}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => e.target.src = 'https://via.placeholder.com/150?text=No+Image'}
@@ -748,7 +797,111 @@ const handleAddToCart = async (produit, e) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
         </svg>
       </button>
-
+{/* Footer */}
+                                    <div className="mt-16 bg-gray-100 border-t-4 border-primary">
+                  <div className="max-w-6xl mx-auto px-4 py-8">
+                    {/* Footer Top - Main Sections */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                      {/* Contact Information */}
+                      <div>
+                        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                          <FaMapMarkerAlt className="mr-2 text-primary" /> Contact
+                        </h3>
+                        <ul className="space-y-3 text-dark/80">
+                          <li className="flex items-start">
+                            <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
+                            <span>123 Rue des Animaux, 8001 Nabeul, Tunisie</span>
+                          </li>
+                          <li className="flex items-center">
+                            <FaPhone className="mr-2 text-primary flex-shrink-0" />
+                            <span>95 888 751</span>
+                          </li>
+                          <li className="flex items-center">
+                            <FaEnvelope className="mr-2 text-primary flex-shrink-0" />
+                            <span>contact@adopti.fr</span>
+                          </li>
+                        </ul>
+                      </div>
+                
+                      {/* Horaires */}
+                      <div>
+                        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                          <FaClock className="mr-2 text-primary" /> Horaires
+                        </h3>
+                        <ul className="space-y-2 text-dark/80">
+                          <li>Lundi - Vendredi: 9h - 18h</li>
+                          <li>Samedi: 9h - 13h</li>
+                          <li>Dimanche: 9h - 16h</li>
+                          <li className="text-primary font-semibold mt-2">
+                            Permanence téléphonique 24h/24
+                          </li>
+                        </ul>
+                      </div>
+                
+                      {/* Liens Rapides */}
+                <div>
+                  <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                    <FaLink className="mr-2 text-primary" /> Liens Rapides
+                  </h3>
+                  <ul className="space-y-2 text-dark/80">
+                    <li>
+                      <Link href="/nos-animaux" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Nos animaux
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/garderie" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Service garde
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/boutique" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Notre boutique
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/marche" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Evennements
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                
+                     
+                    </div>
+                
+                    {/* Social Media */}
+                   <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
+                  {[
+                    { 
+                      icon: FaFacebook, 
+                      label: "Facebook", 
+                      href: "https://www.facebook.com/mouez.benyounes/ " 
+                    },
+                    { icon: FaTwitter, label: "Twitter", href: "https://x.com/benyounesbaha1?t=NhqlO6UTZxdumgHQQ4YcMQ&s=09" },
+                    { icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/baha_benyounes0/" },
+                    { icon: FaYoutube, label: "YouTube", href: "https://www.youtube.com/@ben_younesbaha3194" },
+                  ].map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
+                      aria-label={social.label}
+                    >
+                      <social.icon />
+                    </a>
+                  ))}
+                </div>
+                
+                    {/* Copyright */}
+                    <div className="text-center pt-4 border-t border-dark/10 text-dark/70">
+                      <p>© 2025 Adopti - Association pour la protection animale - SIRET: 123 456 789 00012</p>
+                      <p className="text-xs mt-2">Tous droits réservés - Site développé avec ❤️ pour les animaux</p>
+                    </div>
+                  </div>
+                </div>
     </div>
   );
 };

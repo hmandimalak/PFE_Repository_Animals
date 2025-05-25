@@ -5,7 +5,8 @@ import Navbar from './NavbarPage';
 import { 
   FaPaw, FaSearch, FaArrowRight, FaHeart, 
   FaCalendar, FaUser, FaComments, 
-  FaHashtag, FaAngleLeft, FaAngleRight
+  FaHashtag, FaAngleLeft, FaAngleRight,FaMapMarkerAlt,FaHome,FaPhone,FaEnvelope,FaClock,FaLink,FaFacebook,FaTwitter,FaInstagram,FaYoutube
+
 } from 'react-icons/fa';
 
 // Main Blog Page Component
@@ -29,7 +30,7 @@ const BlogPage = () => {
   useEffect(() => {
     const fetchBlogData = async () => {
       try {
-        const sectionsResponse = await fetch('http://127.0.0.1:8000/api/blog-content/');
+        const sectionsResponse = await fetch('http://127.0.0.1:8001/api/blog-content/');
         
         if (!sectionsResponse.ok) throw new Error('Failed to fetch blog sections');
         
@@ -39,7 +40,7 @@ const BlogPage = () => {
         const activeSections = sectionsData.filter(section => section.is_active);
         setSections(activeSections);
         
-        const postsResponse = await fetch('http://127.0.0.1:8000/api/blog-posts/');
+        const postsResponse = await fetch('http://127.0.0.1:8001/api/blog-posts/');
         if (!postsResponse.ok) throw new Error('Failed to fetch blog posts');
         const postsData = await postsResponse.json();
         setPosts(postsData);
@@ -248,6 +249,111 @@ const BlogPage = () => {
           </div>
         </div>
       </div>
+      {/* Footer */}
+                                    <div className="mt-16 bg-gray-100 border-t-4 border-primary">
+                  <div className="max-w-6xl mx-auto px-4 py-8">
+                    {/* Footer Top - Main Sections */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                      {/* Contact Information */}
+                      <div>
+                        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                          <FaMapMarkerAlt className="mr-2 text-primary" /> Contact
+                        </h3>
+                        <ul className="space-y-3 text-dark/80">
+                          <li className="flex items-start">
+                            <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
+                            <span>123 Rue des Animaux, 8001 Nabeul, Tunisie</span>
+                          </li>
+                          <li className="flex items-center">
+                            <FaPhone className="mr-2 text-primary flex-shrink-0" />
+                            <span>95 888 751</span>
+                          </li>
+                          <li className="flex items-center">
+                            <FaEnvelope className="mr-2 text-primary flex-shrink-0" />
+                            <span>contact@adopti.fr</span>
+                          </li>
+                        </ul>
+                      </div>
+                
+                      {/* Horaires */}
+                      <div>
+                        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                          <FaClock className="mr-2 text-primary" /> Horaires
+                        </h3>
+                        <ul className="space-y-2 text-dark/80">
+                          <li>Lundi - Vendredi: 9h - 18h</li>
+                          <li>Samedi: 9h - 13h</li>
+                          <li>Dimanche: 9h - 16h</li>
+                          <li className="text-primary font-semibold mt-2">
+                            Permanence téléphonique 24h/24
+                          </li>
+                        </ul>
+                      </div>
+                
+                      {/* Liens Rapides */}
+                <div>
+                  <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                    <FaLink className="mr-2 text-primary" /> Liens Rapides
+                  </h3>
+                  <ul className="space-y-2 text-dark/80">
+                    <li>
+                      <Link href="/nos-animaux" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Nos animaux
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/garderie" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Service garde
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/boutique" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Notre boutique
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/marche" className="hover:text-primary flex items-center">
+                        <FaPaw className="mr-2 text-xs" /> Evennements
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                
+                     
+                    </div>
+                
+                    {/* Social Media */}
+                   <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
+                  {[
+                    { 
+                      icon: FaFacebook, 
+                      label: "Facebook", 
+                      href: "https://www.facebook.com/mouez.benyounes/ " 
+                    },
+                    { icon: FaTwitter, label: "Twitter", href: "https://x.com/benyounesbaha1?t=NhqlO6UTZxdumgHQQ4YcMQ&s=09" },
+                    { icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/baha_benyounes0/" },
+                    { icon: FaYoutube, label: "YouTube", href: "https://www.youtube.com/@ben_younesbaha3194" },
+                  ].map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
+                      aria-label={social.label}
+                    >
+                      <social.icon />
+                    </a>
+                  ))}
+                </div>
+                
+                    {/* Copyright */}
+                    <div className="text-center pt-4 border-t border-dark/10 text-dark/70">
+                      <p>© 2025 Adopti - Association pour la protection animale - SIRET: 123 456 789 00012</p>
+                      <p className="text-xs mt-2">Tous droits réservés - Site développé avec ❤️ pour les animaux</p>
+                    </div>
+                  </div>
+                </div>
     </div>
   );
 };

@@ -5,6 +5,7 @@ import Link from "next/link";
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 
+
 import { 
   FaUserPlus, FaLock, FaIdCard, FaEnvelope, 
   FaPhone, FaHome, FaImage, FaCheck, FaPaw, FaDog, FaCat ,FaEye, FaEyeSlash
@@ -89,7 +90,7 @@ export default function RegisterForm() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/register/", {
+      const response = await fetch("http://127.0.0.1:8001/api/auth/register/", {
         method: "POST",
         body: data,
       });
@@ -200,73 +201,78 @@ export default function RegisterForm() {
 
               {/* Formulaire */}
               <form onSubmit={handleSubmit} encType="multipart/form-data">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-5"> 
                   {/* Photo de profil */}
                   <div className="col-span-full">
-                    <label className="block text-sm font-medium text-dark mb-2">
-                      Photo de Profil
-                    </label>
-                    <div className="relative group">
-                      <input
-                        id="profilepicture"
-                        name="profilepicture"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleChange}
-                        className="hidden"
-                      />
-                      <label 
-                        htmlFor="profilepicture" 
-                        className="cursor-pointer flex flex-col items-center justify-center h-32 border-2 border-dashed border-secondary rounded-xl hover:border-accent transition-colors bg-secondary/20"
-                      >
-                        {formData.profilepicture ? (
-                          <div className="absolute inset-0 rounded-xl overflow-hidden">
-                            <img 
-                              src={URL.createObjectURL(formData.profilepicture)}
-                              alt="Preview"
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-dark/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                              <span className="text-white text-sm font-medium">Changer</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <FaImage className="h-8 w-8 text-primary mb-2 group-hover:text-accent" />
-                            <span className="text-sm text-primary">Télécharger votre photo</span>
-                            <p className="text-xs text-dark/60 mt-1">Formats: PNG, JPG (max 2MB)</p>
-                          </>
-                        )}
-                      </label>
-                    </div>
-                  </div>
+  <label className="block text-sm font-medium text-dark mb-2">
+    Photo de Profil
+  </label>
+  <div className="relative group">
+    <input
+      id="profilepicture"
+      name="profilepicture"
+      type="file"
+      accept="image/*"
+      onChange={handleChange}
+      className="hidden"
+    />
+    <label 
+      htmlFor="profilepicture" 
+      className="cursor-pointer flex flex-col items-center justify-center h-24 border border-dashed border-secondary rounded-lg hover:border-accent transition-all bg-secondary/10 hover:bg-secondary/20"
+    >
+      {formData.profilepicture ? (
+        <div className="relative w-full h-full rounded-lg overflow-hidden">
+          <img 
+            src={URL.createObjectURL(formData.profilepicture)}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-dark/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-white text-xs font-medium bg-dark/60 px-2 py-1 rounded-md">
+              Modifier
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center p-2">
+          <FaImage className="h-6 w-6 text-primary mb-1 group-hover:text-accent transition-colors" />
+          <span className="text-xs text-primary text-center">Cliquer pour upload</span>
+          <p className="text-[0.65rem] text-dark/50 mt-0.5">PNG, JPG (max 2MB)</p>
+        </div>
+      )}
+    </label>
+  </div>
+</div>
 
                   {/* Input fields with stylish icons */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaIdCard className="h-5 w-5 text-primary" />
-                    </div>
-                    <input
-                      id="nom"
-                      name="nom"
-                      type="text"
-                      required
-                      className={`w-full pl-10 pr-3 py-2 border ${
-                        errors.nom ? "border-red-500" : "border-secondary"
-                      } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
-                      placeholder="Nom de famille"
-                      value={formData.nom}
-                      onChange={handleChange}
-                    />
+                  {/* Nom */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-dark">Nom de famille</label>
+        <div className="relative">
+              <FaIdCard className="absolute left-3 top-3 text-primary" />
+
+          <input
+            id="nom"
+            name="nom"
+            type="text"
+            placeholder="Nom de famille"
+            required
+            className={`w-full pl-10 pr-3 py-2 border ${
+              errors.nom ? "border-red-500" : "border-secondary"
+            } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`}
+            value={formData.nom}
+            onChange={handleChange}
+          />
                     {errors.nom && (
                       <p className="text-red-500 text-xs mt-1">{errors.nom}</p>
                     )}
                   </div>
                   
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaIdCard className="h-5 w-5 text-primary" />
-                    </div>
+                  <div className="space-y-2">
+        <label className="block text-sm font-medium text-dark">Prénom</label>
+        <div className="relative">
+              <FaIdCard className="absolute left-3 top-3 text-primary" />
+
                     <input
                       id="prenom"
                       name="prenom"
@@ -284,10 +290,13 @@ export default function RegisterForm() {
                     )}
                   </div>
 
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaEnvelope className="h-5 w-5 text-primary" />
-                    </div>
+                  </div>
+
+                 <div className="space-y-2">
+        <label className="block text-sm font-medium text-dark">Adresse email</label>
+        <div className="relative">
+              <FaEnvelope className="absolute left-3 top-3 text-primary" />
+
                     <input
                       id="email"
                       name="email"
@@ -304,36 +313,39 @@ export default function RegisterForm() {
                       <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                     )}
                   </div>
-
-                  {/* Phone Input Component */}
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                      <FaPhone className="h-5 w-5 text-primary" />
-                    </div>
-                    <PhoneInput
-                      country={'tn'}
-                      value={formData.telephone}
-                      onChange={handlePhoneChange}
-                      inputProps={{
-                        name: 'telephone',
-                        id: 'telephone',
-                        required: true,
-                        className: `w-full pl-10 pr-3 py-2 border ${
-                          errors.telephone ? "border-red-500" : "border-secondary"
-                        } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`
-                      }}
-                      containerClass="w-full"
-                      buttonClass="hidden"
-                    />
-                    {errors.telephone && (
-                      <p className="text-red-500 text-xs mt-1">{errors.telephone}</p>
-                    )}
                   </div>
 
-                  <div className="col-span-2 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaHome className="h-5 w-5 text-primary" />
-                    </div>
+                 <div className="space-y-2">
+  <label className="block text-sm font-medium text-dark">Téléphone</label>
+  <div className="relative">
+    <FaPhone className="absolute left-3 top-3 text-primary z-10" />
+    <PhoneInput
+      country={'tn'}
+      value={formData.telephone}
+      onChange={handlePhoneChange}
+      inputProps={{
+        name: 'telephone',
+        id: 'telephone',
+        required: true,
+        className: `w-full pl-10 pr-3 py-2 border ${
+          errors.telephone ? "border-red-500" : "border-secondary"
+        } rounded-lg focus:ring-2 focus:ring-accent focus:border-accent`
+      }}
+      containerClass="relative" // Ajouté
+      inputStyle={{ paddingLeft: '40px' }} // Ajouté
+      buttonStyle={{ display: 'none' }} // Ajouté
+    />
+    {errors.telephone && (
+      <p className="text-red-500 text-xs mt-1">{errors.telephone}</p>
+    )}
+  </div>
+</div>
+
+                 <div className="space-y-2">
+        <label className="block text-sm font-medium text-dark">Adresse complète</label>
+        <div className="relative">
+              <FaHome className="absolute left-3 top-3 text-primary" />
+
                     <input
                       id="adresse"
                       name="adresse"
@@ -350,12 +362,14 @@ export default function RegisterForm() {
                       <p className="text-red-500 text-xs mt-1">{errors.adresse}</p>
                     )}
                   </div>
+                  </div>
 
                   {/* Password Field */}
-<div className="relative">
-  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <FaLock className="h-5 w-5 text-primary" />
-  </div>
+<div className="space-y-2">
+        <label className="block text-sm font-medium text-dark">Mot de passe</label>
+        <div className="relative">
+                        <FaLock className="absolute left-3 top-3 text-primary" />
+
   <input
     id="password"
     name="password"
@@ -379,12 +393,14 @@ export default function RegisterForm() {
     <p className="text-red-500 text-xs mt-1 absolute">{errors.password}</p>
   )}
 </div>
+</div>
 
 {/* Confirm Password Field */}
-<div className="relative">
-  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <FaLock className="h-5 w-5 text-primary" />
-  </div>
+<div className="space-y-2">
+        <label className="block text-sm font-medium text-dark">Confirmation mot de passe</label>
+        <div className="relative">
+                        <FaLock className="absolute left-3 top-3 text-primary" />
+
   <input
     id="confirmPassword"
     name="confirmPassword"
@@ -408,8 +424,10 @@ export default function RegisterForm() {
     <p className="text-red-500 text-xs mt-1 absolute">{errors.confirmPassword}</p>
   )}
 </div>
+</div>
+</div>
                 </div>
-
+                
                 {/* Pet lover badge */}
                 <div className="flex items-center mt-6 bg-secondary/30 p-3 rounded-lg border border-secondary">
                   <div className="mr-3">
@@ -443,6 +461,7 @@ export default function RegisterForm() {
             </div>
           </div>
         </div>
+        
 
         {/* Paw prints decoration at bottom */}
         <div className="flex justify-center mt-8 space-x-2">

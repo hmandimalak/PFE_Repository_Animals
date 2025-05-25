@@ -6,7 +6,9 @@ import Navbar from './NavbarPage';
 import { authenticatedFetch } from '../../app/authInterceptor';
 import { useSearchParams } from 'next/navigation';
 import { Search, X, ChevronDown, Heart, Filter, RefreshCw, Users, Calendar } from 'lucide-react';
-import { FaPaw, FaDog, FaCat, FaHeart, FaSmile } from "react-icons/fa";
+import { FaPaw, FaDog, FaCat, FaHeart,FaMapMarkerAlt,FaHome,FaPhone,FaEnvelope,FaClock,FaLink,
+FaFacebook,FaTwitter,FaInstagram,FaYoutube }from "react-icons/fa";
+import Link from "next/link";
 import { motion } from 'framer-motion';
 import { Nunito } from "next/font/google";
 const nunito = Nunito({ subsets: ["latin"] });
@@ -90,7 +92,7 @@ export default function NosAnimaux() {
     const fetchAnimals = async (query = '', type = '', species = '', age = '', sexe = '') => {
         setPageLoading(true);
         try {
-            const url = new URL('http://127.0.0.1:8000/api/animals/search/');
+            const url = new URL('http://127.0.0.1:8001/api/animals/search/');
             
             // Ensure all parameters are included in the URL
             if (query) url.searchParams.append('query', query);
@@ -135,7 +137,7 @@ export default function NosAnimaux() {
     const fetchAnimalDetails = async (animalId) => {
         setLoading(true);
         try {
-            const response = await fetch(`http://127.0.0.1:8000/api/animals/${animalId}/`);
+            const response = await fetch(`http://127.0.0.1:8001/api/animals/${animalId}/`);
             const data = await response.json();
             setSelectedAnimal(data);
             setIsModalOpen(true);
@@ -182,7 +184,7 @@ export default function NosAnimaux() {
                 animal: selectedAnimal.id,
             };
 
-            const response = await authenticatedFetch('http://127.0.0.1:8000/api/animals/demandes-adoption/', {
+            const response = await authenticatedFetch('http://127.0.0.1:8001/api/animals/demandes-adoption/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -274,7 +276,8 @@ export default function NosAnimaux() {
         <div className="sticky top-0 w-full z-50 bg-white shadow-md">
             <Navbar />
         </div>
-        
+      
+
         
         {/* Background animated elements */}
         
@@ -563,7 +566,7 @@ export default function NosAnimaux() {
                                         <div className="relative h-64">
                                             {animal.image ? (
                                                 <img 
-                                                    src={`http://127.0.0.1:8000${animal.image}`} 
+                                                    src={`http://127.0.0.1:8001${animal.image}`} 
                                                     alt={animal.nom} 
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                 />
@@ -646,11 +649,110 @@ export default function NosAnimaux() {
                         </div>
                     )}
                     {/* Footer */}
-                    <div className="flex justify-center mt-12">
-                        <div className="px-5 py-3 bg-primary/10 rounded-full text-sm text-primary font-medium flex items-center">
-                            <span className="mr-2">🐾</span> Adopti © 2025 | Tous droits réservés
-                        </div>
-                    </div>
+                    <div className="mt-16 bg-gray-100 border-t-4 border-primary">
+  <div className="max-w-6xl mx-auto px-4 py-8">
+    {/* Footer Top - Main Sections */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+      {/* Contact Information */}
+      <div>
+        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+          <FaMapMarkerAlt className="mr-2 text-primary" /> Contact
+        </h3>
+        <ul className="space-y-3 text-dark/80">
+          <li className="flex items-start">
+            <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
+            <span>123 Rue des Animaux, 8001 Nabeul, Tunisie</span>
+          </li>
+          <li className="flex items-center">
+            <FaPhone className="mr-2 text-primary flex-shrink-0" />
+            <span>95 888 751</span>
+          </li>
+          <li className="flex items-center">
+            <FaEnvelope className="mr-2 text-primary flex-shrink-0" />
+            <span>contact@adopti.fr</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Horaires */}
+      <div>
+        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+          <FaClock className="mr-2 text-primary" /> Horaires
+        </h3>
+        <ul className="space-y-2 text-dark/80">
+          <li>Lundi - Vendredi: 9h - 18h</li>
+          <li>Samedi: 9h - 13h</li>
+          <li>Dimanche: 9h - 16h</li>
+          <li className="text-primary font-semibold mt-2">
+            Permanence téléphonique 24h/24
+          </li>
+        </ul>
+      </div>
+
+      {/* Liens Rapides */}
+<div>
+  <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+    <FaLink className="mr-2 text-primary" /> Liens Rapides
+  </h3>
+  <ul className="space-y-2 text-dark/80">
+    <li>
+      <Link href="/nos-animaux" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Nos animaux
+      </Link>
+    </li>
+    <li>
+      <Link href="/garderie" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Service garde
+      </Link>
+    </li>
+    <li>
+      <Link href="/boutique" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Notre boutique
+      </Link>
+    </li>
+    <li>
+      <Link href="/marche" className="hover:text-primary flex items-center">
+        <FaPaw className="mr-2 text-xs" /> Evennements
+      </Link>
+    </li>
+  </ul>
+</div>
+
+     
+    </div>
+
+    {/* Social Media */}
+   <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
+  {[
+    { 
+      icon: FaFacebook, 
+      label: "Facebook", 
+      href: "https://www.facebook.com/mouez.benyounes/ " 
+    },
+    { icon: FaTwitter, label: "Twitter", href: "https://x.com/benyounesbaha1?t=NhqlO6UTZxdumgHQQ4YcMQ&s=09" },
+    { icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/baha_benyounes0/" },
+    { icon: FaYoutube, label: "YouTube", href: "https://www.youtube.com/@ben_younesbaha3194" },
+  ].map((social, index) => (
+    <a
+      key={index}
+      href={social.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
+      aria-label={social.label}
+    >
+      <social.icon />
+    </a>
+  ))}
+</div>
+
+    {/* Copyright */}
+    <div className="text-center pt-4 border-t border-dark/10 text-dark/70">
+      <p>© 2025 Adopti - Association pour la protection animale - SIRET: 123 456 789 00012</p>
+      <p className="text-xs mt-2">Tous droits réservés - Site développé avec ❤️ pour les animaux</p>
+    </div>
+  </div>
+</div>
                 </div>
 
                 {/* Animal Details Modal */}
@@ -670,7 +772,7 @@ export default function NosAnimaux() {
                                 <div className="h-64 md:h-full relative">
                                     {selectedAnimal.image ? (
                                         <img 
-                                            src={`http://127.0.0.1:8000${selectedAnimal.image}`} 
+                                            src={`http://127.0.0.1:8001${selectedAnimal.image}`} 
                                             alt={selectedAnimal.nom} 
                                             className="w-full h-full object-cover"
                                         />

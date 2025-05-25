@@ -59,7 +59,7 @@ export default function LoginForm() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/login/", {
+      const response = await fetch("http://localhost:8001/api/auth/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -89,7 +89,7 @@ export default function LoginForm() {
   };
 
   return (
-    <div className={"min-h-screen bg-gradient-to-b from-secondary to-white ${nunito.className}"}>            
+    <div className={`min-h-screen bg-gradient-to-b from-secondary to-white`}>            
     <div className="sticky top-0 w-full z-50 bg-white shadow-md">
         <Navbar />
     </div>

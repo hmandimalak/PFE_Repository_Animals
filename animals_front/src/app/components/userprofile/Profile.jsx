@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../../app/pages/NavbarPage";
 import EditProfile from "./Edit";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { FaPen } from "react-icons/fa";
+import { FaPen,FaMapMarkerAlt,FaPaw,FaHome,FaPhone,FaEnvelope,FaClock,FaLink,
+FaFacebook,FaTwitter,FaInstagram,FaYoutube } from "react-icons/fa";
+import Link from "next/link";
 import { authenticatedFetch } from '../../../app/authInterceptor';
 import { Search, X, ChevronDown,} from 'lucide-react';
 
@@ -33,39 +35,39 @@ const safeJsonParse = async (response) => {
 // Centralized API service
 const api = {
   fetchUserProfile: async () => {
-    const response = await authenticatedFetch("http://127.0.0.1:8000/api/auth/profile/");
+    const response = await authenticatedFetch("http://127.0.0.1:8001/api/auth/profile/");
     return safeJsonParse(response);
   },
   
   fetchTemporaryAnimals: async () => {
-    const response = await authenticatedFetch("http://127.0.0.1:8000/api/animals/mes-animaux-temporaire/");
+    const response = await authenticatedFetch("http://127.0.0.1:8001/api/animals/mes-animaux-temporaire/");
     return safeJsonParse(response);
   },
   
   fetchDefinitiveAnimals: async () => {
-    const response = await authenticatedFetch("http://127.0.0.1:8000/api/animals/mes-animaux-definitive/");
+    const response = await authenticatedFetch("http://127.0.0.1:8001/api/animals/mes-animaux-definitive/");
     return safeJsonParse(response);
   },
   
   fetchAdoptedAnimals: async () => {
-    const response = await authenticatedFetch("http://127.0.0.1:8000/api/animals/mes-adoptions/");
+    const response = await authenticatedFetch("http://127.0.0.1:8001/api/animals/mes-adoptions/");
     return safeJsonParse(response);
   },
   
   fetchAnimalDetails: async (animalId) => {
-    const response = await authenticatedFetch(`http://127.0.0.1:8000/api/animals/${animalId}/`);
+    const response = await authenticatedFetch(`http://127.0.0.1:8001/api/animals/${animalId}/`);
     return safeJsonParse(response);
   },
   
   fetchOrders: async () => {
-    const response = await authenticatedFetch('http://127.0.0.1:8000/api/boutique/mes-commandes/');
+    const response = await authenticatedFetch('http://127.0.0.1:8001/api/boutique/mes-commandes/');
     return safeJsonParse(response);
   }
 };
 
 // utils/api.js (or wherever you keep your helpers)
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001";
 
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
@@ -651,7 +653,111 @@ export default function Profile() {
             </>
           )}
         </main>
-      </div>
+      </div>{/* Footer */}
+                                          <div className="mt-16 bg-gray-100 border-t-4 border-primary">
+                        <div className="max-w-6xl mx-auto px-4 py-8">
+                          {/* Footer Top - Main Sections */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                            {/* Contact Information */}
+                            <div>
+                              <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                                <FaMapMarkerAlt className="mr-2 text-primary" /> Contact
+                              </h3>
+                              <ul className="space-y-3 text-dark/80">
+                                <li className="flex items-start">
+                                  <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
+                                  <span>123 Rue des Animaux, 8001 Nabeul, Tunisie</span>
+                                </li>
+                                <li className="flex items-center">
+                                  <FaPhone className="mr-2 text-primary flex-shrink-0" />
+                                  <span>95 888 751</span>
+                                </li>
+                                <li className="flex items-center">
+                                  <FaEnvelope className="mr-2 text-primary flex-shrink-0" />
+                                  <span>contact@adopti.fr</span>
+                                </li>
+                              </ul>
+                            </div>
+                      
+                            {/* Horaires */}
+                            <div>
+                              <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                                <FaClock className="mr-2 text-primary" /> Horaires
+                              </h3>
+                              <ul className="space-y-2 text-dark/80">
+                                <li>Lundi - Vendredi: 9h - 18h</li>
+                                <li>Samedi: 9h - 13h</li>
+                                <li>Dimanche: 9h - 16h</li>
+                                <li className="text-primary font-semibold mt-2">
+                                  Permanence téléphonique 24h/24
+                                </li>
+                              </ul>
+                            </div>
+                      
+                            {/* Liens Rapides */}
+                      <div>
+                        <h3 className="text-lg font-bold text-dark mb-4 flex items-center">
+                          <FaLink className="mr-2 text-primary" /> Liens Rapides
+                        </h3>
+                        <ul className="space-y-2 text-dark/80">
+                          <li>
+                            <Link href="/nos-animaux" className="hover:text-primary flex items-center">
+                              <FaPaw className="mr-2 text-xs" /> Nos animaux
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="/garderie" className="hover:text-primary flex items-center">
+                              <FaPaw className="mr-2 text-xs" /> Service garde
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="/boutique" className="hover:text-primary flex items-center">
+                              <FaPaw className="mr-2 text-xs" /> Notre boutique
+                            </Link>
+                          </li>
+                          <li>
+                            <Link href="/marche" className="hover:text-primary flex items-center">
+                              <FaPaw className="mr-2 text-xs" /> Evennements
+                            </Link>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                           
+                          </div>
+                      
+                          {/* Social Media */}
+                         <div className="flex justify-center space-x-6 py-6 border-t border-dark/10">
+                        {[
+                          { 
+                            icon: FaFacebook, 
+                            label: "Facebook", 
+                            href: "https://www.facebook.com/mouez.benyounes/ " 
+                          },
+                          { icon: FaTwitter, label: "Twitter", href: "https://x.com/benyounesbaha1?t=NhqlO6UTZxdumgHQQ4YcMQ&s=09" },
+                          { icon: FaInstagram, label: "Instagram", href: "https://www.instagram.com/baha_benyounes0/" },
+                          { icon: FaYoutube, label: "YouTube", href: "https://www.youtube.com/@ben_younesbaha3194" },
+                        ].map((social, index) => (
+                          <a
+                            key={index}
+                            href={social.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-10 h-10 rounded-full bg-primary hover:bg-accent transition-colors flex items-center justify-center text-white"
+                            aria-label={social.label}
+                          >
+                            <social.icon />
+                          </a>
+                        ))}
+                      </div>
+                      
+                          {/* Copyright */}
+                          <div className="text-center pt-4 border-t border-dark/10 text-dark/70">
+                            <p>© 2025 Adopti - Association pour la protection animale - SIRET: 123 456 789 00012</p>
+                            <p className="text-xs mt-2">Tous droits réservés - Site développé avec ❤️ pour les animaux</p>
+                          </div>
+                        </div>
+                      </div>
       
       
        {/* Animal Details Modal */}
@@ -671,7 +777,7 @@ export default function Profile() {
                                 <div className="h-64 md:h-full relative">
                                     {selectedAnimal.image ? (
                                         <img 
-                                            src={`http://127.0.0.1:8000${selectedAnimal.image}`} 
+                                            src={`http://127.0.0.1:8001${selectedAnimal.image}`} 
                                             alt={selectedAnimal.nom} 
                                             className="w-full h-full object-cover"
                                         />

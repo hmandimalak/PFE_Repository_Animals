@@ -76,7 +76,7 @@ export default function Home() {
         console.log("Decoded token:", decoded);
 
         // Fetch user profile for normal auth
-        fetch("http://127.0.0.1:8000/api/auth/profile/", {
+        fetch("http://127.0.0.1:8001/api/auth/profile/", {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         })
@@ -108,7 +108,7 @@ export default function Home() {
       if (species) queryParams.append("species", species);
   
       // Construct the full URL
-      const url = `http://127.0.0.1:8000/api/animals/search/?${queryParams.toString()}`;
+      const url = `http://127.0.0.1:8001/api/animals/search/?${queryParams.toString()}`;
   
       // Fetch data from the API
       const response = await fetch(url);
@@ -142,7 +142,7 @@ export default function Home() {
 
   const handleAdoptClick = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/animals/demandes-adoption/", {
+      const response = await fetch("http://127.0.0.1:8001/api/animals/demandes-adoption/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ animal: selectedAnimal.id }),
@@ -175,7 +175,7 @@ export default function Home() {
   const fetchAnimalDetails = async (animalId) => {
     setLoading(true);
     try {
-        const response = await fetch(`http://127.0.0.1:8000/api/animals/${animalId}/`);
+        const response = await fetch(`http://127.0.0.1:8001/api/animals/${animalId}/`);
         const data = await response.json();
         setSelectedAnimal(data);
         setIsModalOpen(true);
@@ -201,8 +201,8 @@ export default function Home() {
       <div className="sticky top-0 w-full z-50 bg-white shadow-md">
         <Navbar />
       </div>
-      
-      
+        {/* Return button */}
+    
       {/* Main Content */}
       <div className="relative overflow-hidden">
       {/* Animated background elements */}
@@ -387,7 +387,7 @@ export default function Home() {
                       <div className="w-full h-48 overflow-hidden rounded-t-xl relative">
                         {animal.image ? (
                           <Image
-                            src={`http://127.0.0.1:8000${animal.image}`}
+                            src={`http://127.0.0.1:8001${animal.image}`}
                             alt={animal.nom}
                             fill
                             className="object-cover"
@@ -587,7 +587,7 @@ export default function Home() {
         <ul className="space-y-3 text-dark/80">
           <li className="flex items-start">
             <FaHome className="mt-1 mr-2 text-primary flex-shrink-0" />
-            <span>123 Rue des Animaux, 8000 Nabeul, Tunisie</span>
+            <span>123 Rue des Animaux, 8001 Nabeul, Tunisie</span>
           </li>
           <li className="flex items-center">
             <FaPhone className="mr-2 text-primary flex-shrink-0" />
